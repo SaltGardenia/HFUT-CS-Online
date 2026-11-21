@@ -17,17 +17,17 @@ const ch: NetChapter = {
     { id: 'sec-ch2-idea-h2', text: '分层思想的优点', level: 3 },
     { id: 'sec-ch2-arch', text: '2. 计算机网络体系结构', level: 2 },
     { id: 'sec-ch2-arch-h1', text: '定义：层、接口与协议的集合', level: 3 },
-    { id: 'sec-ch2-arch-h2', text: '实体、协议、服务和 SAP', level: 3 },
+    { id: 'sec-ch2-arch-h2', text: '★ 实体、协议、服务和 SAP', level: 3 },
     { id: 'sec-ch2-arch-h3', text: '计算机网络体系结构模型', level: 3 },
     { id: 'sec-ch2-protocol', text: '3. 网络协议', level: 2 },
-    { id: 'sec-ch2-protocol-h1', text: '协议「三要素」', level: 3 },
+    { id: 'sec-ch2-protocol-h1', text: '★ 协议「三要素」', level: 3 },
     { id: 'sec-ch2-protocol-h2', text: '协议数据单元 PDU', level: 3 },
     { id: 'sec-ch2-osi', text: '4. OSI 参考模型', level: 2 },
     { id: 'sec-ch2-osi-h1', text: '三种模型的比较', level: 3 },
-    { id: 'sec-ch2-osi-h2', text: '主机 1 向主机 2 发送数据', level: 3 },
-    { id: 'sec-ch2-osi-h3', text: 'OSI/RM 各层简介', level: 3 },
+    { id: 'sec-ch2-osi-h2', text: '★ 主机 1 向主机 2 发送数据', level: 3 },
+    { id: 'sec-ch2-osi-h3', text: '★ OSI/RM 各层简介', level: 3 },
     { id: 'sec-ch2-tcpip', text: '5. Internet 模型', level: 2 },
-    { id: 'sec-ch2-tcpip-h1', text: 'Internet 模型简介', level: 3 },
+    { id: 'sec-ch2-tcpip-h1', text: '★ Internet 模型简介', level: 3 },
     { id: 'sec-ch2-tcpip-h2', text: 'Internet 模型特点', level: 3 },
   ],
   sections: [
@@ -38,6 +38,10 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
+          <div class="callout key">
+            <p class="callout-h">本章荧光笔重点</p>
+            <p><strong>协议三要素</strong> · <strong>协议/服务/SAP</strong> · <strong>SDU/PCI/PDU</strong> · <strong>OSI 各层职责</strong> · <strong>TCP/IP 各层功能</strong> · <strong>分层封装</strong></p>
+          </div>
           <h3 id="sec-ch2-idea-h1">分层思想</h3>
           <p>
             将一个庞大、复杂的问题分解为若干个功能相对单一、结构比较简单、处理更为方便的局部问题，并分别解决——这种「化整为零」的方法就是
@@ -120,6 +124,10 @@ const ch: NetChapter = {
             网络对等实体间为完成数据交换所必须遵循的规则、约定和标准。这个定义指明了通信协议的三要素：<strong>语法、语义和时序（同步）</strong>。
           </p>
           <h3 id="sec-ch2-protocol-h1">协议「三要素」</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜协议三要素</p>
+            <p>语法规定数据格式；语义规定控制信息及含义；同步规定交互时序与应答关系。</p>
+          </div>
           <table class="tbl">
             <thead>
               <tr><th>要素</th><th>含义</th><th>举例</th></tr>
@@ -222,6 +230,10 @@ const ch: NetChapter = {
             注意观察加入或剥去首部（尾部）的层次：应用层首部 H5、运输层首部 H4、网络层首部 H3、链路层首部 H2 与链路层尾部 T2。
           </p>
           <h3 id="sec-ch2-osi-h3">OSI/RM 各层简介</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜OSI 各层功能</p>
+            <p>物理层传送比特，链路层处理相邻结点间的帧，网络层负责寻址与路由，运输层提供进程间端到端通信。</p>
+          </div>
           <p>OSI/RM 的层次、协议和各层 PDU：应用层/表示层/会话层的 PDU 统称<strong>报文</strong>，传输层为<strong>段</strong>，网络层为<strong>分组</strong>，数据链路层为<strong>帧</strong>，物理层为<strong>比特</strong>。</p>
           <table class="tbl">
             <thead>
@@ -285,6 +297,10 @@ const ch: NetChapter = {
           html: `
           <p>因为模型中两个核心协议为 TCP 和 IP 协议，Internet 模型也称为 <strong>TCP/IP 模型</strong>。</p>
           <h3 id="sec-ch2-tcpip-h1">Internet 模型简介</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜TCP/IP 各层职责</p>
+            <p>网络接口层连接物理网络；网际层转发 IP 数据报；运输层提供 TCP/UDP 服务；应用层承载 DNS、FTP 等协议。</p>
+          </div>
           <p>
             早期的 ARPANET 使用的主要是 NCP（Network Control Protocol，网络控制协议）协议。随着网络的发展和用户对网络需求的不断提高，
             NCP 暴露出许多问题，特别是缺乏在异构网络之间进行互联的完整机制，制约了 ARPANET 发展成为一个分布广泛的网络。
