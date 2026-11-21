@@ -14,24 +14,24 @@ const ch: NetChapter = {
   toc: [
     { id: 'sec-ch3-basic', text: '1. 基本概念', level: 2 },
     { id: 'sec-ch3-basic-h1', text: '数据、信号和信息及其度量', level: 3 },
-    { id: 'sec-ch3-basic-h2', text: '模拟通信系统与数字通信系统', level: 3 },
+    { id: 'sec-ch3-basic-h2', text: '★ 模拟通信系统与数字通信系统', level: 3 },
     { id: 'sec-ch3-basic-h3', text: '通信系统性能指标', level: 3 },
     { id: 'sec-ch3-media', text: '2. 传输媒体', level: 2 },
     { id: 'sec-ch3-media-h1', text: '金属导体：双绞线与同轴电缆', level: 3 },
-    { id: 'sec-ch3-media-h2', text: '光导纤维', level: 3 },
+    { id: 'sec-ch3-media-h2', text: '★ 光导纤维', level: 3 },
     { id: 'sec-ch3-media-h3', text: '无线传输：微波与卫星', level: 3 },
     { id: 'sec-ch3-mode', text: '3. 数据传输方式', level: 2 },
-    { id: 'sec-ch3-mode-h1', text: '串行与并行方式', level: 3 },
-    { id: 'sec-ch3-mode-h2', text: '同步与异步方式', level: 3 },
+    { id: 'sec-ch3-mode-h1', text: '★ 串行与并行方式', level: 3 },
+    { id: 'sec-ch3-mode-h2', text: '★ 同步与异步方式', level: 3 },
     { id: 'sec-ch3-mode-h3', text: '单工、半双工与全双工方式', level: 3 },
     { id: 'sec-ch3-process', text: '4. 数字通信主要过程', level: 2 },
-    { id: 'sec-ch3-process-h1', text: '信源编码：抽样、量化、编码', level: 3 },
-    { id: 'sec-ch3-process-h2', text: '线路编码：NRZ、曼彻斯特、差分曼彻斯特', level: 3 },
-    { id: 'sec-ch3-process-h3', text: '数字调制：ASK、FSK、PSK', level: 3 },
+    { id: 'sec-ch3-process-h1', text: '★ 信源编码：抽样、量化、编码', level: 3 },
+    { id: 'sec-ch3-process-h2', text: '★ 线路编码：NRZ、曼彻斯特、差分曼彻斯特', level: 3 },
+    { id: 'sec-ch3-process-h3', text: '★ 数字调制：ASK、FSK、PSK', level: 3 },
     { id: 'sec-ch3-mux', text: '5. 多路复用技术', level: 2 },
     { id: 'sec-ch3-mux-h1', text: '频分复用 FDM', level: 3 },
-    { id: 'sec-ch3-mux-h2', text: '时分复用 TDM 与统计时分复用 STDM', level: 3 },
-    { id: 'sec-ch3-mux-h3', text: '码分复用 CDM 与波分复用 WDM', level: 3 },
+    { id: 'sec-ch3-mux-h2', text: '★ 时分复用 TDM 与统计时分复用 STDM', level: 3 },
+    { id: 'sec-ch3-mux-h3', text: '★ 码分复用 CDM 与波分复用 WDM', level: 3 },
     { id: 'sec-ch3-access', text: '6. 宽带接入技术', level: 2 },
     { id: 'sec-ch3-access-h1', text: '用户数字线技术 xDSL 与 ADSL', level: 3 },
     { id: 'sec-ch3-access-h2', text: '光纤同轴混合网 HFC、无线接入与 FTTx', level: 3 },
@@ -45,6 +45,10 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
+          <div class="callout key">
+            <p class="callout-h">本章荧光笔重点</p>
+            <p><strong>通信模型</strong> · <strong>编码与调制</strong> · <strong>曼彻斯特编码</strong> · <strong>ASK/FSK/PSK</strong> · <strong>光纤</strong> · <strong>PCM</strong> · <strong>串并行与同步</strong> · <strong>FDM/TDM/WDM</strong></p>
+          </div>
           <p>通信是将信息从一个地方传送到另外一个地方的过程，涉及信号的识别、采集、传送，并且要保证传送的质量和速度。</p>
           <h3 id="sec-ch3-basic-h1">数据、信号和信息及其度量</h3>
           <ul>
@@ -89,6 +93,10 @@ const ch: NetChapter = {
             <li>增大信道带宽 B 可以增加信道容量 C，但<strong>不能使信道容量 C 无限制地增大</strong>。设 N<sub>0</sub> 为噪声单边功率谱密度，即 N = N<sub>0</sub>B，当信道带宽 B 趋于无穷大时，信道容量 C 的极限值为 1.44 S/N<sub>0</sub>。</li>
           </ul>
           <h3 id="sec-ch3-basic-h2">模拟通信系统与数字通信系统</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜通信系统模型</p>
+            <p>围绕信源、发送设备、信道、接收设备、信宿五个部分，识别数据与信号、模拟与数字的区别。</p>
+          </div>
           <p>
             根据信号的不同，通信系统可以分为<strong>数字通信系统</strong>和<strong>模拟通信系统</strong>：利用模拟信号传递信息的叫做模拟通信系统，
             利用数字信号传递信息的叫做数字通信系统；数字通信系统可分为数字电话通信系统和数字数据通信系统。
@@ -257,6 +265,10 @@ const ch: NetChapter = {
             在实际应用中，这些不同的方式会根据需要混合使用。
           </p>
           <h3 id="sec-ch3-mode-h1">串行与并行方式</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜串行和并行传输</p>
+            <p>并行传输同时传送多个比特，常用于短距离；串行传输逐位发送，适合网络链路。</p>
+          </div>
           <p>
             <strong>串行传输</strong>将待发送数据的各个比特位按一定顺序依次发送；<strong>并行传输</strong>将待发送数据的各个比特位使用多个信道同时发出。
           </p>
@@ -266,6 +278,10 @@ const ch: NetChapter = {
             <li>由于需要建立多个通信信道，并行通信方式造价较高，因此远程通信中通常采用串行传输方式。</li>
           </ul>
           <h3 id="sec-ch3-mode-h2">同步与异步方式</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜同步方式与帧边界</p>
+            <p>区分同步与异步传输；注意同步标志、帧定界和零比特填充的作用。</p>
+          </div>
           <p>
             数据通信的一个基本要求是接收方必须知道接收的每一个比特位的开始时间和持续时间，这样才能正确接收发送方发送来的数据。
             满足上述要求有两类办法：异步传输和同步传输。
@@ -307,6 +323,10 @@ const ch: NetChapter = {
           html: `
           <p>数字通信主要过程包括信源编码、信道编码与数字调制三个环节（信源编码 — 保密编码 — 信道编码 — 调制 → 信道 → 解调 — 解码）。</p>
           <h3 id="sec-ch3-process-h1">信源编码：抽样、量化、编码</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜PCM 脉码调制</p>
+            <p>模拟信号数字化按抽样、量化、编码理解，并与数字数据的线路编码区分。</p>
+          </div>
           <p>
             <strong>信源编码</strong>的任务是用适当的数字符号表示信源信息，并尽可能消除冗余以提高编码效率；它既包括离散信源编码，也包括对模拟信号进行抽样、量化、编码的数字化处理。是否能够无损压缩取决于信源和编码方案，量化通常会引入误差。
             根据编码对象的特征，信源编码可分为离散信源编码、连续信源编码和相关性信源编码。
@@ -443,6 +463,10 @@ const ch: NetChapter = {
             <li>参与复用的每个信号在<strong>全部时间内占用部分频率谱</strong>。</li>
           </ul>
           <h3 id="sec-ch3-mux-h2">时分复用 TDM 与统计时分复用 STDM</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜同步与统计时分复用</p>
+            <p>同步 TDM 固定分配时隙，空闲也可能占位；统计 TDM 按需分配，须识别时隙所属的数据来源。</p>
+          </div>
           <p>
             模拟信号的数字传输或数字信号的多路传输一般都采用时分多路复用方式来提高系统的传输效率。
             单路抽样信号在时间上离散的相邻脉冲间有很大空隙，在空隙中插入若干路其他抽样信号，
