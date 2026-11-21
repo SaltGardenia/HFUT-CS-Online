@@ -15,16 +15,16 @@ const ch: NetChapter = {
     { id: 'sec-ch1-history', text: '1. 计算机网络的产生和发展', level: 2 },
     { id: 'sec-ch1-definition', text: '2. 计算机网络的定义', level: 2 },
     { id: 'sec-ch1-classify', text: '3. 计算机网络的分类', level: 2 },
-    { id: 'sec-ch1-classify-h1', text: '按地理范围分类', level: 3 },
-    { id: 'sec-ch1-classify-h2', text: '按拓扑结构分类', level: 3 },
+    { id: 'sec-ch1-classify-h1', text: '★ 按地理范围分类', level: 3 },
+    { id: 'sec-ch1-classify-h2', text: '★ 按拓扑结构分类', level: 3 },
     { id: 'sec-ch1-work', text: '4. 计算机网络的运行过程', level: 2 },
     { id: 'sec-ch1-work-h1', text: '网络边缘的主机系统：C/S 与 P2P', level: 3 },
     { id: 'sec-ch1-work-h2', text: '网络核心中的路由器与数据交换', level: 3 },
-    { id: 'sec-ch1-work-h3', text: '电路交换、报文交换与分组交换', level: 3 },
+    { id: 'sec-ch1-work-h3', text: '★ 电路交换、报文交换与分组交换', level: 3 },
     { id: 'sec-ch1-performance', text: '5. 计算机网络的性能指标', level: 2 },
-    { id: 'sec-ch1-performance-h1', text: '速率、带宽与吞吐量', level: 3 },
-    { id: 'sec-ch1-performance-h2', text: '时延', level: 3 },
-    { id: 'sec-ch1-performance-h3', text: '利用率', level: 3 },
+    { id: 'sec-ch1-performance-h1', text: '★ 速率、带宽与吞吐量', level: 3 },
+    { id: 'sec-ch1-performance-h2', text: '★ 时延', level: 3 },
+    { id: 'sec-ch1-performance-h3', text: '★ 利用率', level: 3 },
     { id: 'sec-ch1-internet', text: '6. 因特网概述', level: 2 },
     { id: 'sec-ch1-trend', text: '7. 计算机网络的发展趋势', level: 2 },
   ],
@@ -36,6 +36,10 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
+          <div class="callout key">
+            <p class="callout-h">本章荧光笔重点</p>
+            <p><strong>网络定义及组成</strong> · <strong>资源子网/通信子网</strong> · <strong>拓扑结构</strong> · <strong>LAN/MAN/WAN</strong> · <strong>电路/报文/分组交换</strong> · <strong>速率/带宽/单位</strong> · <strong>时延/RTT</strong></p>
+          </div>
           <p>
             计算机网络是<strong>计算机技术与通信技术的产物</strong>。世界上最早的计算机网络
             <strong>ARPANET</strong>（Internet 的前身）由美国国防部高级计划研究署（Advanced Research Projects Agency, ARPA）研制，
@@ -117,6 +121,10 @@ const ch: NetChapter = {
           type: 'html',
           html: `
           <h3 id="sec-ch1-classify-h1">按地理范围分类</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜LAN、MAN、WAN</p>
+            <p>按覆盖范围区分局域网、城域网、广域网，熟悉典型应用及网络互连。</p>
+          </div>
           <table class="tbl">
             <thead>
               <tr><th>类别</th><th>覆盖范围</th><th>典型场景</th></tr>
@@ -128,6 +136,10 @@ const ch: NetChapter = {
             </tbody>
           </table>
           <h3 id="sec-ch1-classify-h2">按拓扑结构分类</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜总线与星形拓扑</p>
+            <p>总线型共享传输介质、故障隔离困难；星形便于维护与扩展，但依赖中心设备。</p>
+          </div>
           <p>
             拓扑学（Topology）是数学中的一个重要分支，研究的几何图形或空间在连续改变形状后还能保持不变的一些性质，
             最著名的例子是欧拉提出的「哥尼斯堡七桥问题」。<strong>计算机网络拓扑</strong>是指通信子网节点间连接结构的拓扑形式，
@@ -311,6 +323,10 @@ const ch: NetChapter = {
           type: 'html',
           html: `
           <h3 id="sec-ch1-performance-h1">速率、带宽与吞吐量</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜速率、带宽与单位</p>
+            <p>网络速率以 bit/s 计；k、M、G 通常按 10³、10⁶、10⁹ 换算，存储容量的 K、M、G 常按 2¹⁰、2²⁰、2³⁰ 换算。</p>
+          </div>
           <p>
             <strong>速率</strong>：比特（bit）是计算机中数据量的单位，也是信息论中使用的信息量的单位，来源于 binary digit，
             一个比特就是二进制数字中的一个 1 或 0。速率即数据率（data rate）或比特率（bit rate），是计算机网络中最重要的一个性能指标，
@@ -355,6 +371,10 @@ const ch: NetChapter = {
               提高链路带宽只能减小数据的发送时延，并不能提高传播速率。</p>
           </div>
           <h3 id="sec-ch1-performance-h3">利用率</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜RTT 与性能</p>
+            <p>RTT 表示往返时间；分析网络性能时结合速率、时延及利用率，不能只看标称带宽。</p>
+          </div>
           <p>
             <strong>信道利用率</strong>指出某个信道在测量周期内，数据占用的时间与整个测量周期时间之比，完全空闲的信道的利用率为零；
             <strong>网络利用率</strong>则是全网络的信道利用率的加权平均值。<strong>信道利用率并非越高越好</strong>。
