@@ -1,5 +1,5 @@
 /* 【自动生成】由 scripts/build-catalog.mjs 扫描 data/ 生成，请勿手改。
- * 共 57 门课程 / 7890 份文件；增删资料后 npm run catalog 刷新。 */
+ * 共 57 门课程 / 7901 份文件；增删资料后 npm run catalog 刷新。 */
 
 export interface CatalogCourse {
   /** 学期文件夹名：大一上…大四下 */
@@ -47,7 +47,7 @@ export const catalog: CatalogCourse[] = [
   { semester: "大二下", name: "组合数学", courseware: 19, exams: 0, misc: 1, total: 20 },
   { semester: "大三上", name: "操作系统", courseware: 6, exams: 7, misc: 337, total: 350 },
   { semester: "大三上", name: "计算机体系结构", courseware: 21, exams: 3, misc: 88, total: 112 },
-  { semester: "大三上", name: "计算机网络", courseware: 23, exams: 10, misc: 75, total: 108 },
+  { semester: "大三上", name: "计算机网络", courseware: 34, exams: 10, misc: 75, total: 119 },
   { semester: "大三上", name: "计算机网络课程设计", courseware: 0, exams: 0, misc: 64, total: 64 },
   { semester: "大三上", name: "人工智能原理", courseware: 0, exams: 1, misc: 50, total: 51 },
   { semester: "大三上", name: "软件体系结构", courseware: 4, exams: 0, misc: 6, total: 10 },
