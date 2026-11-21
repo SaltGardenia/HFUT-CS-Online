@@ -24,9 +24,8 @@ const home: DeckData = {
           type: 'html',
           html: `
           <div class="callout tip">
-            <p class="callout-h">2025 课堂荧光笔｜复习标注说明</p>
-            <p>已按你在最新课件中画出的荧光笔痕迹，在知识点旁补充精简提示。<strong>A 级表示建议优先练会</strong>，<strong>B 级表示理解记忆</strong>，均不是教师公布的必考名单。来源页码均为 PDF 实际页数。</p>
-            <p>对应关系：2025 课件的「第 4 章链路层＋第 5 章局域网」合并在本站第 4 章；2025 课件「第 6 章网络层」对应本站第 5 章。2025 应用层课件暂未检测到同类荧光笔，<strong>不代表该章不考</strong>。</p>
+            <p class="callout-h">课件重点速览</p>
+            <p>结合荧光笔标记整理：<strong>A 级优先掌握</strong>，<strong>B 级理解记忆</strong>。重点已标在各章对应知识点处。</p>
           </div>
 
           <h3 id="sec-net-map-h1">章节脉络</h3>
