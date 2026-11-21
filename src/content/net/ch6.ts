@@ -13,9 +13,9 @@ const ch: NetChapter = {
 `,
   toc: [
     { id: 'sec-ch6-overview', text: '1. 传输层概述', level: 2 },
-    { id: 'sec-ch6-overview-h1', text: '端到端通信', level: 3 },
-    { id: 'sec-ch6-overview-h2', text: '传输层提供的服务', level: 3 },
-    { id: 'sec-ch6-overview-h3', text: '传输层要素：端口、TSAP 与 TPDU', level: 3 },
+    { id: 'sec-ch6-overview-h1', text: '★ 端到端通信', level: 3 },
+    { id: 'sec-ch6-overview-h2', text: '★ 传输层提供的服务', level: 3 },
+    { id: 'sec-ch6-overview-h3', text: '★ 传输层要素：端口、TSAP 与 TPDU', level: 3 },
     { id: 'sec-ch6-overview-h4', text: '传输层寻址和 Socket', level: 3 },
     { id: 'sec-ch6-udp', text: '2. 用户数据报协议 UDP', level: 2 },
     { id: 'sec-ch6-udp-h1', text: 'UDP 的主要特点与面向报文', level: 3 },
@@ -33,15 +33,15 @@ const ch: NetChapter = {
     { id: 'sec-ch6-reliable-h2', text: '停止等待协议', level: 3 },
     { id: 'sec-ch6-reliable-h3', text: '连续 ARQ 协议', level: 3 },
     { id: 'sec-ch6-impl', text: '5. TCP 可靠传输的实现', level: 2 },
-    { id: 'sec-ch6-impl-h1', text: '基于字节的滑动窗口', level: 3 },
+    { id: 'sec-ch6-impl-h1', text: '★ 基于字节的滑动窗口', level: 3 },
     { id: 'sec-ch6-impl-h2', text: '超时重传时间的选择', level: 3 },
     { id: 'sec-ch6-impl-h3', text: '选择确认 SACK', level: 3 },
     { id: 'sec-ch6-flow', text: '6. 流量控制', level: 2 },
-    { id: 'sec-ch6-flow-h1', text: '利用滑动窗口实现流量控制', level: 3 },
+    { id: 'sec-ch6-flow-h1', text: '★ 利用滑动窗口实现流量控制', level: 3 },
     { id: 'sec-ch6-flow-h2', text: '糊涂窗口综合症', level: 3 },
     { id: 'sec-ch6-congestion', text: '7. 拥塞控制', level: 2 },
-    { id: 'sec-ch6-congestion-h1', text: '拥塞控制基本原理', level: 3 },
-    { id: 'sec-ch6-congestion-h2', text: '慢开始和拥塞避免', level: 3 },
+    { id: 'sec-ch6-congestion-h1', text: '★ 拥塞控制基本原理', level: 3 },
+    { id: 'sec-ch6-congestion-h2', text: '★ 慢开始和拥塞避免', level: 3 },
     { id: 'sec-ch6-congestion-h3', text: '快重传和快恢复', level: 3 },
   ],
   sections: [
@@ -52,11 +52,19 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
+          <div class="callout key">
+            <p class="callout-h">本章荧光笔重点</p>
+            <p><strong>进程端到端通信</strong> · <strong>TCP/UDP</strong> · <strong>端口与 Socket</strong> · <strong>字节序号/确认号</strong> · <strong>滑动窗口</strong> · <strong>流量控制</strong> · <strong>拥塞控制</strong></p>
+          </div>
           <p>
             传输层（也称为运输层）无论在 OSI 还是在 TCP/IP 模型中都处于<strong>面向应用部分的最低层和面向通信部分的最高层</strong>，
             实现了一种将面向应用（进程）的通信需求转变为面向网络设备的通信服务，起着承上启下的作用。
           </p>
           <h3 id="sec-ch6-overview-h1">端到端通信</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜应用进程之间的通信</p>
+            <p>网络层侧重主机之间通信；运输层通过端口面向应用进程，提供端到端逻辑通信并完成复用、分用。</p>
+          </div>
           <p>
             计算机网络由<strong>网络边缘</strong>和<strong>网络核心</strong>两大部分组成。
             网络边缘由主机、存储、服务器、数据库等各种软硬件设备组成，是网络信息资源的集散地——
@@ -85,6 +93,10 @@ const ch: NetChapter = {
             <li>即使通信子网能够提供足够好的通信服务，还是有一些用户需要开展更高可靠性的工作或更细致的管理，比如根据不同的应用提供不同的带宽服务。</li>
           </ul>
           <h3 id="sec-ch6-overview-h2">传输层提供的服务</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜TCP 和 UDP</p>
+            <p>UDP 无连接、面向报文且不保证可靠交付；TCP 面向连接，提供可靠的字节流传输。</p>
+          </div>
           <p>
             在 TCP/IP 中，传输层提供了面向连接和面向无连接的两种服务：
             <strong>UDP 服务</strong>——具有差错检测用的校验和字段，但协议本身不提供可靠重传，实现简单，通信速率高；
@@ -104,6 +116,10 @@ const ch: NetChapter = {
             IP 数据报要经过互连网中许多路由器的存储转发，但 UDP 用户数据报是在传输层的端到端抽象的逻辑信道中传送。
           </p>
           <h3 id="sec-ch6-overview-h3">传输层要素：端口、TSAP 与 TPDU</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜端口号的本地意义</p>
+            <p>端口号占 16 位，用于标识本机通信端点；不同主机使用相同端口号不意味着同一进程。</p>
+          </div>
           <p>
             <strong>传输层端口</strong>：在计算机中每个进程都有一个进程标识符，但不同操作系统的命名原则和方法各不相同；
             在计算机网络中不同主机的进程之间进行通信时，无法利用各种操作系统提供的进程标识符进行通信，
@@ -730,6 +746,10 @@ const ch: NetChapter = {
           type: 'html',
           html: `
           <h3 id="sec-ch6-congestion-h1">拥塞控制基本原理</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜拥塞发生的条件</p>
+            <p>资源需求超过网络可用容量时可能发生拥塞；拥塞控制针对网络负载，流量控制针对接收方能力。</p>
+          </div>
           <div class="callout key">
             <p class="callout-h">重点 A｜拥塞控制与流量控制</p>
             <p>拥塞窗口 cwnd 调整网络注入速率，接收窗口 rwnd 保护接收端缓冲；结合慢开始/拥塞避免的过程图判断窗口如何变化。</p>
