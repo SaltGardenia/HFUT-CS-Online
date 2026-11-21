@@ -16,3 +16,5 @@
 - [mox-hub/hfut-cs](https://github.com/mox-hub/hfut-cs)
 - [styitches/HFUT-CS](https://github.com/styitches/HFUT-CS)
 - [Tuning-Luna/HFUT_XC_Study_Things](https://github.com/Tuning-Luna/HFUT_XC_Study_Things)
+
+> 以上仓库仅作资料溯源，未以子模块形式挂在本仓库：本仓库可以直接 `git clone`，约 50MB，克隆与构建都不需要它们。

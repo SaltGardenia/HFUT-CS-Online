@@ -57,4 +57,29 @@ describe('课程注册表（registry）', () => {
     expect(nlu!.base).toBe('/nlu');
     expect(nlu!.ready).toBe(true);
   });
+
+  it('大三下 12 门课程：base / 学期 / 上线状态锁定', () => {
+    const expected: Array<[string, string, string]> = [
+      ['操作系统课程设计', 'operating-system-course-design', '/oscd'],
+      ['编译原理课程设计', 'compiler-principles-course-design', '/cpd'],
+      ['网络工程师综合实训', 'network-engineer-training', '/ntr'],
+      ['计算机视觉与深度学习', 'computer-vision-deep-learning', '/cv'],
+      ['软件项目管理', 'software-project-management', '/spm'],
+      ['大数据处理技术', 'big-data-processing', '/bd'],
+      ['计算机应用项目实训', 'computer-application-project-training', '/cap'],
+      ['人工智能经济学', 'ai-economics', '/aie'],
+      ['信息安全技术', 'information-security-technology', '/sec'],
+      ['数据库系统', 'database-systems', '/db'],
+      ['软件工程', 'software-engineering', '/se'],
+      ['软件测试', 'software-testing', '/st'],
+    ];
+    for (const [name, id, base] of expected) {
+      const c = courses.find((x) => x.name === name);
+      expect(c, name).toBeDefined();
+      expect(c!.id).toBe(id);
+      expect(c!.semester).toBe('大三下');
+      expect(c!.base).toBe(base);
+      expect(c!.ready).toBe(true);
+    }
+  });
 });

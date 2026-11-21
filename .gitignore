@@ -15,7 +15,13 @@ data/**
 !data/整理说明.md
 !data/文件清单.csv
 !data/分类统计.txt
-# 四个上游仓库以子模块挂在仓库根（与 data/ 处理产物解耦），不在 data/** 管辖内
+
+# 四个上游资料仓库（合计 ~7.3GB）：只作本地取用与溯源，不再挂子模块，
+# 需要时自行 clone 到这些目录（见 CONTRIBUTING「环境准备」），跑站点不需要它们
+Tuning-Luna-HFUT_XC_Study_Things/
+styitches-HFUT-CS/
+sunmiao0301-HFUT-CS/
+mox-hub-hfut-cs/
 
 # 本地截图产物
 _tools/shots/

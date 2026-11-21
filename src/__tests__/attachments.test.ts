@@ -15,6 +15,18 @@ import napAtt from '../../public/attachments/大三上__网络攻防实践.json'
 import hdAtt from '../../public/attachments/大三上__系统硬件综合设计.json';
 import mcAtt from '../../public/attachments/大三上__移动计算与应用开发.json';
 import nluAtt from '../../public/attachments/大三上__自然语言理解.json';
+import oscdAtt from '../../public/attachments/大三下__操作系统课程设计.json';
+import cpdAtt from '../../public/attachments/大三下__编译原理课程设计.json';
+import ntrAtt from '../../public/attachments/大三下__网络工程师综合实训.json';
+import cvAtt from '../../public/attachments/大三下__计算机视觉与深度学习.json';
+import spmAtt from '../../public/attachments/大三下__软件项目管理.json';
+import bdAtt from '../../public/attachments/大三下__大数据处理技术.json';
+import capAtt from '../../public/attachments/大三下__计算机应用项目实训.json';
+import aieAtt from '../../public/attachments/大三下__人工智能经济学.json';
+import secAtt from '../../public/attachments/大三下__信息安全技术.json';
+import dbAtt from '../../public/attachments/大三下__数据库系统.json';
+import seAtt from '../../public/attachments/大三下__软件工程.json';
+import stAtt from '../../public/attachments/大三下__软件测试.json';
 
 interface AttNode {
   n: string;
@@ -35,7 +47,8 @@ interface AttManifest {
 }
 
 const CATS = ['课件', '试题', '附件'];
-const REPO_KEYS = ['self', 'sunmiao', 'styitches', 'mox', 'luna'];
+/** 上游资料仓库 + 本站仓库（r='self'：2025 课件随 HFUT-CS-Online 入库，文件可无 size 字段） */
+const REPO_KEYS = ['sunmiao', 'styitches', 'mox', 'luna', 'self'];
 
 const countFiles = (nodes: AttNode[]): number => nodes.reduce((a, x) => a + (x.c ? countFiles(x.c) : 1), 0);
 
@@ -60,10 +73,11 @@ const checkNodes = (nodes: AttNode[]) => {
       }
       checkNodes(node.c);
     } else {
+      // 本站入库文件（r='self'）可无 size 字段；上游文件必须有 size
       if (node.r !== 'self' || node.s !== undefined) {
         expect(node.s ?? -1).toBeGreaterThanOrEqual(0);
       }
-      // 溯源：r 与 sp 成对出现，r 必须是本仓库或四个上游仓库之一
+      // 溯源：r 与 sp 成对出现，r 必须是已登记的仓库之一
       if (node.r !== undefined || node.sp !== undefined) {
         expect(REPO_KEYS).toContain(node.r);
         expect(node.sp).not.toContain('..');
@@ -88,6 +102,18 @@ const manifests: Array<[string, AttManifest]> = [
   ['系统硬件综合设计', hdAtt],
   ['移动计算与应用开发', mcAtt],
   ['自然语言理解', nluAtt],
+  ['操作系统课程设计', oscdAtt],
+  ['编译原理课程设计', cpdAtt],
+  ['网络工程师综合实训', ntrAtt],
+  ['计算机视觉与深度学习', cvAtt],
+  ['软件项目管理', spmAtt],
+  ['大数据处理技术', bdAtt],
+  ['计算机应用项目实训', capAtt],
+  ['人工智能经济学', aieAtt],
+  ['信息安全技术', secAtt],
+  ['数据库系统', dbAtt],
+  ['软件工程', seAtt],
+  ['软件测试', stAtt],
 ];
 
 describe('附件清单（public/attachments）', () => {

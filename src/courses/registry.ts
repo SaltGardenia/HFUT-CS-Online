@@ -137,6 +137,102 @@ export const courses: readonly CourseEntry[] = [
     source: '分词系统讲解课件（FMM 与 BMM）+ 实验报告与代码 · 试题未收录',
   },
   {
+    id: 'operating-system-course-design',
+    name: '操作系统课程设计',
+    semester: '大三下',
+    base: '/oscd',
+    ready: true,
+    source: '系统软件综合设计报告 · 课件与试题未收录',
+  },
+  {
+    id: 'compiler-principles-course-design',
+    name: '编译原理课程设计',
+    semester: '大三下',
+    base: '/cpd',
+    ready: true,
+    source: '课程设计报告与指导书 · 课件与试题未收录',
+  },
+  {
+    id: 'network-engineer-training',
+    name: '网络工程师综合实训',
+    semester: '大三下',
+    base: '/ntr',
+    ready: true,
+    source: '实训题目、实验指导与实训报告 · 课件与试题未收录',
+  },
+  {
+    id: 'computer-vision-deep-learning',
+    name: '计算机视觉与深度学习',
+    semester: '大三下',
+    base: '/cv',
+    ready: true,
+    source: '图像与视频信息处理实验报告 · 课件与试题未收录',
+  },
+  {
+    id: 'software-project-management',
+    name: '软件项目管理',
+    semester: '大三下',
+    base: '/spm',
+    ready: true,
+    source: '结课论文 · 课件与试题未收录',
+  },
+  {
+    id: 'big-data-processing',
+    name: '大数据处理技术',
+    semester: '大三下',
+    base: '/bd',
+    ready: true,
+    source: '作业课件 + 综合设计报告与系列实验 · 试题未收录',
+  },
+  {
+    id: 'computer-application-project-training',
+    name: '计算机应用项目实训',
+    semester: '大三下',
+    base: '/cap',
+    ready: true,
+    source: '无人机系统答辩课件 + 实训分章文档 · 试题未收录',
+  },
+  {
+    id: 'ai-economics',
+    name: '人工智能经济学',
+    semester: '大三下',
+    base: '/aie',
+    ready: true,
+    source: '八章课件精讲 · 试题未收录',
+  },
+  {
+    id: 'information-security-technology',
+    name: '信息安全技术',
+    semester: '大三下',
+    base: '/sec',
+    ready: true,
+    source: '六章课件精讲 + 网络安全补充 · 试题未收录',
+  },
+  {
+    id: 'database-systems',
+    name: '数据库系统',
+    semester: '大三下',
+    base: '/db',
+    ready: true,
+    source: '九章课件精讲 + 实验环境搭建 · 5 份试卷在线练习',
+  },
+  {
+    id: 'software-engineering',
+    name: '软件工程',
+    semester: '大三下',
+    base: '/se',
+    ready: true,
+    source: '十三章课件精讲 + 课程设计 · 2 份试卷在线练习',
+  },
+  {
+    id: 'software-testing',
+    name: '软件测试',
+    semester: '大三下',
+    base: '/st',
+    ready: true,
+    source: '九章课件精讲 + 作业讲解 · 1 份试卷在线练习',
+  },
+  {
     id: 'distributed-programming',
     name: '分布式程序设计',
     semester: '大四上',
@@ -219,17 +315,53 @@ export const MC_BASE = courses[13].base;
 /** 自然语言理解课路由前缀（同上约定） */
 export const NLU_BASE = courses[14].base;
 
+/** 操作系统课程设计课路由前缀（同上约定） */
+export const OSCD_BASE = courses[15].base;
+
+/** 编译原理课程设计课路由前缀（同上约定） */
+export const CPD_BASE = courses[16].base;
+
+/** 网络工程师综合实训课路由前缀（同上约定） */
+export const NTR_BASE = courses[17].base;
+
+/** 计算机视觉与深度学习课路由前缀（同上约定） */
+export const CV_BASE = courses[18].base;
+
+/** 软件项目管理课路由前缀（同上约定） */
+export const SPM_BASE = courses[19].base;
+
+/** 大数据处理技术课路由前缀（同上约定） */
+export const BD_BASE = courses[20].base;
+
+/** 计算机应用项目实训课路由前缀（同上约定） */
+export const CAP_BASE = courses[21].base;
+
+/** 人工智能经济学课路由前缀（同上约定） */
+export const AIE_BASE = courses[22].base;
+
+/** 信息安全技术课路由前缀（同上约定） */
+export const SEC_BASE = courses[23].base;
+
+/** 数据库系统课路由前缀（同上约定） */
+export const DB_BASE = courses[24].base;
+
+/** 软件工程课路由前缀（同上约定） */
+export const SE_BASE = courses[25].base;
+
+/** 软件测试课路由前缀（同上约定） */
+export const ST_BASE = courses[26].base;
+
 /** 分布式程序设计课路由前缀（同上约定） */
-export const DP_BASE = courses[15].base;
+export const DP_BASE = courses[27].base;
 
 /** 软件工程师综合训练课路由前缀（同上约定） */
-export const SWT_BASE = courses[16].base;
+export const SWT_BASE = courses[28].base;
 
 /** 领域方向综合设计课路由前缀（同上约定） */
-export const DSD_BASE = courses[17].base;
+export const DSD_BASE = courses[29].base;
 
 /** 创新实践课路由前缀（同上约定） */
-export const IP_BASE = courses[18].base;
+export const IP_BASE = courses[30].base;
 
 export function findCourseByName(name: string): CourseEntry | undefined {
   return courses.find((c) => c.name === name);

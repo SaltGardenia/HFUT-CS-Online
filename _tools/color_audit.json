@@ -119,6 +119,102 @@
   "dups": [],
   "adj": []
  },
+ "oscd/light": {
+  "dups": [],
+  "adj": []
+ },
+ "oscd/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "cpd/light": {
+  "dups": [],
+  "adj": []
+ },
+ "cpd/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "ntr/light": {
+  "dups": [],
+  "adj": []
+ },
+ "ntr/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "cv/light": {
+  "dups": [],
+  "adj": []
+ },
+ "cv/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "spm/light": {
+  "dups": [],
+  "adj": []
+ },
+ "spm/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "bd/light": {
+  "dups": [],
+  "adj": []
+ },
+ "bd/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "cap/light": {
+  "dups": [],
+  "adj": []
+ },
+ "cap/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "aie/light": {
+  "dups": [],
+  "adj": []
+ },
+ "aie/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "sec/light": {
+  "dups": [],
+  "adj": []
+ },
+ "sec/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "db/light": {
+  "dups": [],
+  "adj": []
+ },
+ "db/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "se/light": {
+  "dups": [],
+  "adj": []
+ },
+ "se/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "st/light": {
+  "dups": [],
+  "adj": []
+ },
+ "st/dark": {
+  "dups": [],
+  "adj": []
+ },
  "dp/light": {
   "dups": [],
   "adj": []

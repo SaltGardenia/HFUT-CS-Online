@@ -55,6 +55,18 @@
   --hd: #c43a71;                 /* 系统硬件综合设计 · 玫红（紫红相位，落在算法课紫与玫红之间的空档，暗而不刺眼） */
   --mc: #35505a;                 /* 移动计算与应用开发 · 深青灰（青灰相位，介于网络课青绿与软件体系结构课石板蓝之间的去饱和空档） */
   --nlu: #6736c9;                /* 自然语言理解 · 蓝紫罗兰（紫罗兰相位，落在程序设计艺术与方法课的灰蓝紫与大学物理课的藕紫之间的高饱和空档） */
+  --oscd: #31345e;               /* 操作系统课程设计 · 暗藏青（藏青相位，比程序设计艺术与方法课的蓝紫更暗更净） */
+  --cpd: #6f5a1f;                /* 编译原理课程设计 · 暗金（赭金相位，与程序设计基础课的赭金拉开明度差） */
+  --ntr: #a76262;                /* 网络工程师综合实训 · 灰红（陶红相位，介于砖红与灰褐之间更柔的中间调） */
+  --cv: #7a5270;                 /* 计算机视觉与深度学习 · 灰紫红（藕红相位，介于大学物理课藕紫与系统硬件课玫红之间更灰） */
+  --spm: #7b234c;                /* 软件项目管理 · 深酒红紫（酒红紫相位，暗于系统硬件课玫红且更沉） */
+  --bd: #262687;                 /* 大数据处理技术 · 靛蓝（深靛相位，比算法课靛更暗更蓝） */
+  --cap: #a96b42;                /* 计算机应用项目实训 · 陶橙（暖陶相位，介于砖红与赭金之间的亮陶土） */
+  --aie: #2a845a;                /* 人工智能经济学 · 翠绿（正绿相位，介于操作系统课橄榄绿与算法课绿之间更正） */
+  --sec: #395643;                /* 信息安全技术 · 暗松绿（松绿相位，比高等数学课苔藓绿更暗更冷） */
+  --db: #7b802d;                 /* 数据库系统 · 橄榄金（黄绿相位，介于操作系统课橄榄绿与赭金之间的黄绿） */
+  --se: #4b8391;                 /* 软件工程 · 青灰蓝（青灰蓝相位，介于网络课深青与软件体系结构课石板蓝之间） */
+  --st: #564a39;                 /* 软件测试 · 深褐（暖深褐相位，全色环上最后的低饱和空档） */
   --dp: #4f246b;                 /* 分布式程序设计 · 深紫（紫罗兰暗相位，比算法课紫与自然语言理解蓝紫罗兰都更暗更沉） */
   --swt: #a1367d;                /* 软件工程师综合训练 · 玫红紫（紫红相位，介于人工智能课品红与系统硬件课玫红之间更沉更灰） */
   --dsd: #88a136;                /* 领域方向综合设计 · 苹果绿（黄绿亮相位，比操作系统课橄榄绿更亮更黄） */
@@ -92,6 +104,17 @@
   --pd9: #7d5ba6;  --pd10: #6b7a2f; --pd11: #9c4a72;
   /* 系统硬件综合设计 · 4 讲 */
   --hd1: #31708e;  --hd2: #2e7d5b;  --hd3: #7d5ba6;  --hd4: #8f741c;
+  /* aie 章（按章节序号取共享色板） */
+  --aie1: #31708e;  --aie2: #a05a2c;  --aie3: #2e7d5b;  --aie4: #b5485e;  --aie5: #8f741c;  --aie6: #4a5aa8;  --aie7: #22767c;  --aie8: #8a4a2f;
+  /* sec 章（按章节序号取共享色板） */
+  --sec1: #31708e;  --sec2: #a05a2c;  --sec3: #2e7d5b;  --sec4: #b5485e;  --sec5: #8f741c;  --sec6: #4a5aa8;
+  /* db 章（按章节序号取共享色板） */
+  --db1: #31708e;  --db2: #a05a2c;  --db3: #2e7d5b;  --db4: #b5485e;  --db5: #8f741c;  --db6: #4a5aa8;  --db7: #22767c;  --db8: #8a4a2f;  --db9: #7d5ba6;  --db10: #6b7a2f;  --db11: #9c4a72;  --db12: #56698f;
+  /* se 章（按章节序号取共享色板，偏移 1 与课程青灰蓝基础色拉开） */
+  --se1: #a05a2c;  --se2: #2e7d5b;  --se3: #b5485e;  --se4: #8f741c;  --se5: #4a5aa8;  --se6: #22767c;  --se7: #8a4a2f;  --se8: #7d5ba6;  --se9: #6b7a2f;  --se10: #9c4a72;  --se11: #56698f;  --se12: #36a136;  --se13: #6e4a24;  --se14: #0071a4;
+  /* st 章（按章节序号取共享色板） */
+  --st1: #31708e;  --st2: #a05a2c;  --st3: #2e7d5b;  --st4: #b5485e;  --st5: #8f741c;  --st6: #4a5aa8;  --st7: #22767c;  --st8: #8a4a2f;  --st9: #7d5ba6;  --st10: #6b7a2f;  --st11: #9c4a72;
+
 
   /* ---- 在线练习 / 附件页专属色：每课与总目录、各章均不同色（选色见 _tools/pick_colors3.py，
    * 约束：课内全部颜色两两 ΔE≥22（不可达时≥18），导航相邻 ≥22；避开 ok/hot/warn 语义色） ---- */
@@ -110,10 +133,25 @@
   --hd-att: #54527f;
   --mc-att: #6e214f;
   --nlu-att: #8f741c;
+  --oscd-att: #812e8a;
+  --cpd-att: #8d34c9;
+  --ntr-att: #812e8a;
+  --cv-att: #335b47;
+  --spm-att: #a1369a;
+  --bd-att: #36a16b;
+  --cap-att: #b53aad;
+  --aie-att: #56698f;
+  --sec-att: #a1369d;
+  --db-att: #8a6a30;
+  --se-att: #37335b;
+  --st-att: #4a5f7a;
   --dp-att: #6f36a1;
   --swt-att: #37505f;
   --dsd-att: #37335b;
   --ip-att: #29367a;
+  --db-practice: #8d34c9;
+  --se-practice: #8d34c9;
+  --st-practice: #8d34c9;
 
   --deck-accent: var(--accent);  /* 当前讲次色（无讲次时回落全局色） */
 
@@ -169,8 +207,7 @@
   --press-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* ------------------------------------------------------------- 暗色主题 */
-[data-theme='dark'] {
+/* ------------------------------------------------------------- 暗色主题 */[data-theme='dark'][data-theme='dark'][data-theme='dark'][data-theme='dark'][data-theme='dark'] {
   color-scheme: dark;
 
   --bg: #161617;
@@ -217,6 +254,18 @@
   --hd: #ca7195;
   --mc: #65bac3;
   --nlu: #a86ed8;
+  --oscd: #5890d0;
+  --cpd: #d7d770;
+  --ntr: #d39064;
+  --cv: #d058d0;
+  --spm: #d3b1ce;
+  --bd: #9288af;
+  --cap: #d37373;
+  --aie: #acc8b0;
+  --sec: #6dba6d;
+  --db: #bab06d;
+  --se: #94e1d6;
+  --st: #e4e0a0;
   --dp: #7275d5;
   --swt: #de68a7;
   --dsd: #a3e279;
@@ -242,6 +291,12 @@
   --pd5: #d4b95a; --pd6: #8f9ce0; --pd7: #6cc4c9; --pd8: #d18f6e;
   --pd9: #b39be0; --pd10: #b3c26e; --pd11: #d69ab8;
   --hd1: #74b3d2; --hd2: #7cc9a3; --hd3: #b39be0; --hd4: #d4b95a;
+  --se1: #e0975f;  --se2: #7cc9a3;  --se3: #ec8ea0;  --se4: #d4b95a;  --se5: #8f9ce0;  --se6: #6cc4c9;  --se7: #d18f6e;  --se8: #b39be0;  --se9: #b3c26e;  --se10: #d69ab8;  --se11: #9db0d6;  --se12: #68de68;  --se13: #d69c63;  --se14: #4db8e8;
+  --aie1: #74b3d2;  --aie2: #e0975f;  --aie3: #7cc9a3;  --aie4: #ec8ea0;  --aie5: #d4b95a;  --aie6: #8f9ce0;  --aie7: #6cc4c9;  --aie8: #d18f6e;
+  --sec1: #74b3d2;  --sec2: #e0975f;  --sec3: #7cc9a3;  --sec4: #ec8ea0;  --sec5: #d4b95a;  --sec6: #8f9ce0;
+  --db1: #74b3d2;  --db2: #e0975f;  --db3: #7cc9a3;  --db4: #ec8ea0;  --db5: #d4b95a;  --db6: #8f9ce0;  --db7: #6cc4c9;  --db8: #d18f6e;  --db9: #b39be0;  --db10: #b3c26e;  --db11: #d69ab8;  --db12: #9db0d6;
+  --st1: #74b3d2;  --st2: #e0975f;  --st3: #7cc9a3;  --st4: #ec8ea0;  --st5: #d4b95a;  --st6: #8f9ce0;  --st7: #6cc4c9;  --st8: #d18f6e;  --st9: #b39be0;  --st10: #b3c26e;  --st11: #d69ab8;
+
   --deck-practice: #cfdeaf;
   --os-practice: #bf5af2;  --os-att: #da6cc8;
   --net-practice: #bf5af2; --net-att: #e279d4;
@@ -257,10 +312,25 @@
   --hd-att: #a8a4d4;
   --mc-att: #b873a1;
   --nlu-att: #d4b95a;
+  --oscd-att: #93b8d4;
+  --cpd-att: #da6cc8;
+  --ntr-att: #da6cc8;
+  --cv-att: #afdec5;
+  --spm-att: #da6cc8;
+  --bd-att: #da6cc8;
+  --cap-att: #decaaf;
+  --aie-att: #9db0d6;
+  --sec-att: #da6cc8;
+  --db-att: #d0aa55;
+  --se-att: #da6cc8;
+  --st-att: #93b8d4;
   --dp-att: #ca8ae5;
   --swt-att: #93b3c9;
   --dsd-att: #da6cc8;
   --ip-att: #a9d7e5;
+  --db-practice: #bf5af2;
+  --se-practice: #bf5af2;
+  --st-practice: #bf5af2;
 
   --key-bg: rgba(10, 132, 255, 0.14);
   --warn-bg: rgba(255, 159, 10, 0.14);
@@ -357,6 +427,42 @@
 /* --------------------- 自然语言理解 → 蓝紫罗兰主题（html[data-deck='nlu']） */
 :root[data-deck='nlu'] { --deck-accent: var(--nlu); }
 
+/* --------------------- 操作系统课程设计 → 暗藏青主题（html[data-deck='oscd']） */
+:root[data-deck='oscd'] { --deck-accent: var(--oscd); }
+
+/* --------------------- 编译原理课程设计 → 暗金主题（html[data-deck='cpd']） */
+:root[data-deck='cpd'] { --deck-accent: var(--cpd); }
+
+/* --------------------- 网络工程师综合实训 → 灰红主题（html[data-deck='ntr']） */
+:root[data-deck='ntr'] { --deck-accent: var(--ntr); }
+
+/* --------------------- 计算机视觉与深度学习 → 灰紫红主题（html[data-deck='cv']） */
+:root[data-deck='cv'] { --deck-accent: var(--cv); }
+
+/* --------------------- 软件项目管理 → 深酒红紫主题（html[data-deck='spm']） */
+:root[data-deck='spm'] { --deck-accent: var(--spm); }
+
+/* --------------------- 大数据处理技术 → 靛蓝主题（html[data-deck='bd']） */
+:root[data-deck='bd'] { --deck-accent: var(--bd); }
+
+/* --------------------- 计算机应用项目实训 → 陶橙主题（html[data-deck='cap']） */
+:root[data-deck='cap'] { --deck-accent: var(--cap); }
+
+/* --------------------- 人工智能经济学 → 翠绿主题（html[data-deck='aie']） */
+:root[data-deck='aie'] { --deck-accent: var(--aie); }
+
+/* --------------------- 信息安全技术 → 暗松绿主题（html[data-deck='sec']） */
+:root[data-deck='sec'] { --deck-accent: var(--sec); }
+
+/* --------------------- 数据库系统 → 橄榄金主题（html[data-deck='db']） */
+:root[data-deck='db'] { --deck-accent: var(--db); }
+
+/* --------------------- 软件工程 → 青灰蓝主题（html[data-deck='se']） */
+:root[data-deck='se'] { --deck-accent: var(--se); }
+
+/* --------------------- 软件测试 → 深褐主题（html[data-deck='st']） */
+:root[data-deck='st'] { --deck-accent: var(--st); }
+
 /* --------------------- 分布式程序设计 → 深紫主题（html[data-deck='dp']） */
 :root[data-deck='dp'] { --deck-accent: var(--dp); }
 
@@ -446,10 +552,26 @@
 :root[data-deck='hd'][data-pg='att'] { --deck-accent: var(--hd-att); }
 :root[data-deck='mc'][data-pg='att'] { --deck-accent: var(--mc-att); }
 :root[data-deck='nlu'][data-pg='att'] { --deck-accent: var(--nlu-att); }
+:root[data-deck='oscd'][data-pg='att'] { --deck-accent: var(--oscd-att); }
+:root[data-deck='cpd'][data-pg='att'] { --deck-accent: var(--cpd-att); }
+:root[data-deck='ntr'][data-pg='att'] { --deck-accent: var(--ntr-att); }
+:root[data-deck='cv'][data-pg='att'] { --deck-accent: var(--cv-att); }
+:root[data-deck='spm'][data-pg='att'] { --deck-accent: var(--spm-att); }
+:root[data-deck='bd'][data-pg='att'] { --deck-accent: var(--bd-att); }
+:root[data-deck='cap'][data-pg='att'] { --deck-accent: var(--cap-att); }
+:root[data-deck='aie'][data-pg='att'] { --deck-accent: var(--aie-att); }
+:root[data-deck='sec'][data-pg='att'] { --deck-accent: var(--sec-att); }
+:root[data-deck='db'][data-pg='att'] { --deck-accent: var(--db-att); }
+:root[data-deck='se'][data-pg='att'] { --deck-accent: var(--se-att); }
+:root[data-deck='st'][data-pg='att'] { --deck-accent: var(--st-att); }
 :root[data-deck='dp'][data-pg='att'] { --deck-accent: var(--dp-att); }
 :root[data-deck='swt'][data-pg='att'] { --deck-accent: var(--swt-att); }
 :root[data-deck='dsd'][data-pg='att'] { --deck-accent: var(--dsd-att); }
 :root[data-deck='ip'][data-pg='att'] { --deck-accent: var(--ip-att); }
+:root[data-deck='db'][data-pg='practice'] { --deck-accent: var(--db-practice); }
+:root[data-deck='se'][data-pg='practice'] { --deck-accent: var(--se-practice); }
+:root[data-deck='st'][data-pg='practice'] { --deck-accent: var(--st-practice); }
+
 :root[data-deck='math'][data-ch='1'] { --deck-accent: var(--math1); }
 :root[data-deck='math'][data-ch='2'] { --deck-accent: var(--math2); }
 :root[data-deck='math'][data-ch='3'] { --deck-accent: var(--math3); }
@@ -471,6 +593,59 @@
 :root[data-deck='hd'][data-ch='2'] { --deck-accent: var(--hd2); }
 :root[data-deck='hd'][data-ch='3'] { --deck-accent: var(--hd3); }
 :root[data-deck='hd'][data-ch='4'] { --deck-accent: var(--hd4); }
+:root[data-deck='aie'][data-ch='1'] { --deck-accent: var(--aie1); }
+:root[data-deck='aie'][data-ch='2'] { --deck-accent: var(--aie2); }
+:root[data-deck='aie'][data-ch='3'] { --deck-accent: var(--aie3); }
+:root[data-deck='aie'][data-ch='4'] { --deck-accent: var(--aie4); }
+:root[data-deck='aie'][data-ch='5'] { --deck-accent: var(--aie5); }
+:root[data-deck='aie'][data-ch='6'] { --deck-accent: var(--aie6); }
+:root[data-deck='aie'][data-ch='7'] { --deck-accent: var(--aie7); }
+:root[data-deck='aie'][data-ch='8'] { --deck-accent: var(--aie8); }
+:root[data-deck='sec'][data-ch='1'] { --deck-accent: var(--sec1); }
+:root[data-deck='sec'][data-ch='2'] { --deck-accent: var(--sec2); }
+:root[data-deck='sec'][data-ch='3'] { --deck-accent: var(--sec3); }
+:root[data-deck='sec'][data-ch='4'] { --deck-accent: var(--sec4); }
+:root[data-deck='sec'][data-ch='5'] { --deck-accent: var(--sec5); }
+:root[data-deck='sec'][data-ch='6'] { --deck-accent: var(--sec5); }
+:root[data-deck='sec'][data-ch='7'] { --deck-accent: var(--sec6); }
+:root[data-deck='db'][data-ch='1'] { --deck-accent: var(--db1); }
+:root[data-deck='db'][data-ch='2'] { --deck-accent: var(--db2); }
+:root[data-deck='db'][data-ch='3'] { --deck-accent: var(--db3); }
+:root[data-deck='db'][data-ch='4'] { --deck-accent: var(--db4); }
+:root[data-deck='db'][data-ch='5'] { --deck-accent: var(--db5); }
+:root[data-deck='db'][data-ch='6'] { --deck-accent: var(--db6); }
+:root[data-deck='db'][data-ch='7'] { --deck-accent: var(--db7); }
+:root[data-deck='db'][data-ch='8'] { --deck-accent: var(--db8); }
+:root[data-deck='db'][data-ch='9'] { --deck-accent: var(--db9); }
+:root[data-deck='db'][data-ch='10'] { --deck-accent: var(--db10); }
+:root[data-deck='db'][data-ch='11'] { --deck-accent: var(--db11); }
+:root[data-deck='db'][data-ch='12'] { --deck-accent: var(--db12); }
+:root[data-deck='se'][data-ch='1'] { --deck-accent: var(--se1); }
+:root[data-deck='se'][data-ch='2'] { --deck-accent: var(--se2); }
+:root[data-deck='se'][data-ch='3'] { --deck-accent: var(--se3); }
+:root[data-deck='se'][data-ch='4'] { --deck-accent: var(--se4); }
+:root[data-deck='se'][data-ch='5'] { --deck-accent: var(--se5); }
+:root[data-deck='se'][data-ch='6'] { --deck-accent: var(--se6); }
+:root[data-deck='se'][data-ch='7'] { --deck-accent: var(--se7); }
+:root[data-deck='se'][data-ch='8'] { --deck-accent: var(--se8); }
+:root[data-deck='se'][data-ch='9'] { --deck-accent: var(--se9); }
+:root[data-deck='se'][data-ch='10'] { --deck-accent: var(--se10); }
+:root[data-deck='se'][data-ch='11'] { --deck-accent: var(--se11); }
+:root[data-deck='se'][data-ch='12'] { --deck-accent: var(--se12); }
+:root[data-deck='se'][data-ch='13'] { --deck-accent: var(--se13); }
+:root[data-deck='se'][data-ch='14'] { --deck-accent: var(--se14); }
+:root[data-deck='st'][data-ch='1'] { --deck-accent: var(--st1); }
+:root[data-deck='st'][data-ch='2'] { --deck-accent: var(--st2); }
+:root[data-deck='st'][data-ch='3'] { --deck-accent: var(--st3); }
+:root[data-deck='st'][data-ch='4'] { --deck-accent: var(--st4); }
+:root[data-deck='st'][data-ch='5'] { --deck-accent: var(--st5); }
+:root[data-deck='st'][data-ch='6'] { --deck-accent: var(--st6); }
+:root[data-deck='st'][data-ch='7'] { --deck-accent: var(--st7); }
+:root[data-deck='st'][data-ch='8'] { --deck-accent: var(--st8); }
+:root[data-deck='st'][data-ch='9'] { --deck-accent: var(--st9); }
+:root[data-deck='st'][data-ch='10'] { --deck-accent: var(--st10); }
+:root[data-deck='st'][data-ch='11'] { --deck-accent: var(--st11); }
+
 
 /* ------------------------------------------------------- 无障碍偏好适配 */
 @media (prefers-reduced-transparency: reduce) {
