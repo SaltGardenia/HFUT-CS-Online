@@ -20,22 +20,22 @@ const ch: NetChapter = {
     { id: 'sec-ch5-routing', text: '3. 路由选择', level: 2 },
     { id: 'sec-ch5-routing-h1', text: '静态策略', level: 3 },
     { id: 'sec-ch5-routing-h2', text: '动态策略', level: 3 },
-    { id: 'sec-ch5-routing-h3', text: '距离向量算法与无穷计数问题', level: 3 },
-    { id: 'sec-ch5-routing-h4', text: '链路状态算法 L-S', level: 3 },
+    { id: 'sec-ch5-routing-h3', text: '★ 距离向量算法与无穷计数问题', level: 3 },
+    { id: 'sec-ch5-routing-h4', text: '★ 链路状态算法 L-S', level: 3 },
     { id: 'sec-ch5-protocol', text: '4. 路由协议', level: 2 },
-    { id: 'sec-ch5-protocol-h1', text: 'RIP 与 OSPF', level: 3 },
-    { id: 'sec-ch5-protocol-h2', text: '自治域与域间路由协议 BGP', level: 3 },
+    { id: 'sec-ch5-protocol-h1', text: '★ RIP 与 OSPF', level: 3 },
+    { id: 'sec-ch5-protocol-h2', text: '★ 自治域与域间路由协议 BGP', level: 3 },
     { id: 'sec-ch5-ip', text: '5. IP 协议', level: 2 },
-    { id: 'sec-ch5-ip-h1', text: '概述与 IP 分组格式', level: 3 },
-    { id: 'sec-ch5-ip-h2', text: '分类 IP 地址', level: 3 },
-    { id: 'sec-ch5-ip-h3', text: '划分子网与子网掩码', level: 3 },
-    { id: 'sec-ch5-ip-h4', text: '可变长子网掩码 VLSM', level: 3 },
-    { id: 'sec-ch5-ip-h5', text: '超网与 CIDR', level: 3 },
-    { id: 'sec-ch5-ip-h6', text: 'IP 分组路由与最长前缀匹配', level: 3 },
+    { id: 'sec-ch5-ip-h1', text: '★ 概述与 IP 分组格式', level: 3 },
+    { id: 'sec-ch5-ip-h2', text: '★ 分类 IP 地址', level: 3 },
+    { id: 'sec-ch5-ip-h3', text: '★ 划分子网与子网掩码', level: 3 },
+    { id: 'sec-ch5-ip-h4', text: '★ 可变长子网掩码 VLSM', level: 3 },
+    { id: 'sec-ch5-ip-h5', text: '★ 超网与 CIDR', level: 3 },
+    { id: 'sec-ch5-ip-h6', text: '★ IP 分组路由与最长前缀匹配', level: 3 },
     { id: 'sec-ch5-icmp', text: '6. 网际控制报文协议 ICMP', level: 2 },
     { id: 'sec-ch5-arp', text: '7. 地址解析协议 ARP', level: 2 },
-    { id: 'sec-ch5-arp-h0', text: 'MAC 地址', level: 3 },
-    { id: 'sec-ch5-arp-h1', text: 'ARP 协议工作原理', level: 3 },
+    { id: 'sec-ch5-arp-h0', text: '★ MAC 地址', level: 3 },
+    { id: 'sec-ch5-arp-h1', text: '★ ARP 协议工作原理', level: 3 },
     { id: 'sec-ch5-arp-h2', text: 'ARP 报文格式', level: 3 },
   ],
   sections: [
@@ -46,6 +46,10 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
+          <div class="callout key">
+            <p class="callout-h">本章荧光笔重点</p>
+            <p><strong>分类 IP</strong> · <strong>IPv4 首部/分片</strong> · <strong>IP 与 MAC</strong> · <strong>ARP 缓存</strong> · <strong>路由转发</strong> · <strong>子网掩码 AND</strong> · <strong>CIDR/VLSM</strong> · <strong>RIP/OSPF/IGP/EGP</strong></p>
+          </div>
           <p>结点间数据交换方式有多种：电路交换、分组交换、信元交换、帧中继。</p>
           <ul>
             <li>
@@ -182,6 +186,10 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch5-routing-h3">距离向量算法与无穷计数问题</h3>
           <div class="callout key">
+            <p class="callout-h">重点 A｜RIP 的交换与更新</p>
+            <p>RIP 仅和相邻路由器交换信息，通常周期性交换（典型 30 秒），距离 16 表示不可达。</p>
+          </div>
+          <div class="callout key">
             <p class="callout-h">重点 A｜RIP 距离向量更新</p>
             <p>对邻居发来的路由距离先加 1；同下一跳可更新，不同下一跳优选较小跳数；RIP 中 16 代表不可达，练习表格逐行更新。</p>
           </div>
@@ -280,6 +288,10 @@ const ch: NetChapter = {
             <li><strong>可认证</strong>：支持认证服务，防止非法向路由器发送假路由信息来愚弄路由。</li>
           </ul>
           <h3 id="sec-ch5-protocol-h2">自治域与域间路由协议 BGP</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜IGP、EGP 与自治系统</p>
+            <p>自治系统内使用 IGP，如 RIP、OSPF；自治系统间的域间路由选择使用 BGP。</p>
+          </div>
           <p>
             <strong>自治域</strong>（Autonomous System, AS）：在互联网中，一个或多个实体管辖下的所有执行共同路由策略的 IP 网络和路由器的组合。
             每个独立的 AS 都被分配一个唯一的自治域编号（ASN）作为其在互联网上存在的唯一标识——最初的 ASN 是 16 位长的整数，
@@ -324,6 +336,10 @@ const ch: NetChapter = {
           html: `
           <h3 id="sec-ch5-ip-h1">概述与 IP 分组格式</h3>
           <div class="callout key">
+            <p class="callout-h">重点 A｜IPv4 首部检验和</p>
+            <p>按 16 位反码算术计算，只检验 IPv4 首部而不检验数据；转发时 TTL 等字段变化后需更新。</p>
+          </div>
+          <div class="callout key">
             <p class="callout-h">重点 A｜IPv4 首部与分片</p>
             <p>熟记固定首部、标识、DF/MF 标志和 13 位片偏移；片偏移以 8 字节为单位，计算分片时需同时检查 MTU 和首部长度。</p>
           </div>
@@ -358,6 +374,10 @@ const ch: NetChapter = {
             若进位单元非零则将进位单元与本体单元相加并再次分割，如此循环直至进位单元为零 → 将本体单元的值取反并存入校验和字段。
             <strong>检验</strong>：接收 IP 包时按同样算法计算，若最终本体单元的结果取反后为零，则认为收到的 IP 头正确，否则有错。</p>
           <h3 id="sec-ch5-ip-h2">分类 IP 地址</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜A/B/C 类地址与主机数</p>
+            <p>区分各类地址的网络号和主机号长度；传统可用主机数通常按 2^主机位数−2 计算，注意特殊地址。</p>
+          </div>
           <p>
             TCP/IP 网络模型将整个 Internet 视为一个单一的、抽象的网络，IP 地址就是给每个连接在这个网络上的主机、路由器或其他设备分配的
             分配给网络接口的 <strong>32 位 IPv4 地址</strong>；采用私有地址、NAT 等技术时，并非所有设备在全球都使用互不重复的 IPv4 地址。IP 地址的分配方法（网络规划方法）包括：
@@ -399,6 +419,10 @@ const ch: NetChapter = {
             </li>
           </ul>
           <h3 id="sec-ch5-ip-h3">划分子网与子网掩码</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜子网转发逐项 AND</p>
+            <p>目的 IP 与路由表中各子网掩码逐位 AND，所得网络地址匹配路由项，随后按下一跳或接口转发。</p>
+          </div>
           <div class="callout key">
             <p class="callout-h">重点 A｜IP 地址与子网掩码逐位 AND</p>
             <p>先根据掩码确定网络位，再逐位相与求网络地址；可以用 /20、255.255.192.0 等课件例子自测。</p>
@@ -499,6 +523,10 @@ const ch: NetChapter = {
             </tbody>
           </table>
           <h3 id="sec-ch5-ip-h6">IP 分组路由与最长前缀匹配</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜直接交付、下一跳及默认路由</p>
+            <p>区分直连网络、特定主机路由、网络路由和默认路由；无匹配项时不能继续正常转发。</p>
+          </div>
           <div class="callout key">
             <p class="callout-h">重点 A｜最长前缀匹配</p>
             <p>同一目的地址可能命中多条路由时，优先使用匹配的最长网络前缀；结合路由表做逐位匹配练习。</p>
@@ -614,6 +642,10 @@ const ch: NetChapter = {
             除了第四种情况外，其余三种都是在同一个网络内的数据报文传输。
           </p>
           <h3 id="sec-ch5-arp-h0">MAC 地址</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜IP 与 MAC 地址的区别</p>
+            <p>IP 地址写在网络层数据报首部，MAC 地址写在链路层帧首部；经路由器逐跳转发时，IP 地址通常不变，MAC 地址逐跳改变。</p>
+          </div>
           <p>
             无论 OSI 还是 TCP/IP，都奉行<strong>对等层通信原则</strong>——低层只是向上层提供支持，将上层的协议报文作为载荷封装在本层相关协议的数据单元中；
             在低层，无法获得也不能理解被封装的高层协议报文的内容（低层协议看不见高层数据）。
@@ -627,6 +659,10 @@ const ch: NetChapter = {
             （如 08:00:20:0A:8C:6D）。在 48 位二进制数字中，IEEE 负责向以太网产品生产厂商分配前 24 位，由厂商负责编写后 24 位，并确保所有 MAC 地址的唯一性。
           </p>
           <h3 id="sec-ch5-arp-h1">ARP 协议工作原理</h3>
+          <div class="callout key">
+            <p class="callout-h">重点 A｜ARP 缓存与查询</p>
+            <p>先查本地 ARP 缓存的 IP→MAC 映射；未命中时发起解析并更新缓存，过期项自动删除。</p>
+          </div>
           <div class="callout key">
             <p class="callout-h">重点 A｜ARP 的对象是下一跳</p>
             <p>在同一局域网解析目标主机 IP 对应的 MAC；跨路由器发送时解析的是下一跳网关的 MAC，IP 目的地址仍是终点主机。</p>
