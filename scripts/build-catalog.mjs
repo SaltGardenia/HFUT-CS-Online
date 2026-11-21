@@ -4,13 +4,15 @@
  * 目录结构契约见 data/整理说明.md：<学期>/<课程>/{课件,试题,附件}/**。
  * 只读目录名、文件名与文件大小，不读取文件内容。生成物随提交入库，运行时零 IO。 */
 import { readdirSync, statSync, writeFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative } from 'node:path';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
-const MATERIALS = join(ROOT, '..', 'data');
-const OUT = join(ROOT, '..', 'src', 'content', 'catalog.ts');
-const ATTACH_DIR = join(ROOT, '..', 'public', 'attachments');
+const REPO_ROOT = join(ROOT, '..');
+const MATERIALS = join(REPO_ROOT, 'data');
+const OUT = join(REPO_ROOT, 'src', 'content', 'catalog.ts');
+const ATTACH_DIR = join(REPO_ROOT, 'public', 'attachments');
 
 const SEMESTER_ORDER = ['大一上', '大一下', '大二上', '大二下', '大三上', '大三下', '大四上', '大四下'];
 
@@ -60,6 +62,113 @@ function loadProvenance() {
 }
 const PROVENANCE = loadProvenance();
 
+/** 从 git log 提取的 author name / email 解析展示名（优先 GitHub noreply 用户名，否则回退 author name）。 */
+function resolveGitAuthor(name, email) {
+  const m = email?.trim().match(/^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/i);
+  if (m?.[1]) return m[1];
+  const n = name?.trim();
+  if (n) return n;
+  return email?.split('@')[0]?.trim() || '';
+}
+
+/* 通过本地 git log 一次性扫描 data/ 下所有已入库文件的首次上传者：
+ * 返回 Map<仓库内 POSIX 路径 (如 data/大三上/...), 上传者名称>。
+ * 浅克隆或非 git 环境失败时返回空 Map，不影响构建。 */
+function loadGitUploaders() {
+  const map = new Map();
+  try {
+    const out = execFileSync(
+      'git',
+      [
+        '-c',
+        'core.quotepath=false',
+        'log',
+        '--diff-filter=A',
+        '--no-renames',
+        '--reverse',
+        '--format=__COMMIT__\t%an\t%ae',
+        '--name-only',
+        '--',
+        'data',
+      ],
+      { cwd: REPO_ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] },
+    );
+    let currentAuthor = '';
+    for (const rawLine of out.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line) continue;
+      if (line.startsWith('__COMMIT__\t')) {
+        const [, name = '', email = ''] = line.split('\t');
+        currentAuthor = resolveGitAuthor(name, email);
+        continue;
+      }
+      if (currentAuthor && !map.has(line)) {
+        map.set(line, currentAuthor);
+      }
+    }
+  } catch {
+    // 非 git 仓库或无 git 命令时静默跳过
+  }
+  return map;
+}
+const GIT_UPLOADERS = loadGitUploaders();
+
+/** 若目录下所有后代文件共享同一上传者，则在目录节点上标记 u；否则清除。 */
+function stampFolderUploader(node) {
+  const uploaders = new Set();
+  const collect = (x) => {
+    if (x.c) x.c.forEach(collect);
+    else uploaders.add(x.u ?? null);
+  };
+  node.c.forEach(collect);
+  if (uploaders.size === 1 && !uploaders.has(null)) {
+    node.u = [...uploaders][0];
+  } else {
+    delete node.u;
+  }
+}
+
+/* 当 data/ 不完整（如 CI 或仅检出部分课件）跳过全量扫描时，
+ * 仍用本地 git log 为已有 public/attachments/*.json 中的本仓库（r === 'self'）节点补全上传者 u。 */
+function syncExistingManifestUploaders() {
+  if (GIT_UPLOADERS.size === 0 || !existsSync(ATTACH_DIR)) return;
+  let updated = 0;
+  const walk = (nodes) => {
+    for (const node of nodes) {
+      if (node.c) {
+        walk(node.c);
+        stampFolderUploader(node);
+      } else if (node.r === 'self' && node.sp) {
+        const u = GIT_UPLOADERS.get(node.sp);
+        if (u) node.u = u;
+      }
+    }
+  };
+  for (const name of readdirSync(ATTACH_DIR)) {
+    if (!name.endsWith('.json')) continue;
+    const file = join(ATTACH_DIR, name);
+    const raw = readFileSync(file, 'utf8');
+    let manifest;
+    try {
+      manifest = JSON.parse(raw);
+    } catch {
+      continue;
+    }
+    if (!Array.isArray(manifest?.cats)) continue;
+    for (const cat of manifest.cats) {
+      if (Array.isArray(cat?.tree)) walk(cat.tree);
+    }
+    const next = JSON.stringify(manifest);
+    if (next !== raw.trim()) {
+      writeFileSync(file, next, 'utf8');
+      updated += 1;
+    }
+  }
+  if (updated > 0) {
+    console.log(`[build-catalog] 已从 git log 同步 ${updated} 份附件清单的上传者信息`);
+  }
+}
+
 /* 列出目录内容：目录在前、文件在后，各组内按中文序。 */
 function listSorted(d) {
   return readdirSync(d)
@@ -78,9 +187,17 @@ function buildCourseTree(dir, provKey) {
   const fileNode = (name, rel, size) => {
     const node = { n: name, p: rel, s: size };
     const prov = PROVENANCE.get(`${provKey}/${rel}`);
+    const selfPath = `data/${provKey}/${rel}`;
     if (prov) {
       node.r = prov.repo;
       node.sp = prov.src;
+    } else if (GIT_UPLOADERS.has(selfPath)) {
+      node.r = 'self';
+      node.sp = selfPath;
+    }
+    if (node.r === 'self' && node.sp) {
+      const uploader = GIT_UPLOADERS.get(node.sp);
+      if (uploader) node.u = uploader;
     }
     return node;
   };
@@ -101,6 +218,7 @@ function buildCourseTree(dir, provKey) {
         node.sp = i > 0 ? first.sp.slice(0, i) : '';
       }
     }
+    stampFolderUploader(node);
   };
   // 上游仓库自带的说明文件（README*）不算课程附件——仅限课程目录/类别目录（课件/试题/附件）
   // 直属的那一层；实验工程等更深目录里的 ReadMe.txt 是课程内容，保留
@@ -135,6 +253,7 @@ function buildCourseTree(dir, provKey) {
 }
 
 if (!existsSync(MATERIALS)) {
+  syncExistingManifestUploaders();
   console.warn(`[build-catalog] 未找到资料目录 ${MATERIALS}，跳过（保留现有 catalog.ts）`);
   process.exit(0);
 }
@@ -148,6 +267,7 @@ if (skipped.length) console.log(`[build-catalog] 跳过非学期目录（子模�
 // CI 上 data/ 目录存在但只有入库的说明文件（课件本体被 gitignore）——此时不能生成空目录，保留已提交的 catalog.ts
 if (semesters.length === 0) {
   if (existsSync(OUT)) {
+    syncExistingManifestUploaders();
     console.warn('[build-catalog] data/ 下无学期目录（CI 环境），跳过（保留现有 catalog.ts）');
     process.exit(0);
   }
@@ -163,6 +283,7 @@ const presentCourses = semesters.reduce((count, sem) => count +
   readdirSync(join(MATERIALS, sem))
     .filter((course) => statSync(join(MATERIALS, sem, course)).isDirectory()).length, 0);
 if (knownCourses > presentCourses) {
+  syncExistingManifestUploaders();
   console.warn(`[build-catalog] 仅发现 ${presentCourses}/${knownCourses} 门课程资料，保留已跟踪的静态索引`);
   process.exit(0);
 }

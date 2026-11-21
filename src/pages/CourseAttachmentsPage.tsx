@@ -17,6 +17,8 @@ interface AttNode {
   r?: string;
   /** 上游仓库内路径（目录为仓库内目录路径） */
   sp?: string;
+  /** Git 上传者（由 build-catalog 从本地 git log 自动提取） */
+  u?: string;
 }
 interface AttManifest {
   semester: string;
@@ -44,6 +46,33 @@ function fmtSize(bytes: number): string {
 }
 
 const countFiles = (nodes: AttNode[]): number => nodes.reduce((a, x) => a + (x.c ? countFiles(x.c) : 1), 0);
+
+/** 目录行来源文案：单一仓库时优先展示 git 上传者（支持多人汇总），否则回退仓库 owner；多仓库目录显示「多仓库混合」。 */
+function formatDirSource(node: AttNode): string {
+  if (!node.r) return ' · 多仓库混合';
+  if (node.u) return ` · 来自 ${node.u}`;
+  const uploaders = new Set<string>();
+  const collect = (nodes: AttNode[]) => {
+    for (const x of nodes) {
+      if (x.c) collect(x.c);
+      else if (x.u) uploaders.add(x.u);
+      else if (x.r && REPOS[x.r]) uploaders.add(REPOS[x.r].owner);
+    }
+  };
+  if (node.c) collect(node.c);
+  const list = [...uploaders];
+  if (list.length === 1) return ` · 来自 ${list[0]}`;
+  if (list.length === 2) return ` · 来自 ${list[0]}、${list[1]}`;
+  if (list.length > 2) return ` · 来自 ${list[0]} 等 ${list.length} 人`;
+  return ` · 来自 ${REPOS[node.r].owner}`;
+}
+
+/** 文件行来源文案：优先展示 git 上传者，否则回退仓库 owner。 */
+function formatFileSource(node: AttNode): string {
+  const owner = node.u ?? (node.r ? REPOS[node.r]?.owner : undefined);
+  if (!owner) return '';
+  return `${node.s == null ? '' : ' · '}来自 ${owner}`;
+}
 
 /** 与类别同名的顶层目录（课件/课件）拍平到类别下，避免组头与目录重名 */
 const flattenCats = (m: AttManifest) => m.cats.map((c) => ({ name: c.name, tree: c.tree.flatMap((t) => (t.c && t.n === c.name ? t.c : [t])) }));
@@ -207,7 +236,7 @@ export default function CourseAttachmentsPage() {
                           </span>
                           <span className="att-row-path">
                             {countFiles(node.c)} 份文件
-                            {node.r ? ` · 来自 ${REPOS[node.r].owner}` : ' · 多仓库混合'}
+                            {formatDirSource(node)}
                           </span>
                         </button>
                         {node.r && (
@@ -224,7 +253,7 @@ export default function CourseAttachmentsPage() {
                           </span>
                           <span className="att-row-path">
                             {node.s == null ? '' : fmtSize(node.s)}
-                            {node.r && `${node.s == null ? '' : ' · '}来自 ${REPOS[node.r].owner}`}
+                            {formatFileSource(node)}
                           </span>
                         </div>
                         {node.r ? (
