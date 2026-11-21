@@ -143,9 +143,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch4-frame-h2">透明传输</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜封装成帧与透明传输</p>
+            <p class="callout-h">重点 A｜封装成帧与透明传输</p>
             <p>封装成帧确定帧界限；透明传输要求数据中即使出现与定界符相同的位组合，也不会误判边界。透明传输不等于“永远不会出现差错”。</p>
-            <p><small>依据：2025 数据链路层 PDF 第 7–11 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -235,9 +234,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch4-error-h4">循环冗余码 CRC</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜CRC 模 2 除法</p>
+            <p class="callout-h">重点 A｜CRC 模 2 除法</p>
             <p>练会生成多项式与二进制序列的对应、补零后模 2 除法、余数 FCS 和发送码字。余数为零表示通过检验，不是绝对无错保证。</p>
-            <p><small>依据：2025 数据链路层 PDF 第 14、19 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -308,9 +306,8 @@ const ch: NetChapter = {
           <p><em>课件将本节标注为「略」并要求自学，但保留了基本内容，此处按课件原文收录。</em></p>
           <h3 id="sec-ch4-flow-h1">停—等协议</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜停止等待效率</p>
+            <p class="callout-h">重点 A｜停止等待效率</p>
             <p>区分数据帧发送时间、单向传播时间和 ACK 开销，再根据题目假设计算信道利用率；注意重传与编号机制。</p>
-            <p><small>依据：2025 数据链路层 PDF 第 28、37、44 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -325,9 +322,8 @@ const ch: NetChapter = {
           <p>一个帧的完整周期 = 发送数据帧 L/B → 传播 2R → 确认帧。如考虑由于差错造成的重发，以及帧头、校验和冗余信息，信道实际利用率达不到最大利用率。</p>
           <h3 id="sec-ch4-flow-h2">滑动窗口协议</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜GBN / SR 与滑动窗口</p>
+            <p class="callout-h">重点 A｜GBN / SR 与滑动窗口</p>
             <p>比较回退 N 帧和选择重传的接收窗口、确认与重传范围；能沿时间轴模拟发送窗口的移动。</p>
-            <p><small>依据：2025 数据链路层 PDF 第 28、45、50–53 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -474,9 +470,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch4-p2p-h2">PPP 协议</h3>
           <div class="callout tip">
-            <p class="callout-h">荧光笔复习 B｜PPP 能做与不能做的事</p>
+            <p class="callout-h">重点 B｜PPP 能做与不能做的事</p>
             <p>把封装成帧、透明性、差错检测与可靠重传、流量控制分开判断：PPP 能检错，但不提供可靠重传保证。</p>
-            <p><small>依据：2025 数据链路层 PDF 第 58、60、62 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -663,9 +658,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch4-broadcast-h2">CSMA/CD 与 CSMA/CA</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜CSMA/CD 与指数退避</p>
+            <p class="callout-h">重点 A｜CSMA/CD 与指数退避</p>
             <p>会画最晚检测碰撞的时间关系，区分往返传播时延 2τ 与 RTT 的口语混用；退避参数 k=min(重传次数,10)，连续冲突达到 16 次后放弃。</p>
-            <p><small>依据：2025 局域网 PDF 第 12、17、23–25 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -723,9 +717,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch4-broadcast-h3">局域网与经典以太网</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜MAC 帧与交换机自学习</p>
+            <p class="callout-h">重点 A｜MAC 帧与交换机自学习</p>
             <p>掌握以太网 MAC 帧字段顺序、典型长度；交换机按源 MAC 学习端口，按目的 MAC 查表转发/泛洪，表项可老化。</p>
-            <p><small>依据：2025 局域网 PDF 第 43、48–49、68、74、77–78 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -809,9 +802,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch4-broadcast-h5">局域网扩展与虚拟局域网</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜广播域、碰撞域与 VLAN</p>
+            <p class="callout-h">重点 A｜广播域、碰撞域与 VLAN</p>
             <p>每个交换机端口一般是独立碰撞域；未划分 VLAN 的二层交换网络仍可处于同一广播域，VLAN 用于逻辑分隔广播域。</p>
-            <p><small>依据：2025 局域网 PDF 第 88、91–92 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
