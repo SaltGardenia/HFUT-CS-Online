@@ -271,6 +271,12 @@ const ch: NetChapter = {
             <strong>被动等待连接建立的应用进程称为服务器</strong>（server）。
           </p>
           <h3 id="sec-ch6-tcp-h2">TCP 报文段的首部结构</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜字节编号与累计确认</p>
+            <p>TCP 为字节编号：ACK 确认号通常表示下一个期望收到的字节序号，而不是已收最后一个字节序号。</p>
+            <p><small>依据：2025 传输层 PDF 第 54 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>TCP 报文段 = 20 字节的固定首部 + 选项（长度可变）+ 填充 + 数据部分。固定首部各字段：</p>
           <table class="tbl">
             <thead>
@@ -540,6 +546,12 @@ const ch: NetChapter = {
             TCP 连接的往返时间 RTT 也不是固定不变的，需要使用特定的算法估算较为合理的重传时间。
           </p>
           <h3 id="sec-ch6-impl-h1">基于字节的滑动窗口</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜滑动窗口移动过程</p>
+            <p>通过已发送/已确认/可发送范围画出发送窗口，辨别接收端流量控制窗口 rwnd 的限制作用。</p>
+            <p><small>依据：2025 传输层 PDF 第 62 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             <strong>TCP 滑动窗口的特点之一：面向字节流</strong>——以字节为单位进行控制。
             滑动窗口用于<strong>拥塞控制</strong>（改变窗口的大小）和<strong>流量控制</strong>（控制发送报文的速率）。
@@ -720,6 +732,12 @@ const ch: NetChapter = {
           type: 'html',
           html: `
           <h3 id="sec-ch6-congestion-h1">拥塞控制基本原理</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜拥塞控制与流量控制</p>
+            <p>拥塞窗口 cwnd 调整网络注入速率，接收窗口 rwnd 保护接收端缓冲；结合慢开始/拥塞避免的过程图判断窗口如何变化。</p>
+            <p><small>依据：2025 传输层 PDF 第 98 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             <strong>拥塞</strong>（congestion）：即对资源的需求超过了可用的资源——若网络中许多资源同时供应不足，网络的性能就要明显变坏，
             整个网络的吞吐量随负荷的增大而下降。出现资源拥塞的条件：对资源需求的总和 &gt; 可用资源。
