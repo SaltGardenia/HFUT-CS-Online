@@ -181,6 +181,12 @@ const ch: NetChapter = {
             （集中路由选择：每个结点根据整个网络的链路状态数据计算路由。）
           </p>
           <h3 id="sec-ch5-routing-h3">距离向量算法与无穷计数问题</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜RIP 距离向量更新</p>
+            <p>对邻居发来的路由距离先加 1；同下一跳可更新，不同下一跳优选较小跳数；RIP 中 16 代表不可达，练习表格逐行更新。</p>
+            <p><small>依据：2025 网络层第二套 PDF 第 23、29、32 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             <strong>距离向量路由选择算法</strong>（D-V 算法）：最早在 ARPANET 中使用，后在 Internet 及 Novell 网中的 IPX 中使用，即 RIP 协议。
             基本思想：每个结点都保存一张路由表（目的地址、最短距离、最佳输出链路），与固定路由选择不同的是
@@ -203,6 +209,12 @@ const ch: NetChapter = {
             所以 B 把到 A 的距离置为∞）。水平分割有时会失败。
           </p>
           <h3 id="sec-ch5-routing-h4">链路状态算法 L-S</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜OSPF 链路状态</p>
+            <p>理解链路状态信息的分发、同步的拓扑数据库与 Dijkstra 最短路径求解，和 RIP 的距离向量思路比较。</p>
+            <p><small>依据：2025 网络层第二套 PDF 第 44、49 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             <strong>链路状态路由选择算法</strong>（L-S 算法）：ARPANET 以及后来的 Internet 的内部网关协议由距离向量改为链路状态。
             基本思想：每个结点<strong>定期广播</strong>路由信息，并根据最新路由信息刷新路由表。主要步骤：
@@ -313,6 +325,12 @@ const ch: NetChapter = {
           type: 'html',
           html: `
           <h3 id="sec-ch5-ip-h1">概述与 IP 分组格式</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜IPv4 首部与分片</p>
+            <p>熟记固定首部、标识、DF/MF 标志和 13 位片偏移；片偏移以 8 字节为单位，计算分片时需同时检查 MTU 和首部长度。</p>
+            <p><small>依据：2025 网络层第一套 PDF 第 83、89–93 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             IP 协议是 Internet 体系结构的核心协议，已成为连接异构网络的工业标准。
             IP 提供<strong>无连接的数据报服务</strong>：每个 IP 分组长度 ≤ 64K 字节，不能保证分组可靠的、按序到达，这些留给高层协议解决。
@@ -384,6 +402,12 @@ const ch: NetChapter = {
             </li>
           </ul>
           <h3 id="sec-ch5-ip-h3">划分子网与子网掩码</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜IP 地址与子网掩码逐位 AND</p>
+            <p>先根据掩码确定网络位，再逐位相与求网络地址；可以用 /20、255.255.192.0 等课件例子自测。</p>
+            <p><small>依据：2025 网络层第一套 PDF 第 112–120、124 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             <strong>划分子网</strong>（RFC 950，1985 年提出）：将一个 IP 类网划分成几个较小的子网（subnet），多个物理网共享同一个 IP 类网前缀，
             IP 地址成为三级结构：IP 地址 ::= {&lt;网络号&gt;, &lt;子网号&gt;, &lt;主机号&gt;}。
@@ -431,6 +455,12 @@ const ch: NetChapter = {
             分别用于 25 人和 10 人部门。即 192.168.1.0/25、192.168.1.128/26、192.168.1.192/27、192.168.1.224/27。
           </p>
           <h3 id="sec-ch5-ip-h5">超网与 CIDR</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜VLSM、CIDR 与地址块</p>
+            <p>按前缀长度求地址块大小、首末地址与掩码；牢记前缀变长意味着地址块变小，不能机械套用旧式分类编址规则。</p>
+            <p><small>依据：2025 网络层第一套 PDF 第 131–139 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             <strong>超网</strong>也称为无分类域间路由（Classless Inter-Domain Routing，CIDR）编址方法，是在变长子网掩码基础上发展出来的一种 IP 地址编址方法。
             CIDR 中不再有传统的 A 类、B 类和 C 类地址以及划分子网的概念，因而可以更加有效地分配 IPv4 的地址空间；
@@ -474,6 +504,12 @@ const ch: NetChapter = {
             </tbody>
           </table>
           <h3 id="sec-ch5-ip-h6">IP 分组路由与最长前缀匹配</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜最长前缀匹配</p>
+            <p>同一目的地址可能命中多条路由时，优先使用匹配的最长网络前缀；结合路由表做逐位匹配练习。</p>
+            <p><small>依据：2025 网络层第一套 PDF 第 129、143 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             每个路由器中都保存一张路由表（无论是静态还是动态），路由表的主要项目有两个：<strong>网络号、下一跳地址</strong>（最佳输出链路）。
             当一个 IP 分组到达后，路由器对其进行的基于「存储转发」的路由寻找过程就是 IP 分组的路由过程：
@@ -597,6 +633,12 @@ const ch: NetChapter = {
             （如 08:00:20:0A:8C:6D）。在 48 位二进制数字中，IEEE 负责向以太网产品生产厂商分配前 24 位，由厂商负责编写后 24 位，并确保所有 MAC 地址的唯一性。
           </p>
           <h3 id="sec-ch5-arp-h1">ARP 协议工作原理</h3>
+          <div class="callout key">
+            <p class="callout-h">荧光笔复习 A｜ARP 的对象是下一跳</p>
+            <p>在同一局域网解析目标主机 IP 对应的 MAC；跨路由器发送时解析的是下一跳网关的 MAC，IP 目的地址仍是终点主机。</p>
+            <p><small>依据：2025 网络层第一套 PDF 第 54、64、66–78 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
+          </div>
+
           <p>
             地址解析协议（Address Resolution Protocol，ARP）是 IP 协议最重要的配套协议之一，其目的就是<strong>将 IP 地址转化成 MAC（物理或硬件）地址</strong>：
           </p>
