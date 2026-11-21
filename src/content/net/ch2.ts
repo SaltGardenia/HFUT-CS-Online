@@ -82,9 +82,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch2-arch-h2">实体、协议、服务和 SAP</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜协议与服务、SDU/PCI/PDU</p>
+            <p class="callout-h">重点 A｜协议与服务、SDU/PCI/PDU</p>
             <p>协议约束同层对等实体（水平），服务由下层向上层提供（垂直）；本层通过加入 PCI 等控制信息形成相应 PDU，勿混淆数据单元层次。</p>
-            <p><small>依据：2025 体系结构 PDF 第 27、45 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <ul>
@@ -205,9 +204,8 @@ const ch: NetChapter = {
           </table>
           <h3 id="sec-ch2-osi-h2">主机 1 向主机 2 发送数据</h3>
           <div class="callout tip">
-            <p class="callout-h">荧光笔复习 B｜分层封装/解封装</p>
+            <p class="callout-h">重点 B｜分层封装/解封装</p>
             <p>结合分层传输图辨别各层作用、传输层的端到端通信，以及 TCP/IP 各层的功能对应。</p>
-            <p><small>依据：2025 体系结构 PDF 第 31–38、71 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>主机 1 的应用进程 AP1 向主机 2 的应用进程 AP2 发送数据的完整过程（自上而下逐层封装，再自下而上逐层拆封）：</p>
