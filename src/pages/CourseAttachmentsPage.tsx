@@ -25,11 +25,12 @@ interface AttManifest {
 }
 
 /**
- * 四个上游资料仓库 → 直链参数。
+ * 四个上游资料仓库及本站新增课件 → 下载直链参数。
  * 分支为各仓库默认分支实测值（styitches/mox 是 master，其余是 main）；
  * 上游若改默认分支，跳转/下载会 404，需重新 `git ls-remote --symref` 核对。
  */
 const REPOS: Record<string, { owner: string; repo: string; branch: string }> = {
+  self: { owner: 'SaltGardenia', repo: 'HFUT-CS-Online', branch: 'main' },
   sunmiao: { owner: 'sunmiao0301', repo: 'HFUT-CS', branch: 'main' },
   styitches: { owner: 'styitches', repo: 'HFUT-CS', branch: 'master' },
   mox: { owner: 'mox-hub', repo: 'hfut-cs', branch: 'master' },
@@ -57,8 +58,8 @@ const visibleRows = (nodes: AttNode[], open: Set<string>, depth: number, out: { 
 
 /**
  * 课程附件页 —— 所有课程共用的「附件」导航页。
- * 资料文件本体不入库（data/** 被 gitignore），预览不可用：页面按课件/试题/附件三类
- * 陈列层级目录树（保留上游仓库的目录结构），一键下载直接从四个上游资料仓库
+ * 旧资料文件本体不入库（data/** 默认被 gitignore）；2025 课件已单独纳入仓库。页面按课件/试题/附件三类
+ * 陈列层级目录树（保留资料的目录结构），一键下载从上游资料仓库或本站
  * 拉取 raw 文件存盘（fetch→blob→download）；单一来源的项目目录额外提供 GitHub 跳转链接。
  * 清单由 npm run catalog 生成至 public/attachments/（含来源仓库与源路径溯源）。
  */
@@ -163,7 +164,7 @@ export default function CourseAttachmentsPage() {
       <h1>附件</h1>
       <div className="lede">
         <p>
-          {course?.name} 课程资料：课件 · 试题 · 附件共 {manifest ? total : '—'} 份文件，按原仓库目录层级陈列，均来自 4 个上游资料仓库。
+          {course?.name} 课程资料：课件 · 试题 · 附件共 {manifest ? total : '—'} 份文件，按资料目录层级陈列，包括 2025 新版课件和 4 个上游资料仓库。
         </p>
       </div>
 
@@ -222,8 +223,8 @@ export default function CourseAttachmentsPage() {
                             {node.n}
                           </span>
                           <span className="att-row-path">
-                            {fmtSize(node.s ?? 0)}
-                            {node.r && ` · 来自 ${REPOS[node.r].owner}`}
+                            {node.s == null ? '' : fmtSize(node.s)}
+                            {node.r && `${node.s == null ? '' : ' · '}来自 ${REPOS[node.r].owner}`}
                           </span>
                         </div>
                         {node.r ? (
