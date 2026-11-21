@@ -224,9 +224,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch1-work-h3">电路交换、报文交换与分组交换</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜三种交换方式</p>
+            <p class="callout-h">重点 A｜三种交换方式</p>
             <p>能说清建立连接/存储转发/分组切分的差别；结合典型传送过程比较等待与时延。</p>
-            <p><small>依据：2025 概论 PDF 第 51–52 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -331,9 +330,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch1-performance-h2">时延</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜发送时延 ≠ 传播时延</p>
+            <p class="callout-h">重点 A｜发送时延 ≠ 传播时延</p>
             <p>发送时延 = 分组比特数 ÷ 发送速率；传播时延 = 链路长度 ÷ 传播速度。分辨速率、带宽、RTT 的物理意义再计算。</p>
-            <p><small>依据：2025 概论 PDF 第 67–75、91 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
