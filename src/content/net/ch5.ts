@@ -182,9 +182,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch5-routing-h3">距离向量算法与无穷计数问题</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜RIP 距离向量更新</p>
+            <p class="callout-h">重点 A｜RIP 距离向量更新</p>
             <p>对邻居发来的路由距离先加 1；同下一跳可更新，不同下一跳优选较小跳数；RIP 中 16 代表不可达，练习表格逐行更新。</p>
-            <p><small>依据：2025 网络层第二套 PDF 第 23、29、32 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -210,9 +209,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch5-routing-h4">链路状态算法 L-S</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜OSPF 链路状态</p>
+            <p class="callout-h">重点 A｜OSPF 链路状态</p>
             <p>理解链路状态信息的分发、同步的拓扑数据库与 Dijkstra 最短路径求解，和 RIP 的距离向量思路比较。</p>
-            <p><small>依据：2025 网络层第二套 PDF 第 44、49 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -326,9 +324,8 @@ const ch: NetChapter = {
           html: `
           <h3 id="sec-ch5-ip-h1">概述与 IP 分组格式</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜IPv4 首部与分片</p>
+            <p class="callout-h">重点 A｜IPv4 首部与分片</p>
             <p>熟记固定首部、标识、DF/MF 标志和 13 位片偏移；片偏移以 8 字节为单位，计算分片时需同时检查 MTU 和首部长度。</p>
-            <p><small>依据：2025 网络层第一套 PDF 第 83、89–93 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -403,9 +400,8 @@ const ch: NetChapter = {
           </ul>
           <h3 id="sec-ch5-ip-h3">划分子网与子网掩码</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜IP 地址与子网掩码逐位 AND</p>
+            <p class="callout-h">重点 A｜IP 地址与子网掩码逐位 AND</p>
             <p>先根据掩码确定网络位，再逐位相与求网络地址；可以用 /20、255.255.192.0 等课件例子自测。</p>
-            <p><small>依据：2025 网络层第一套 PDF 第 112–120、124 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -456,9 +452,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch5-ip-h5">超网与 CIDR</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜VLSM、CIDR 与地址块</p>
+            <p class="callout-h">重点 A｜VLSM、CIDR 与地址块</p>
             <p>按前缀长度求地址块大小、首末地址与掩码；牢记前缀变长意味着地址块变小，不能机械套用旧式分类编址规则。</p>
-            <p><small>依据：2025 网络层第一套 PDF 第 131–139 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -505,9 +500,8 @@ const ch: NetChapter = {
           </table>
           <h3 id="sec-ch5-ip-h6">IP 分组路由与最长前缀匹配</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜最长前缀匹配</p>
+            <p class="callout-h">重点 A｜最长前缀匹配</p>
             <p>同一目的地址可能命中多条路由时，优先使用匹配的最长网络前缀；结合路由表做逐位匹配练习。</p>
-            <p><small>依据：2025 网络层第一套 PDF 第 129、143 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
@@ -634,9 +628,8 @@ const ch: NetChapter = {
           </p>
           <h3 id="sec-ch5-arp-h1">ARP 协议工作原理</h3>
           <div class="callout key">
-            <p class="callout-h">荧光笔复习 A｜ARP 的对象是下一跳</p>
+            <p class="callout-h">重点 A｜ARP 的对象是下一跳</p>
             <p>在同一局域网解析目标主机 IP 对应的 MAC；跨路由器发送时解析的是下一跳网关的 MAC，IP 目的地址仍是终点主机。</p>
-            <p><small>依据：2025 网络层第一套 PDF 第 54、64、66–78 页；A/B 为复习建议，不代表教师正式划定考试范围。</small></p>
           </div>
 
           <p>
