@@ -33,10 +33,13 @@ const ch: NetChapter = {
     { id: 'sec-ch1-work-h2', text: '网络核心中的路由器与分组交换', level: 3 },
     { id: 'sec-ch1-work-h3', text: '★ 电路交换、报文交换与分组交换', level: 3 },
     { id: 'sec-ch1-performance', text: '5. 计算机网络的性能指标', level: 2 },
-    { id: 'sec-ch1-performance-h1', text: '★ 速率、带宽与吞吐量', level: 3 },
-    { id: 'sec-ch1-performance-h2', text: '★ 时延', level: 3 },
-    { id: 'sec-ch1-performance-loss', text: '分组丢失率、时延带宽积与 RTT', level: 3 },
-    { id: 'sec-ch1-performance-h3', text: '★ 利用率', level: 3 },
+    { id: 'sec-ch1-performance-h1', text: '★ 速率与带宽', level: 3 },
+    { id: 'sec-ch1-performance-throughput', text: '★ 吞吐量：实际通过多少数据', level: 3 },
+    { id: 'sec-ch1-performance-h2', text: '★ 时延：四种时延及其区别', level: 3 },
+    { id: 'sec-ch1-performance-loss', text: '★ 丢包率（分组丢失率）', level: 3 },
+    { id: 'sec-ch1-performance-bdp', text: '★ 时延带宽积', level: 3 },
+    { id: 'sec-ch1-performance-rtt', text: '往返时间 RTT', level: 3 },
+    { id: 'sec-ch1-performance-h3', text: '★ 利用率与时延', level: 3 },
     { id: 'sec-ch1-internet', text: '6. 因特网概述', level: 2 },
     { id: 'sec-ch1-trend', text: '7. 计算机网络的发展趋势', level: 2 },
   ],
@@ -569,7 +572,7 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
-          <h3 id="sec-ch1-performance-h1">速率、带宽与吞吐量</h3>
+          <h3 id="sec-ch1-performance-h1">速率与带宽</h3>
           <div class="callout key">
             <p class="callout-h">重点 A｜速率、带宽与单位</p>
             <p><strong>通信速率用 bit/s，k/M/G/T 按 10³/10⁶/10⁹/10¹² 换算；存储容量用 B，二进制 Ki/Mi/Gi/Ti 按 2¹⁰/2²⁰/2³⁰/2⁴⁰ 换算。</strong>特别注意 b 与 B 相差 8 倍。</p>
@@ -633,72 +636,264 @@ const ch: NetChapter = {
             太比每秒 Tb/s（10<sup>12</sup> b/s）。在时间轴上信号的宽度随带宽的增大而变窄——带宽为 1 Mb/s 时每秒 10<sup>6</sup> 个比特，
             带宽为 4 Mb/s 时每秒 4×10<sup>6</sup> 个比特。
           </p>
-          <p>
-            <strong>吞吐量</strong>（throughput）：表示在单位时间内通过某个网络（或信道、接口）的数据量。
-            吞吐量更经常地用于对现实世界中的网络的一种测量，了解实际上到底有多少数据量能够通过网络；
-            吞吐量受网络的带宽或网络的额定速率的限制。
-          </p>
-          <h3 id="sec-ch1-performance-h2">时延</h3>
+          <h3 id="sec-ch1-performance-throughput">吞吐量（throughput）</h3>
           <div class="callout key">
-            <p class="callout-h">重点 A｜发送时延 ≠ 传播时延</p>
-            <p>发送时延 = 分组比特数 ÷ 发送速率；传播时延 = 链路长度 ÷ 传播速度。分辨速率、带宽、RTT 的物理意义再计算。</p>
+            <p class="callout-h">记忆重点｜实际通过的数据量</p>
+            <p><strong>速率看标称能力，吞吐量看实际结果。</strong>吞吐量越低，不一定意味着信号传播速度越慢。</p>
           </div>
-
           <p>
-            <strong>发送时延</strong>（传输时延）：是发送数据时，数据块从结点进入到传输介质所需要的时间，
-            也就是从发送数据块的第一个比特算起，到该块的最后一个比特发送完毕所需的时间。
+            <strong>定义：</strong>吞吐量是<strong>单位时间内通过某个网络（或信道、接口）的实际数据量</strong>，
+            用于衡量网络真实运行时能传送多少数据，而不是设备标注的最大能力。
+          </p>
+          <p class="formula">吞吐量 = 实际通过的数据量 ÷ 测量时间</p>
+          <ul>
+            <li><strong>受什么限制：</strong>受网络的带宽或相应接口的额定速率限制。对于一条传输路径，端到端吞吐量也受瓶颈链路、设备处理能力和协议开销等限制。</li>
+            <li><strong>与额定速率的关系：</strong>在同一接口和相同计量口径下，额定速率是吞吐量的理论上限；实际吞吐量<strong>可能远小于额定速率，甚至下降到零</strong>。</li>
+            <li><strong>常用单位：</strong>bit/s、kbit/s、Mbit/s 等；也可以用<strong>每秒传送的字节数（B/s）或帧数（帧/s）</strong>表示，换算时注意每帧大小可能不同。</li>
+          </ul>
+          <h4>为什么实际吞吐量达不到标称速率？</h4>
+          <p>
+            多个用户共享链路时需要分配传输机会；分组首部和协议控制信息也占用带宽；
+            路由器的排队与处理、无线信道干扰、丢包重传、接收方或服务器处理能力，都可能降低实际有效数据率。
+            <strong>额定速率高，不代表任何时刻都有同样高的吞吐量。</strong>
+          </p>
+          <h4>计算例题：100 Mbit/s 链路</h4>
+          <p>
+            某接口标称速率为 <strong>100 Mbit/s</strong>，实际 2 s 内传输了 <strong>16 MB</strong> 数据（这里 MB 按十进制计）。
+            数据量为 16 × 8 = 128 Mbit，实际吞吐量为
+            <strong>128 ÷ 2 = 64 Mbit/s = 8 MB/s</strong>，并不是 100 Mbit/s。
+          </p>
+          <p><strong>速记：</strong>额定速率回答“理论上能传多快”，吞吐量回答“实际传了多少”。</p>
+          <h3 id="sec-ch1-performance-h2">时延（delay / latency）</h3>
+          <div class="callout key">
+            <p class="callout-h">四种时延｜发、传、处、排</p>
+            <p><strong>发送时延</strong>在发送器产生；<strong>传播时延</strong>在链路上产生；
+              <strong>处理时延和排队时延</strong>在主机或路由器等结点中产生。</p>
+          </div>
+          <p>
+            <strong>定义：</strong>一个报文或分组从网络（或链路）的一端传送到另一端所需要的时间。
+            分组在发送和转发时要经历发送、传播、处理和排队等阶段。
+          </p>
+          <h4>1. 发送时延（传输时延）</h4>
+          <p>
+            数据块从结点进入传输介质所需的时间：从<strong>第一个比特开始发送</strong>，
+            到<strong>最后一个比特发送完毕</strong>为止。由<strong>数据块长度和发送速率</strong>决定，
+            与链路长度没有直接关系。
           </p>
           <p class="formula">发送时延 = 数据块长度（比特） / 信道带宽（比特/秒）</p>
-          <p><strong>传播时延</strong>：是电磁波在信道中需要传播一定的距离而花费的时间。
-            信号传输速率（即发送速率）和信号在信道上的传播速率是完全不同的概念。</p>
-          <p class="formula">传播时延 = 信道长度（米） / 信号在信道上的传播速率（米/秒）</p>
           <p>
-            <strong>处理时延</strong>：是交换结点为存储转发而进行一些必要的处理所花费的时间。
-            <strong>排队时延</strong>：是结点缓存队列中分组排队所经历的时延，其长短往往取决于网络中当时的通信量。
-            数据经历的总时延就是四种时延之和：
+            <strong>例：</strong>1500 B = 12 000 bit 的分组，在 10 Mbit/s 链路上发送需要
+            12 000 ÷ (10 × 10<sup>6</sup>) = <strong>1.2 ms</strong>；
+            若发送速率变为 100 Mbit/s，则只需 <strong>0.12 ms</strong>。
           </p>
-          <p class="formula">总时延 = 发送时延 + 传播时延 + 处理时延 + 排队时延</p>
-          <p>四种时延产生的地方：发送时延在发送器产生；传播时延在链路上产生；处理时延和排队时延在结点（路由器）中产生。</p>
-          <div class="callout warn">
-            <p class="callout-h">容易产生的错误概念</p>
-            <p>对于高速网络链路，我们提高的仅仅是数据的<strong>发送速率</strong>而不是比特在链路上的<strong>传播速率</strong>。
-              提高链路带宽只能减小数据的发送时延，并不能提高传播速率。</p>
-          </div>
 
-          <h3 id="sec-ch1-performance-loss">分组丢失率、时延带宽积与 RTT</h3>
-          <p>丢包率反映传输途中丢弃的分组比例；时延带宽积表示链路上正在传播的比特容量；
-            RTT 是往返时间。三者分别涉及分组丢失情况、链路在途数据量与往返响应时间，不能混为“网速”。</p>
-          <p><strong>丢包率（分组丢失率）</strong>：一定测量时间内，丢失分组数占发送分组总数的比率；
-            可按接口、结点、链路、路径或网络分别统计。网络拥塞是丢包的重要原因，
-            但物理错误、设备故障、策略性丢弃等也可能造成丢包；丢包率为零并不等于时延必然很小。</p>
-          <p class="formula">分组丢失率 = 丢失的分组数 / 发送的分组总数 × 100%</p>
-          <p><strong>时延带宽积（Bandwidth-Delay Product, BDP）</strong>：
-            其值为<strong>带宽 × 单程传播时延</strong>，单位是 bit。
-            直观理解：在发送端连续注入比特且最先发出的比特刚好到达接收端时，链路中同时“在途”的比特数。
-            它不是链路的速率，也不是单个分组的发送时延。</p>
-          <p class="formula">时延带宽积（bit）= 链路带宽（bit/s）× 单程传播时延（s）</p>
-          <p>计算示例：带宽 100 Mbit/s，单程传播时延 20 ms，则
-            BDP = 100 × 10<sup>6</sup> × 0.020 = <strong>2 × 10<sup>6</sup> bit = 250 kB</strong>。</p>
-          <p><strong>往返时间 RTT</strong>：数据从发送方发出、到相应确认或响应返回所经历的时间。
-            RTT 可能包含两个方向的传播、处理、排队与发送时延；只有在两端路径对称且忽略其他时延时，
-            才可近似写成 RTT ≈ 2 × 单程传播时延。
-            因此，BDP 中使用的单程传播时延不应在未经说明时直接换成 RTT。</p>
-          <h3 id="sec-ch1-performance-h3">利用率</h3>
-          <div class="callout tip">
-            <p class="callout-h">重点 B｜RTT 与性能</p>
-            <p>RTT 表示往返时间；分析网络性能时结合速率、时延及利用率，不能只看标称带宽。</p>
-          </div>
+          <h4>2. 传播时延</h4>
           <p>
-            <strong>信道利用率</strong>指出某个信道在测量周期内，数据占用的时间与整个测量周期时间之比，完全空闲的信道的利用率为零；
-            <strong>网络利用率</strong>则是全网络的信道利用率的加权平均值。<strong>信道利用率并非越高越好</strong>。
+            电磁波在传输介质中传播一定距离所需的时间，由<strong>链路长度与介质中的传播速度</strong>决定；
+            与信号在发送端被注入链路的快慢无关。
+          </p>
+          <p class="formula">传播时延 = 信道长度（米） / 信号在信道上的传播速率（米/秒）</p>
+          <table class="tbl">
+            <thead><tr><th>传播介质</th><th>典型传播速度</th><th>理解</th></tr></thead>
+            <tbody>
+              <tr><td>自由空间</td><td>约 3.0 × 10<sup>5</sup> km/s</td><td>近似光速</td></tr>
+              <tr><td>铜线电缆</td><td>约 2.3 × 10<sup>5</sup> km/s</td><td>受传输介质影响</td></tr>
+              <tr><td>光纤</td><td>约 2.0 × 10<sup>5</sup> km/s</td><td>通常小于真空光速</td></tr>
+            </tbody>
+          </table>
+          <p>
+            <strong>例：</strong>1000 km 光纤链路按 2.0 × 10<sup>8</sup> m/s 计算，
+            单程传播时延为 (1000 × 1000) ÷ (2.0 × 10<sup>8</sup>) = <strong>5 ms</strong>。
+            即使提高链路带宽，这 5 ms 的传播时延也不会因此缩短。
+          </p>
+
+          <h4>3. 处理时延</h4>
+          <p>
+            主机或路由器收到分组后，为<strong>分析首部、提取数据、差错检验、查找路由或转发表</strong>
+            等操作花费的时间。主要受<strong>交换结点性能、处理任务和转发表规模</strong>等因素影响。
+            例如路由器要检查分组的目的地址，再决定从哪个输出端口转发。
+          </p>
+
+          <h4>4. 排队时延</h4>
+          <p>
+            分组在路由器<strong>输入或输出队列</strong>中等待处理、等待输出链路空闲所经历的时间，
+            主要取决于<strong>当时的网络通信量、队列长度和服务能力</strong>。
+            网络空闲时可能很小；通信量大时会明显增加。
           </p>
           <p>
-            根据排队理论，当某个信道的利用率增大时，该信道引起的时延也就迅速增加。
-            若令 D<sub>0</sub> 表示网络空闲时的时延，D 表示网络当前的时延，则在适当的假定条件下，可以用下面的简单公式表示 D 和 D<sub>0</sub> 之间的关系
-            （U 是信道利用率，数值在 0 到 1 之间）：
+            当缓存队列溢出时，分组可能被<strong>丢弃</strong>，不会再完成排队和转发。
+            不能把丢弃理解成一个正常完成、只是等待了无限长时间的分组。
+          </p>
+
+          <h4>总时延与发生位置</h4>
+          <p class="formula">总时延 = 发送时延 + 传播时延 + 处理时延 + 排队时延</p>
+          <table class="tbl">
+            <thead><tr><th>时延</th><th>产生位置</th><th>由什么决定</th><th>怎么记</th></tr></thead>
+            <tbody>
+              <tr><td>发送</td><td>发送器</td><td>分组长度、发送速率</td><td>把数据“推上路”</td></tr>
+              <tr><td>传播</td><td>链路介质</td><td>距离、传播速度</td><td>信号“走在路上”</td></tr>
+              <tr><td>处理</td><td>结点内部</td><td>报文解析、检错、查表</td><td>先“看清去哪儿”</td></tr>
+              <tr><td>排队</td><td>结点队列</td><td>业务负载、队列积压</td><td>等“轮到自己”</td></tr>
+            </tbody>
+          </table>
+          <p>
+            <strong>例：</strong>若某次分组传输的发送时延为 1.2 ms、传播时延为 5 ms、
+            处理时延为 0.3 ms、排队时延为 2 ms，
+            则总时延 = 1.2 + 5 + 0.3 + 2 = <strong>8.5 ms</strong>。
+            多跳路径要计入沿途各链路、各结点相应的时延。
+          </p>
+          <p>
+            <strong>主导因素需要具体分析：</strong>距离远时传播时延可能占主导；
+            发送速率低、分组大时发送时延可能占主导；
+            网络拥塞时排队时延可能占主导。对交互应用而言，
+            一个<strong>低速率但小时延</strong>的网络，有时比高速率但大时延的网络体验更好。
+          </p>
+
+          <h4>为什么带宽高不代表传播得快？</h4>
+          <div class="callout tip">
+            <p class="callout-h">高速公路收费站类比</p>
+            <p><strong>链路 = 高速公路；发送速率（带宽）= 收费站的放行速度；传播速度 = 汽车的行驶速度。</strong>
+              假设收费站每 5 s 放行 1 辆车，而汽车进入高速公路后都以 60 km/h 行驶：
+              提高收费站的放行效率，就能让更多汽车在相同时间内上路，
+              <strong>却不会让已经上路的汽车跑得更快</strong>。</p>
+          </div>
+          <p>
+            按 60 km/h（约 16.67 m/s）的车速计算，每 5 s 放行一辆，理想车距约为 <strong>83.3 m</strong>；
+            改为每 1 s 放行一辆，同样车速下理想车距缩至 <strong>16.7 m</strong>。
+            <strong>放行得更密，不等于车速更快。</strong>
+          </p>
+          <div class="callout warn">
+            <p class="callout-h">易错判断</p>
+            <p>宽带线路每秒可以把<strong>更多比特注入线路</strong>，而不是让比特在同样的传输介质中跑得更快。
+              提高数据发送速率主要减少<strong>发送时延</strong>，不能直接缩短由距离和介质决定的<strong>传播时延</strong>。</p>
+          </div>
+          <h3 id="sec-ch1-performance-loss">丢包率（分组丢失率）</h3>
+          <p>
+            <strong>定义：</strong>在一定测量时间内，分组传输过程中<strong>丢失的分组数量与发送分组总数量的比率</strong>。
+            丢包率反映传输过程中有多少分组未成功到达预期位置，是网络运行质量的重要指标。
+          </p>
+          <p class="formula">分组丢失率 = 丢失的分组数 / 发送的分组总数 × 100%</p>
+          <p>
+            <strong>统计范围：</strong>可以按<strong>接口丢包率、结点丢包率、链路丢包率、
+            路径丢包率、网络丢包率</strong>等不同范围统计，比较数值时必须先明确统计口径。
+          </p>
+          <p>
+            <strong>为什么会丢包：</strong>网络拥塞是现代计算机网络中丢包的重要原因。
+            分组到达太快，路由器缓存不足时会发生队列溢出而丢包；
+            此外，传输错误、设备故障、主动丢弃策略等也可能造成丢包。
+            <strong>丢包率可反映拥塞情况，但并非所有丢包都源于拥塞。</strong>
+          </p>
+          <p>
+            <strong>例：</strong>测量期间发送 1000 个分组，其中 20 个丢失，
+            丢包率 = 20 ÷ 1000 × 100% = <strong>2%</strong>。
+            若要可靠传输，上层协议可能需要重传，进一步降低有效吞吐量并增加等待时间。
+          </p>
+          <p><strong>速记：</strong>丢包率看“丢了多少”，不是“传了多快”；<strong>零丢包也不意味着零时延。</strong></p>
+
+          <h3 id="sec-ch1-performance-bdp">时延带宽积（Bandwidth–Delay Product, BDP）</h3>
+          <p>
+            <strong>定义：</strong>一条链路的<strong>传播时延 × 链路带宽</strong>，
+            表示在连续发送且链路被充分利用时，<strong>链路中正在传播的比特数量</strong>。
+            可以把链路想成水管：<strong>带宽</strong>表示单位时间能注入多少水，
+            <strong>传播时延</strong>表示水在管道中运行多久，
+            <strong>时延带宽积</strong>表示管道中能容纳多少正在传输的数据。
+          </p>
+          <p class="formula">时延带宽积（bit）= 链路带宽（bit/s）× 单程传播时延（s）</p>
+          <p>
+            <strong>例：</strong>链路带宽为 100 Mbit/s，单程传播时延为 20 ms，
+            则 BDP = 100 × 10<sup>6</sup> × 0.020 =
+            <strong>2 × 10<sup>6</sup> bit = 250 kB ≈ 244.14 KiB</strong>。
+            这里 250 kB 按十进制字节单位计算。
+          </p>
+          <p>
+            <strong>注意：</strong>BDP 的单位是<strong>bit</strong>（数据量），而不是 bit/s（速率）或 s（时间）；
+            公式使用<strong>单程传播时延</strong>，不要直接把往返时间 RTT 代入。
+            如果研究的是一个往返传输路径的在途数据窗口，才可能使用带宽 × RTT，
+            但它与单条链路的传播时延带宽积不是同一个定义。
+          </p>
+          <p><strong>速记：</strong>带宽 × 时间 = 在途比特数；先把 ms 换成 s，再根据需要把 bit 除以 8 变成 B。</p>
+
+          <h3 id="sec-ch1-performance-rtt">往返时间 RTT（Round-Trip Time）</h3>
+          <p>
+            <strong>定义：</strong>从发送方发出请求或数据开始，到<strong>相应的响应或确认返回发送方</strong>所经历的时间。
+            可用 RTT 描述一次往返交互的快慢，如往返网络探测或应用请求—响应。
+          </p>
+          <p>
+            <strong>组成：</strong>RTT 可能包括正反两个方向的<strong>传播时延、发送时延、处理时延和排队时延</strong>；
+            两个方向可能使用不同路径、经历不同排队情况，因此 RTT 不是恒定值。
+          </p>
+          <p>
+            <strong>例：</strong>如果正反两个方向的单程传播时延各为 20 ms，
+            并暂时忽略所有其他时延，那么 RTT ≈ <strong>40 ms</strong>；
+            一旦出现排队、处理或响应生成时间，实际观测值可能更大。
+          </p>
+          <p>
+            <strong>注意：</strong>只有在路径近似对称、其他时延可以忽略时，才可以估算
+            <strong>RTT ≈ 2 × 单程传播时延</strong>。
+            一般情况下不能把 RTT 无条件除以 2 就当作真实单程时延。
+          </p>
+          <p><strong>速记：</strong>传播时延是“去一程”，RTT 是“去一趟再回来”，且还可能含沿途等待和处理时间。</p>
+          <h3 id="sec-ch1-performance-h3">利用率及其与时延的关系</h3>
+          <div class="callout key">
+            <p class="callout-h">利用率越高越好吗？</p>
+            <p><strong>不一定。</strong>高利用率意味着信道忙碌，但过度接近 100% 时，排队等待可能迅速增加。</p>
+          </div>
+          <h4>信道利用率与网络利用率</h4>
+          <ul>
+            <li><strong>信道利用率：</strong>某信道在测量时间内，有数据通过的时间占总测量时间的百分比；完全空闲时为 <strong>0</strong>。</li>
+            <li><strong>网络利用率：</strong>全网络各信道利用率的<strong>加权平均值</strong>，不是简单地把所有链路的百分比相加。</li>
+          </ul>
+          <p class="formula">信道利用率 U = 信道被利用的时间 ÷ 测量总时间</p>
+          <p>
+            <strong>例：</strong>某信道在 10 s 内有 8 s 用于传输数据，利用率
+            U = 8 ÷ 10 = <strong>80%</strong>。这只说明该信道忙碌的时间比例，
+            不能直接认定其端到端吞吐量已经达到最大。
+          </p>
+          <h4>为什么信道利用率不能无限接近 100%？</h4>
+          <p>
+            当分组到达速率逐渐接近处理和转发能力时，新的分组很容易排在已有分组后面，
+            <strong>排队时延会迅速增加</strong>。网络空闲时的时延记为 D<sub>0</sub>，
+            当前时延记为 D；在简化的排队模型中：
           </p>
           <p class="formula">D = D<sub>0</sub> / (1 &minus; U)</p>
-          <p>时延 D 随利用率 U 的增大而急剧增大——当 U 接近 1 时，时延急剧上升。</p>
+          <p>
+            其中 <strong>U 是 0 到 1 之间的小数</strong>（80% 应代入 0.8）。
+            此式用于理解排队负载接近上限时的趋势，不是所有实际网络普遍适用的精确公式。
+          </p>
+          <table class="tbl">
+            <thead><tr><th>信道利用率 U</th><th>简化模型中的时延 D</th><th>结论</th></tr></thead>
+            <tbody>
+              <tr><td>0%</td><td>D<sub>0</sub></td><td>空闲时基准时延</td></tr>
+              <tr><td>50%</td><td>2D<sub>0</sub></td><td>时延约为 2 倍</td></tr>
+              <tr><td>80%</td><td>5D<sub>0</sub></td><td>时延约为 5 倍</td></tr>
+              <tr><td>90%</td><td>10D<sub>0</sub></td><td>时延约为 10 倍</td></tr>
+              <tr><td>95%</td><td>20D<sub>0</sub></td><td>时延约为 20 倍</td></tr>
+            </tbody>
+          </table>
+          <p><strong>速记：</strong>利用率看“有多忙”；接近满载时，<strong>忙不等于快，反而可能更卡</strong>。</p>
+
+          <h4>性能指标速查：一眼区分考点</h4>
+          <table class="tbl">
+            <thead><tr><th>指标</th><th>核心问题</th><th>常用单位或公式</th></tr></thead>
+            <tbody>
+              <tr><td>速率 / 带宽</td><td>每秒理论上能发送多少数据？</td><td>bit/s，通常十进制换算</td></tr>
+              <tr><td>吞吐量</td><td>实际每秒通过多少数据？</td><td>实际数据量 ÷ 时间</td></tr>
+              <tr><td>发送时延</td><td>把整块数据推入链路需要多久？</td><td>比特数 ÷ 发送速率</td></tr>
+              <tr><td>传播时延</td><td>信号在链路上走多久？</td><td>距离 ÷ 传播速度</td></tr>
+              <tr><td>处理 / 排队时延</td><td>结点处理和等候多久？</td><td>与处理负载、队列有关</td></tr>
+              <tr><td>丢包率</td><td>有多少分组没送达？</td><td>丢失数 ÷ 发送总数 × 100%</td></tr>
+              <tr><td>时延带宽积</td><td>链路上能有多少在途比特？</td><td>带宽 × 单程传播时延，bit</td></tr>
+              <tr><td>RTT</td><td>一次往返花多久？</td><td>时间，ms / s</td></tr>
+              <tr><td>利用率</td><td>信道有多忙？</td><td>忙碌时间 ÷ 总时间</td></tr>
+            </tbody>
+          </table>
+          <div class="callout tip">
+            <p class="callout-h">考前自检</p>
+            <p>① 速率从 10 Mbit/s 提高到 100 Mbit/s，传播时延会自动缩短吗？<strong>不会。</strong>
+              ② 某网络标称 100 Mbit/s，实际吞吐量可能只有 20 Mbit/s 吗？<strong>可能。</strong>
+              ③ 时延带宽积用 RTT 直接计算吗？<strong>单条链路的定义使用单程传播时延。</strong>
+              ④ 利用率 90% 时，D = D<sub>0</sub>/(1-U) 是几倍？<strong>10 倍。</strong></p>
+          </div>
           `,
         },
       ],

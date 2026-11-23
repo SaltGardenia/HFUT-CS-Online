@@ -209,6 +209,34 @@ describe('2025 版计算机网络课件顺序', () => {
       .toBeLessThan(html.indexOf('<strong>带宽</strong>'));
   });
 
+  it('第1章性能指标按吞吐量、时延、丢包率、BDP、RTT、利用率逐项展开', () => {
+    const chapter = netChapters[0];
+    const section = chapter.sections.find((x) => x.id === 'sec-ch1-performance');
+    const html = section?.blocks.filter((x) => x.type === 'html').map((x) => x.html).join('\\n') ?? '';
+    const ids = ['sec-ch1-performance-throughput', 'sec-ch1-performance-h2',
+      'sec-ch1-performance-loss', 'sec-ch1-performance-bdp',
+      'sec-ch1-performance-rtt', 'sec-ch1-performance-h3'];
+    const positions = ids.map((id) => html.indexOf('id="' + id + '"'));
+    expect(positions.every((p) => p >= 0)).toBe(true);
+    for (let i = 1; i < positions.length; i++) expect(positions[i]).toBeGreaterThan(positions[i-1]);
+    for (const id of ids) expect(chapter.toc.some((item) => item.id === id)).toBe(true);
+
+    for (const term of [
+      '实际通过的数据量 ÷ 测量时间', '甚至下降到零',
+      '每秒传送的字节数（B/s）或帧数（帧/s）',
+      '128 ÷ 2 = 64 Mbit/s = 8 MB/s',
+      '分析首部、提取数据、差错检验、查找路由或转发表',
+      '输入或输出队列', '2.3 × 10<sup>5</sup> km/s',
+      '2.0 × 10<sup>5</sup> km/s', '收费站每 5 s',
+      '83.3 m', '分组丢失率 = 丢失的分组数',
+      '接口丢包率、结点丢包率、链路丢包率',
+      '250 kB ≈ 244.14 KiB', 'RTT ≈ 2 × 单程传播时延',
+      '全网络各信道利用率的', 'D = D<sub>0</sub> / (1 &minus; U)',
+      '20D<sub>0</sub>', '性能指标速查：一眼区分考点',
+    ]) expect(html, '遗漏：' + term).toContain(term);
+    expect(html).not.toMatch(/课件(?:明确指出|表述为|指出|强调)/);
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');
