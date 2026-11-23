@@ -212,6 +212,20 @@ const ch: NetChapter = {
             UDP 只在 IP 的数据报服务之上增加了很少一点的功能，即<strong>端口的功能和差错检测的功能</strong>。
           </p>
           <h3 id="sec-ch6-udp-h1">UDP 的主要特点与面向报文</h3>
+          <h4>TCP 与 UDP 怎么选？先辨认服务需求</h4>
+          <table class="tbl">
+            <thead><tr><th>问题</th><th>TCP</th><th>UDP</th></tr></thead>
+            <tbody>
+              <tr><td>是否建连接</td><td>先建立连接</td><td>不建立连接</td></tr>
+              <tr><td>数据单位</td><td>面向连续字节流，不保留应用写入边界</td><td>面向报文，保留数据报边界</td></tr>
+              <tr><td>可靠性</td><td>按序、可靠字节流（借助确认与重传）</td><td>尽力交付，不保证到达或顺序</td></tr>
+              <tr><td>首部长度</td><td>基本首部至少 20 B</td><td>固定 8 B</td></tr>
+              <tr><td>主要权衡</td><td>可靠、有序，但控制和维护开销较多</td><td>简单、开销小；需要可靠性时由应用自行设计</td></tr>
+            </tbody>
+          </table>
+          <p><strong>理解：</strong>不能把“UDP 无连接”误解为“完全没有校验”，也不能把“TCP 可靠”理解为 IP 网络本身保证不会丢包。
+            DNS、语音等应用可能选择 UDP；FTP、传统 HTTP 主要使用 TCP。具体应用也可使用新传输方案，如基于 UDP 的 QUIC。</p>
+          
           <ul>
             <li>UDP 是<strong>无连接</strong>协议，在发送数据之前不需要建立连接；</li>
             <li>UDP 使用<strong>尽最大努力交付</strong>，不保证可靠交付，同时也不使用拥塞控制；</li>
@@ -705,6 +719,16 @@ const ch: NetChapter = {
             <strong>流量控制</strong>（flow control）就是让发送方的发送速率不要太快——既要让接收方来得及接收，也不要使网络发生拥塞。
           </p>
           <h3 id="sec-ch6-flow-h1">利用滑动窗口实现流量控制</h3>
+          <h4>流量控制与拥塞控制：最容易混淆的两个窗口</h4>
+          <p><strong>接收窗口 rwnd</strong> 由接收方通告，表示接收方目前还能接收多少数据，解决<strong>接收端来不及处理</strong>的问题；
+            <strong>拥塞窗口 cwnd</strong> 由发送端根据网络状况维护，解决<strong>网络中间结点和链路过载</strong>的问题。</p>
+          <p class="formula">可用发送窗口上界 = min(rwnd, cwnd)</p>
+          <p><strong>例：</strong>接收方通告 rwnd = 12 KB，但网络拥塞控制只允许 cwnd = 4 KB，
+            则在忽略其他约束并按窗口上界理解时，发送窗口受 <strong>4 KB</strong> 限制；
+            若 rwnd 降到 2 KB，则窗口受 <strong>2 KB</strong> 限制。</p>
+          <p><strong>速记：</strong><strong>rwnd 防止“收不下”；cwnd 防止“网堵住”</strong>。
+            两者约束的是未确认的在途数据量，不等于每个报文段的固定大小；实际还能发送多少取决于已发送但未确认的数据。</p>
+          
           <p>利用滑动窗口机制可以很方便地在 TCP 连接上实现流量控制。</p>
           <p>
             <strong>示例</strong>：A 向 B 发送数据。在连接建立时 B 告诉 A：「我的接收窗口 rwnd = 400（字节）」——

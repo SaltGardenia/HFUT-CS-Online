@@ -249,6 +249,27 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).toContain('分组丢失率');
   });
 
+  it('第2到第8章补充具体条件、关键过程、例题与辨析', () => {
+    const expected: Record<number, string[]> = {
+      2: ['通、启、址、在、备、格、错', '格式—含义—顺序'],
+      3: ['故事要表达的情节', '看码元开始处', '高→低表示 0'],
+      4: ['数据撞上定界符', 'ACK 丢失或迟到', '序号防重复交付'],
+      5: ['51.2 μs', 'r × 2τ', '第 3 次碰撞'],
+      6: ['206.0.71.128', '206.0.68.0/22', '206.0.71.128/25'],
+      7: ['面向连续字节流', '固定 8 B', 'min(rwnd, cwnd)'],
+      8: ['区不一定等于域', '打开网页的一次请求', 'DNS 负责解析名字'],
+    };
+    for (const [chapterNo, terms] of Object.entries(expected)) {
+      const html = netChapters[Number(chapterNo) - 1].sections
+        .flatMap((section) => section.blocks)
+        .filter((block) => block.type === 'html')
+        .map((block) => block.html).join('\\n');
+      for (const term of terms) {
+        expect(html, '第' + chapterNo + '章遗漏：' + term).toContain(term);
+      }
+    }
+  });
+
   it('第3章编码调制与数据传输三种方向按幻灯片内部顺序出现', () => {
     const html = allHtml(3);
     const ordered = [

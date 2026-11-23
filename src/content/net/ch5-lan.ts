@@ -87,6 +87,21 @@ const ch: NetChapter = {
             向除入端口外的其他端口泛洪；如果已知目的地址映射到入端口，则进行过滤。
             动态学习表项有老化时间。</p>
           <h3 id="sec-ch5-lan-current-h1">信道利用率、载波延伸与分组突发</h3>
+          <h4>经典共享式以太网：争用期和退避的计算思路</h4>
+          <ol>
+            <li><strong>争用期：</strong>若端到端单程传播时延为 τ，则碰撞检测窗口为 <strong>2τ</strong>，也就是一次往返传播时延。</li>
+            <li><strong>10 Mbit/s 经典以太网：</strong>争用期为 <strong>51.2 μs</strong>，对应 512 bit，即 64 B 的发送时间。</li>
+            <li><strong>碰撞后随机退避：</strong>令 k = min(已发生的重传次数, 10)，从 <strong>0 到 2<sup>k</sup>−1</strong> 中随机选择整数 r，等待 <strong>r × 2τ</strong> 后再尝试。</li>
+            <li><strong>重试上限：</strong>连续 16 次碰撞仍未发送成功时，停止继续重传并向上层报告。</li>
+          </ol>
+          <p><strong>例：</strong>第 1 次碰撞，r 只能取 0 或 1；第 2 次碰撞，r 可取 0、1、2、3；
+            第 3 次碰撞，可取 0～7。冲突次数越多，等待范围越大，以减少反复碰撞的概率。</p>
+          <div class="callout tip">
+            <p class="callout-h">适用范围</p>
+            <p>这些规则针对采用 <strong>CSMA/CD 的经典半双工共享式以太网</strong>。
+              现代全双工交换式以太网没有这种共享碰撞检测过程，不能对所有以太网链路照搬争用期和退避公式。</p>
+          </div>
+          
           <p>下述信道利用率模型、载波延伸和分组突发主要描述<strong>经典半双工共享式以太网</strong>；
             现代常见的全双工交换式以太网不依靠 CSMA/CD 解决争用。</p>
           <p><strong>信道利用率参数 a</strong>：单程端到端传播时延记为 τ，一帧的发送时延为 T<sub>0</sub> = L/C，

@@ -91,6 +91,13 @@ const ch: NetChapter = {
           html: `
           <p>分组交换技术的两种实现方式：<strong>虚电路</strong>与<strong>数据报</strong>。</p>
           <h3 id="sec-ch5-vc-h1">虚电路</h3>
+          <div class="callout tip">
+            <p class="callout-h">网络层为什么有虚电路与数据报两种思路？</p>
+            <p><strong>虚电路：</strong>先建立逻辑连接，再让属于该连接的分组沿预先确定的路径转发。
+              <strong>数据报：</strong>不先建立网络层连接，各个 IP 数据报独立路由、尽最大努力交付。
+              虚电路是<strong>逻辑路径，不是专门拉一条物理线</strong>；IP 的尽力而为不承诺每个分组都按时、无差错、按序到达。</p>
+          </div>
+          
           <p>
             主机 HA 要和 HC 进行数据交换：首先 HA 向 HC 发一<strong>虚呼叫</strong>（虚电路连接请求），该虚呼叫选择一条适当的路径传送到 HC，
             记下沿途所经过的路程作为虚电路（如 HA-A-E-B-C-HC），并给其赋一个虚电路号 VC1；如果 HC 准备就绪，则发一响应给 HA，
@@ -560,6 +567,19 @@ const ch: NetChapter = {
             </tbody>
           </table>
           <h3 id="sec-ch5-ip-h6">IP 分组路由与最长前缀匹配</h3>
+          <h4>最长前缀匹配：同一地址命中两条路由</h4>
+          <p><strong>例：</strong>目的 IP 为 <strong>206.0.71.128</strong>，路由表同时存在
+            <strong>206.0.68.0/22</strong> 和 <strong>206.0.71.128/25</strong>。
+            前者覆盖 206.0.68.0～206.0.71.255，后者覆盖 206.0.71.128～206.0.71.255。
+            两条路由都能匹配，最终选择前缀更长、更具体的 <strong>/25</strong> 路由。</p>
+          <ol>
+            <li>把目的 IP 与每条路由的<strong>子网掩码逐位 AND</strong>，判断是否属于对应地址块。</li>
+            <li>若有多条匹配，比较前缀长度，选择<strong>前缀最长</strong>的项。</li>
+            <li>从所选路由记录中获得<strong>下一跳或出接口</strong>，然后转发；不是简单挑数值更大的网络地址。</li>
+          </ol>
+          <p><strong>速记：</strong>先判断“是否覆盖”，再选“范围最小的那条”。<strong>/25 比 /22 更具体</strong>，
+            但前提是它也必须匹配目的地址。</p>
+          
           <div class="callout key">
             <p class="callout-h">重点 A｜直接交付、下一跳及默认路由</p>
             <p>区分直连网络、特定主机路由、网络路由和默认路由；无匹配项时不能继续正常转发。</p>

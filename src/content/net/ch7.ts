@@ -160,6 +160,22 @@ const ch: NetChapter = {
             而只要记住更加接近人类理解特性的域名即可——因此互联网用户对 DNS 有极强的依赖性。
           </p>
           <h3 id="sec-ch7-dns-h1">域名系统概述</h3>
+          <h4>域名、区与 IP 地址的关系</h4>
+          <p><strong>域名</strong>采用层次树状命名方式，标号用点分隔，例如 <strong>www.example.com</strong>，
+            从左到右依次可以看成主机或更低层名字、二级域、顶级域。
+            <strong>域名是逻辑名称，不表示主机的物理位置，也不等同于 IP 地址中的子网。</strong></p>
+          <p><strong>域（domain）</strong>是名字空间的层次划分；
+            <strong>区（zone）</strong>是由特定权威 DNS 服务器负责管理的一组 DNS 数据。
+            一个域可以由一个区管理，也可以把子域委派出去形成多个区，
+            因此<strong>区不一定等于域</strong>。</p>
+          <p><strong>例：</strong>管理 example.com 的服务器可以直接管理 www.example.com 的记录；
+            如果将 lab.example.com 委派给另一组权威服务器，则需要区分父域的管理范围与子域对应的独立区。</p>
+          <div class="callout tip">
+            <p class="callout-h">记忆顺序</p>
+            <p><strong>域名是名字 → DNS 查找资源记录 → 区确定谁对记录具有管理权 → 解析器获取回答。</strong>
+              域名与地址不要求一对一：同一域名可以解析到多个 IP，一个 IP 也可能承载多个域名。</p>
+          </div>
+          
           <p>
             <strong>域名及域名结构</strong>：DNS 用层次结构组织命名空间，便于管理委派和资源记录查询；<strong>域名与 IP 地址并不是严格的一对一关系</strong>：
             一个域名可以对应多条 A/AAAA 记录（即多个 IP 地址），一个 IP 地址也可关联多个域名，域名还可对应 MX、TXT 等非地址记录。
@@ -566,6 +582,18 @@ const ch: NetChapter = {
             使用 HTTP 的 URL 的一般形式：http://&lt;主机&gt;:&lt;端口&gt;/&lt;路径&gt;，冒号和两个斜线是规定的格式。
           </p>
           <h3 id="sec-ch7-http-h2">超文本传送协议 HTTP</h3>
+          <h4>打开网页的一次请求：URL、DNS、连接、HTTP</h4>
+          <ol>
+            <li><strong>解析 URL：</strong>浏览器确定协议、主机名、端口和资源路径。</li>
+            <li><strong>查找地址：</strong>使用缓存或 DNS 把域名解析为可连接的服务器地址。</li>
+            <li><strong>建立传输：</strong>传统 HTTP/1.1 可使用 TCP，HTTPS 通常还需要 TLS；HTTP/3 通常使用 QUIC。</li>
+            <li><strong>发送请求并接收响应：</strong>客户端发送方法、路径、首部等；服务器返回状态码、首部与响应内容。</li>
+            <li><strong>继续获取资源：</strong>浏览器可能还要请求样式表、脚本、图片等；并按缓存规则复用已有资源。</li>
+          </ol>
+          <p><strong>易错：</strong>DNS 负责解析名字，不负责传输网页正文；HTTP 负责应用层请求和响应，
+            不应把 HTTP 的报文格式与 TCP 的可靠传输功能混为一谈。
+            HTTP 的“无状态”是指协议本身不要求服务器记住前一次请求，并不排斥 Cookie 或应用会话。</p>
+          
           <p>
             为了使超文本的链接能够高效率地完成，需要用 HTTP 协议来传送一切必须的信息。
             从层次的角度看，HTTP 是<strong>面向事务的</strong>（transaction-oriented）应用层协议，它是万维网上能够可靠地交换文件

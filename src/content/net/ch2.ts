@@ -43,6 +43,20 @@ const ch: NetChapter = {
             <p><strong>协议三要素</strong> · <strong>协议/服务/SAP</strong> · <strong>SDU/PCI/PDU</strong> · <strong>OSI 各层职责</strong> · <strong>TCP/IP 各层功能</strong> · <strong>分层封装</strong></p>
           </div>
           <h3 id="sec-ch2-idea-h1">分层思想</h3>
+          <h4>两台计算机传送文件必须协调的七件事</h4>
+          <p>把“从主机 A 向主机 B 传送一个文件”作为贯穿例子，通信前后需要解决七个问题：</p>
+          <ol>
+            <li><strong>通路：</strong>首先必须存在能够传送数据的通路。</li>
+            <li><strong>激活：</strong>发送方必须能够激活或使用这条通信通路。</li>
+            <li><strong>寻址：</strong>发送方要让网络识别正确的接收方。</li>
+            <li><strong>在线：</strong>需要考虑对方是否开机、网络连接是否正常。</li>
+            <li><strong>准备：</strong>需要考虑对方是否有能力和空间接收、保存文件。</li>
+            <li><strong>格式：</strong>如果双方的文件表示方式不兼容，需要进行格式转换。</li>
+            <li><strong>差错：</strong>还要处理传输错误或异常，使接收方获得正确的数据。</li>
+          </ol>
+          <p><strong>理解：</strong>这些问题不必由一个巨大协议一次解决，而可以分配给不同层次与协议共同完成。
+            <strong>速记：通、启、址、在、备、格、错。</strong>上面的检查是通信问题的功能清单，并非每次通信都要依次人工执行七个操作。</p>
+          
           <p>
             将一个庞大、复杂的问题分解为若干个功能相对单一、结构比较简单、处理更为方便的局部问题，并分别解决——这种「化整为零」的方法就是
             <strong>分层思想</strong>。计算机网络体系结构的分层思想：<strong>每一层在其下层所提供服务的支持下，通过自身内部功能为其上层提供一种或几种特定的服务</strong>。
@@ -137,6 +151,15 @@ const ch: NetChapter = {
             网络对等实体间为完成数据交换所必须遵循的规则、约定和标准。这个定义指明了通信协议的三要素：<strong>语法、语义和时序（同步）</strong>。
           </p>
           <h3 id="sec-ch2-protocol-h1">协议「三要素」</h3>
+          <div class="callout tip">
+            <p class="callout-h">协议三要素｜对话类比</p>
+            <p><strong>语法</strong>解决“按什么格式说”；<strong>语义</strong>解决“说的话有什么含义”；
+              <strong>同步</strong>解决“什么时候说、说完由谁回答”。例如见面问好：用中文说“你好”是格式，
+              “你好”表达问候，听到问候后作出回答体现交互顺序。</p>
+          </div>
+          <p><strong>易错：</strong>同步不只意味着发送双方的时钟完全相同，它还包括交互先后次序、状态变化和应答规则。
+            记忆时用<strong>格式—含义—顺序</strong>分别对应语法、语义、同步。</p>
+          
           <div class="callout key">
             <p class="callout-h">重点 A｜协议三要素</p>
             <p>语法规定数据格式；语义规定控制信息及含义；同步规定交互时序与应答关系。</p>
