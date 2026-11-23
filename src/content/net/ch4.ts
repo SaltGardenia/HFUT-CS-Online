@@ -225,7 +225,7 @@ const ch: NetChapter = {
           </div>
           <h3 id="sec-ch4-error-h3">海明码</h3>
           <p>
-            1950 年海明发明海明码（Hamming Code）。海明码是一种<strong>纠错码</strong>，课件概括其能力为“检测 2 位错误并纠正 1 位错误”。
+            1950 年海明发明海明码（Hamming Code）。海明码是一种<strong>纠错码</strong>，有时把其能力概括为“检测 2 位错误并纠正 1 位错误”。
             <strong>这一概括须区分两种模式的能力，不能误认为普通海明码可以同时保证纠一检二</strong>。
             海明码是一种分组码，由 m 位信息位和 r 位校验位构成，要求满足：
           </p>
@@ -327,7 +327,7 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
-          <p><em>课件将本节标注为「略」并要求自学，但保留了基本内容，此处按课件原文收录。</em></p>
+          <p><em>本节属于拓展自学内容。</em></p>
           <h3 id="sec-ch4-flow-h1">停—等协议</h3>
           <div class="callout key">
             <p class="callout-h">重点 A｜停止等待中的确认与重传</p>
@@ -510,12 +510,12 @@ const ch: NetChapter = {
           </div>
 
           <p>
-            课件以 HDLC 和 PPP 对比链路层的可靠交付机制：部分链路层协议可使用帧序号、确认和重传提供逐跳可靠交付，
+            HDLC 与 PPP 提供的链路层可靠交付机制不同：部分链路层协议可使用帧序号、确认和重传提供逐跳可靠交付，
             而基础 PPP 侧重于成帧、透明传输、协议复用和检错，<strong>并不提供基于帧确认与重传的可靠交付保证</strong>。
             <strong>OSI/RM 不要求所有数据链路层协议必须可靠，也不存在后来所有链路层协议一律取消可靠交付的规则</strong>：
             是否在链路层采用 ARQ、流量控制由技术条件和具体协议决定，例如 IEEE 802.11 无线 MAC 可使用帧确认与重传。
             点对点协议（Point to Point Protocol，<strong>PPP</strong>）就是一个比 HDLC 协议简单的数据链路层协议：
-            一个得到广泛应用的广域网及接入网中的数据链路层协议。课件称其“<strong>面向字符</strong>”，
+            一个得到广泛应用的广域网及接入网中的数据链路层协议。异步链路上的 PPP 可以描述为“<strong>面向字符</strong>”，
             对应异步链路采用字节填充的场景；但 PPP 还支持同步链路上的比特填充，不能认为它只支持字符导向的封装；
             目的是通过拨号或专线方式建立点对点的连接和通信，为各种主机、网桥和路由器之间简单连接提供一种共通的标准解决方案。
             应用场合包括拨号方式和专线方式。
@@ -625,7 +625,7 @@ const ch: NetChapter = {
           ${pppConfigFigure}
           <div class="callout tip">
             <p class="callout-h">标准对照｜LCP 报文名称与选项协商</p>
-            <p><strong>保留上方课件原表述。</strong>按 RFC 1661，LCP 终止请求的确认应为
+            <p>按 RFC 1661，LCP 终止请求的确认应为
             <strong>Terminate-Ack</strong>（而非 Terminate-Reply）；
             <strong>Configure-Reject</strong> 携带的是被拒绝的配置选项，而不是必然拒绝全部选项；
             <strong>Configure-Nak</strong> 可用于对可识别的选项提出不同的可接受取值。
@@ -761,10 +761,10 @@ const ch: NetChapter = {
             发送端就可知道是否遭受了碰撞——这个时间称为<strong>争用期</strong>（碰撞窗口），只要超过这个时间就不会发生碰撞。
           </p>
           <div class="callout warn">
-            <p class="callout-h">课件勘误｜CSMA/CD 争用期</p>
+            <p class="callout-h">注意｜CSMA/CD 争用期</p>
             <p>有些教学资料把 2τ 写成「两倍的端到端往返时延」，但同页又将 τ 定义为单程传播时延。这里属于措辞错误：
               <strong>2τ = 两倍单程传播时延 = 一次往返传播时延</strong>，不是「两倍往返时延」。
-              课件给出的标准以太网争用期 51.2 μs 无需翻倍。计算题请按 2τ 代入。</p>
+              标准以太网争用期 51.2 μs 无需翻倍。计算题请按 2τ 代入。</p>
           </div>
           <p><strong>碰撞避退算法</strong>：判断发生碰撞后，CSMA/CD 采用「二进制指数退避」算法：</p>
           <ul>

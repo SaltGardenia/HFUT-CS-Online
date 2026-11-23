@@ -567,7 +567,7 @@ describe('第七轮计网核验：HTTP/2、QUIC 的标准限定', () => {
     .filter((b) => b.type === 'html').map((b) => b.html).join('');
 
   it('不能断言 TCP/TLS 普遍需要4-5 RTT；QUIC是名称不是缩写', () => {
-    expect(html).toContain('课件“建连需 4～5 RTT”不适用于所有基于 TCP 的应用');
+    expect(html).toContain('“建连需 4～5 RTT”不适用于所有基于 TCP 的应用');
     expect(html).toContain('RFC 9000 明确指出 QUIC 是名称而非首字母缩写');
   });
 

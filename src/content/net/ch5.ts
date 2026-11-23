@@ -346,7 +346,7 @@ const ch: NetChapter = {
           </ul>
           <p>
             <strong>BGP 协议</strong>：自治系统（AS）之间交换网络可达性信息的外部网关协议，属于<strong>路径矢量（Path Vector）协议</strong>。
-            课件所谓“改进型 D-V 算法”可帮助理解它与距离向量协议的历史联系，但 BGP 不按 RIP 式单纯跳数或性能指标求最短路：
+            “改进型 D-V 算法”体现了与距离向量协议的历史联系，但 BGP 不按 RIP 式单纯跳数或性能指标求最短路：
             它交换包含 <strong>AS_PATH、NEXT_HOP</strong> 等属性的路由通告，并根据本地路由策略等条件选择路径。
             <strong>AS_PATH 主要表示路由通告经过的自治系统序列，不是每一台路由器的精确逐跳转发路径</strong>；
             检查自身 AS 号是否出现在 AS_PATH 中有助于避免域间路由通告环路（RFC 4271），也不代表数据平面永远不会出现短暂环路。
@@ -462,7 +462,7 @@ const ch: NetChapter = {
           </div>
           <div class="callout key">
             <p class="callout-h">重点 A｜IP 地址与子网掩码逐位 AND</p>
-            <p>先根据掩码确定网络位，再逐位相与求网络地址；可以用 /20、255.255.192.0 等课件例子自测。</p>
+            <p>先根据掩码确定网络位，再逐位相与求网络地址；可以用 /20、255.255.192.0 等数值例子自测。</p>
           </div>
 
           <p>
@@ -649,8 +649,8 @@ const ch: NetChapter = {
           </table>
           <div class="callout warn">
             <p class="callout-h">单位勘误｜ICMP 时间戳</p>
-            <p>课件把时间戳（Timestamp Request/Reply，类型 13/14）的 32 位字段
-              解释为“从 1900 年 1 月 1 日起经过的秒数”，<strong>这是错误的单位与起点</strong>。
+            <p>ICMP 时间戳（Timestamp Request/Reply，类型 13/14）的 32 位字段不应
+              解释为“从 1900 年 1 月 1 日起经过的秒数”。
               按 RFC 792，ICMP 时间戳字段通常用<strong>从 UTC 当日午夜起经过的毫秒数</strong>表示；
               不应与 NTP 以 1900 年为纪元的时间戳混同。
               ICMP 时间戳属于较早期的诊断机制，现代网络中可能被屏蔽或很少使用。</p>

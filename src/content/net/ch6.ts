@@ -241,8 +241,8 @@ const ch: NetChapter = {
             按二进制反码运算求和得出结果，再将得出的结果求反码得到检验和。
           </p>
           <div class="callout warn">
-            <p class="callout-h">2025 版传输层课件第12—13页 · UDP 应用表勘误</p>
-            <p>课件将<strong>“多播：IGMP → UDP”</strong>列入 UDP 应用举例，
+            <p class="callout-h">注意｜UDP 与 IGMP</p>
+            <p>“多播：IGMP → UDP”是容易误解的简化示意，
               但<strong>IGMP 并不封装在 UDP 中</strong>。
               IGMP 是管理 IPv4 组播成员关系的协议，IGMP 报文直接封装在 IPv4 数据报内，
               IP 首部的 <strong>Protocol = 2</strong>（由 IANA 分配）。
@@ -264,7 +264,7 @@ const ch: NetChapter = {
           <p>
             RPC 的应用：RPC 是远程调用的交互机制，常用于客户机/服务器式分布式计算；具体框架可基于 UDP、TCP 等传输，
             <strong>RPC 并非必然采用无连接对话</strong>，其超时、重试、去重等机制也由具体实现决定。
-            RPC 使客户端能传送参数、调用远端过程并取得结果。课件按照 OSI 的会话层功能介绍 RPC；
+            RPC 使客户端能传送参数、调用远端过程并取得结果。RPC 可以与 OSI 的会话层功能相联系；
             实际的 RPC 框架通常实现于应用层，不能将其绝对地归入某一个 OSI 层。
           </p>
           `,
@@ -519,7 +519,7 @@ const ch: NetChapter = {
           <p class="formula">理想化信道利用率 U = min{1, n·T<sub>D</sub> / (T<sub>D</sub> + RTT + T<sub>A</sub>)}</p>
           <p>
             其中 n 是<strong>允许连续发送而未确认的最大帧数（本例按窗口上限计算）</strong>。
-            分母沿用课件假设：单帧发送时间 T<sub>D</sub>，往返传播时延 RTT，确认帧发送时间 T<sub>A</sub>；
+            分母采用以下计算假设：单帧发送时间 T<sub>D</sub>，往返传播时延 RTT，确认帧发送时间 T<sub>A</sub>；
             假设帧等长、处理和排队时延忽略、没有丢帧及碰撞、确认及时返回。
             <strong>利用率不可能超过 100%</strong>，当 n 足以填满链路时只能达到这一理想上界，
             不得把原来的 n·T<sub>D</sub>/(T<sub>D</sub>+RTT+T<sub>A</sub>) 数值超过 1 当作实际利用率。
@@ -807,7 +807,7 @@ const ch: NetChapter = {
             但只要网络出现拥塞，拥塞窗口就减小一些，以减少注入到网络中的字节数。
           </p>
           <p>
-            <strong>慢开始算法的课堂模型</strong>：课件从 cwnd = 1 MSS 起步，以便清晰演示窗口指数增长；<strong>这不是所有现代 TCP 实现都采用的初始 cwnd</strong>。
+            <strong>慢开始算法的简化模型</strong>：以 cwnd = 1 MSS 为初始值，以便清晰演示窗口指数增长；<strong>这不是所有现代 TCP 实现都采用的初始 cwnd</strong>。
             RFC 5681 对初始窗口有随 SMSS 变化的上限规定，RFC 6928 还讨论了 10 个报文段的更大初始窗口试验。
             在本节后续 1→2→4→8 的演示中仍约定从 1 MSS 开始；
             在每收到一个对新的报文段的确认后，将拥塞窗口加 1（即增加一个 MSS 的数值）；
@@ -821,7 +821,7 @@ const ch: NetChapter = {
           <p>
             <strong>门限状态变量 ssthresh</strong>：用于决定进入慢开始还是拥塞避免阶段，<strong>没有统一固定为 65535 的初始值</strong>。
             旧版 RFC 2001 曾采用 65535 字节的示例，RFC 5681 则建议将初始值设得足够高、拥塞后再降低。
-            下文 ssthresh = 16 MSS 是课堂计算的指定示例，不是所有 TCP 连接都必须采用的初值。
+            下文 ssthresh = 16 MSS 是此处计算的指定示例，不是所有 TCP 连接都必须采用的初值。
             当 cwnd &lt; ssthresh 时，使用慢开始算法；当 cwnd &gt; ssthresh 时，停止使用慢开始算法而改用<strong>拥塞避免算法</strong>；
             当 cwnd = ssthresh 时，既可使用慢开始算法，也可使用拥塞避免算法。
             拥塞避免算法的思路是让拥塞窗口 cwnd <strong>缓慢地增大</strong>——即每经过一个往返时间 RTT 就把发送方的拥塞窗口 cwnd 加 1 而不是加倍，
@@ -862,10 +862,10 @@ const ch: NetChapter = {
             </li>
           </ul>
           <div class="callout warn">
-            <p class="callout-h">课件表述提示｜快恢复只减半一次</p>
-            <p>2025 年传输层课件第 132 页的文字含「把慢开始门限减半」与「拥塞窗口设置为慢开始门限减半后的数值」，
-              容易误看成连续两次减半。按本课程图示与简化算法：<strong>新 ssthresh = 原 cwnd / 2，新 cwnd = 新 ssthresh</strong>。
-              例如原 cwnd = 24 KB，则快恢复后按该课堂模型取 12 KB；这与某些 TCP Reno 实现进入快恢复时的短暂窗口膨胀表示法不同。</p>
+            <p class="callout-h">注意｜快恢复只减半一次</p>
+            <p>“把慢开始门限减半”与“拥塞窗口设置为减半后的慢开始门限”是同一次减半，
+              容易误看成连续两次减半。在这一简化算法中：<strong>新 ssthresh = 原 cwnd / 2，新 cwnd = 新 ssthresh</strong>。
+              例如原 cwnd = 24 KB，则快恢复后按此计算规则取 12 KB；这与某些 TCP Reno 实现进入快恢复时的短暂窗口膨胀表示法不同。</p>
           </div>
           <div class="callout tip">
             <p class="callout-h">本章小结</p>
