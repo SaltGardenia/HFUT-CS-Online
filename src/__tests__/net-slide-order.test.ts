@@ -113,6 +113,25 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).toContain('不限定使用令牌协议');
   });
 
+  it('第1章在分组交换前保留课件的计算机数据传输特点与选型结论', () => {
+    const chapter = netChapters[0];
+    // 对齐 PPT 顺序后，交换技术位于“网络分类”节，而非原“网络运行”节。
+    const switching = chapter.sections.find((section) => section.id === 'sec-ch1-classify');
+    const html = switching?.blocks
+      .filter((block) => block.type === 'html')
+      .map((block) => block.html).join('\\n') ?? '';
+    const intro = html.indexOf('<h4>计算机数据传输的特点</h4>');
+    const packet = html.indexOf('<strong>分组交换</strong>：');
+    const message = html.indexOf('报文交换的主要特点');
+    expect(message).toBeGreaterThanOrEqual(0);
+    expect(intro).toBeGreaterThan(message);
+    expect(packet).toBeGreaterThan(intro);
+    expect(html).toContain('<strong>突发性：</strong>计算机数据是突发性地出现在传输线路上');
+    expect(html).toContain('<strong>复杂性：</strong>可能是一对一通信，但也可能是一对多通信');
+    expect(html).toContain('计算机网络使用分组交换技术');
+    expect(html).toContain('技术说明：');
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');
