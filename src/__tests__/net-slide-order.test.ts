@@ -187,6 +187,28 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).not.toMatch(/课件(?:明确指出|表述为|指出|强调|概括为)/);
   });
 
+  it('第1章速率区分通信的十进制单位与存储容量的二进制单位', () => {
+    const section = netChapters[0].sections.find((item) => item.id === 'sec-ch1-performance');
+    const html = section?.blocks.filter((block) => block.type === 'html')
+      .map((block) => block.html).join('\\n') ?? '';
+    expect(html).toContain('通信领域：速率使用十进制单位');
+    expect(html).toContain('计算机领域：存储容量常使用二进制单位');
+    for (const factor of ['10<sup>3</sup>', '10<sup>6</sup>', '10<sup>9</sup>', '10<sup>12</sup>']) {
+      expect(html).toContain(factor);
+    }
+    for (const factor of ['2<sup>10</sup>', '2<sup>20</sup>', '2<sup>30</sup>', '2<sup>40</sup>']) {
+      expect(html).toContain(factor);
+    }
+    expect(html).toContain('1 B = 8 bit');
+    expect(html).toContain('4 × 10<sup>10</sup> bit/s');
+    expect(html).toContain('40 Gbit/s');
+    expect(html).toContain('12.5 MB/s');
+    expect(html).toContain('11.92 MiB/s');
+    expect(html).toContain('不是 100 MB/s');
+    expect(html.indexOf('通信领域：速率使用十进制单位'))
+      .toBeLessThan(html.indexOf('<strong>带宽</strong>'));
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');

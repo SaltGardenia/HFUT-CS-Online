@@ -572,12 +572,59 @@ const ch: NetChapter = {
           <h3 id="sec-ch1-performance-h1">速率、带宽与吞吐量</h3>
           <div class="callout key">
             <p class="callout-h">重点 A｜速率、带宽与单位</p>
-            <p>网络速率以 bit/s 计；k、M、G 通常按 10³、10⁶、10⁹ 换算，存储容量的 K、M、G 常按 2¹⁰、2²⁰、2³⁰ 换算。</p>
+            <p><strong>通信速率用 bit/s，k/M/G/T 按 10³/10⁶/10⁹/10¹² 换算；存储容量用 B，二进制 Ki/Mi/Gi/Ti 按 2¹⁰/2²⁰/2³⁰/2⁴⁰ 换算。</strong>特别注意 b 与 B 相差 8 倍。</p>
           </div>
           <p>
             <strong>速率</strong>：比特（bit）是计算机中数据量的单位，也是信息论中使用的信息量的单位，来源于 binary digit，
             一个比特就是二进制数字中的一个 1 或 0。速率即数据率（data rate）或比特率（bit rate），是计算机网络中最重要的一个性能指标，
-            单位是 b/s，或 kb/s、Mb/s、Gb/s 等。速率往往是指<strong>额定速率或标称速率</strong>。
+            单位是 b/s，或 kb/s、Mb/s、Gb/s 等。速率往往是指<strong>额定速率或标称速率</strong>，不等于实际吞吐量。
+          </p>
+          <h4>通信领域：速率使用十进制单位</h4>
+          <p>
+            <strong>网络通信速率</strong>用<strong>比特每秒（bit/s，也写作 b/s）</strong>表示。
+            这里的 k、M、G、T 依次表示 <strong>10<sup>3</sup>、10<sup>6</sup>、10<sup>9</sup>、10<sup>12</sup></strong>，
+            每升高一级按 <strong>1000 倍</strong>换算，而不是 1024 倍。
+          </p>
+          <table class="tbl">
+            <thead><tr><th>通信速率单位</th><th>换算（十进制）</th></tr></thead>
+            <tbody>
+              <tr><td>1 kbit/s（kb/s）</td><td>10<sup>3</sup> bit/s = 1 000 bit/s</td></tr>
+              <tr><td>1 Mbit/s（Mb/s）</td><td>10<sup>6</sup> bit/s = 1 000 000 bit/s</td></tr>
+              <tr><td>1 Gbit/s（Gb/s）</td><td>10<sup>9</sup> bit/s</td></tr>
+              <tr><td>1 Tbit/s（Tb/s）</td><td>10<sup>12</sup> bit/s</td></tr>
+            </tbody>
+          </table>
+          <p><strong>例：</strong>4 × 10<sup>10</sup> bit/s = <strong>40 Gbit/s</strong>。</p>
+
+          <h4>计算机领域：存储容量常使用二进制单位</h4>
+          <p>
+            计算机文件大小、内存等存储容量通常以<strong>字节 B（Byte）</strong>表示；
+            <strong>1 B = 8 bit</strong>。在传统计算机存储容量的二进制换算中，
+            K、M、G、T 对应 <strong>2<sup>10</sup>、2<sup>20</sup>、2<sup>30</sup>、2<sup>40</sup></strong>。
+            为避免与通信领域的十进制前缀混淆，二进制单位可明确写成 KiB、MiB、GiB、TiB。
+          </p>
+          <table class="tbl">
+            <thead><tr><th>存储容量单位</th><th>换算（二进制）</th></tr></thead>
+            <tbody>
+              <tr><td>1 KiB</td><td>2<sup>10</sup> B = 1 024 B</td></tr>
+              <tr><td>1 MiB</td><td>2<sup>20</sup> B = 1 048 576 B</td></tr>
+              <tr><td>1 GiB</td><td>2<sup>30</sup> B</td></tr>
+              <tr><td>1 TiB</td><td>2<sup>40</sup> B</td></tr>
+            </tbody>
+          </table>
+          <div class="callout warn">
+            <p class="callout-h">易混淆：Mb/s、MB/s 与 MiB/s</p>
+            <p><strong>小写 b 是 bit（比特），大写 B 是 Byte（字节）。</strong>
+              通信速率 100 Mb/s = 100 × 10<sup>6</sup> bit/s，
+              ÷ 8 后为 <strong>12.5 MB/s</strong>（十进制字节每秒），
+              约为 <strong>11.92 MiB/s</strong>（二进制字节每秒），
+              不是 100 MB/s。以上为忽略协议开销等因素的理论换算。</p>
+          </div>
+          <p>
+            <strong>单位书写注意：</strong>通信速率中的 k、M、G、T 按十进制换算。
+            有些传统计算机教材用 KB、MB、GB、TB 表示 1024 的幂；
+            严格区分时应使用 KiB、MiB、GiB、TiB。
+            单独出现 MB 或 GB 时，需要根据上下文判断采用哪种单位约定。
           </p>
           <p>
             <strong>带宽</strong>（bandwidth）：本来是指信号具有的频带宽度，单位是赫（或千赫、兆赫、吉赫等）；
