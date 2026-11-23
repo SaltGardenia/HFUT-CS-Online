@@ -56,6 +56,17 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).toContain('分组丢失率');
   });
 
+  it('第3章编码调制与数据传输三种方向按幻灯片内部顺序出现', () => {
+    const html = allHtml(3);
+    const ordered = [
+      'sec-ch3-process-h2', 'sec-ch3-process-h3', 'sec-ch3-process-h1',
+      'sec-ch3-mode-h3', 'sec-ch3-mode-h1', 'sec-ch3-mode-h2',
+    ];
+    const positions = ordered.map((id) => html.indexOf('id="' + id + '"'));
+    expect(positions.every((pos) => pos >= 0)).toBe(true);
+    for (let i = 1; i < positions.length; i++) expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+  });
+
   it('第5章 CSMA/CD、传统以太网、利用率、MAC、扩展、VLAN 和高速以太网依次出现', () => {
     const html = allHtml(5);
     const anchors = ['sec-ch5-broadcast-h2', 'sec-ch5-broadcast-h3', 'sec-ch5-lan-current-h1',

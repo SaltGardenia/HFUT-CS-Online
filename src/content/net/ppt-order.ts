@@ -116,6 +116,18 @@ function chapter2(chapter: DeckData): DeckData {
 }
 
 function chapter3(chapter: DeckData, network: DeckData): DeckData {
+  const process = sectionOf(chapter, 'sec-ch3-process');
+  const [processIntro, processTopics] = cut(contents(process), '<h3 id="sec-ch3-process-h1">');
+  const [pcm, lineAndModulation] = cut(processTopics, '<h3 id="sec-ch3-process-h2">');
+  const [lineEncoding, modulation] = cut(lineAndModulation, '<h3 id="sec-ch3-process-h3">');
+  // 幻灯片先讲数字数据的数字编码，再讲模拟调制，最后讲 PCM。
+  const processInSlideOrder = processIntro + lineEncoding + modulation + pcm;
+  const mode = sectionOf(chapter, 'sec-ch3-mode');
+  const [modeIntro, modeTopics] = cut(contents(mode), '<h3 id="sec-ch3-mode-h1">');
+  const [serialParallel, syncAndDirection] = cut(modeTopics, '<h3 id="sec-ch3-mode-h2">');
+  const [synchronization, direction] = cut(syncAndDirection, '<h3 id="sec-ch3-mode-h3">');
+  // 数据传输方向（单工/半双工/全双工）→ 并/串行 → 同步/异步。
+  const modeInSlideOrder = modeIntro + direction + serialParallel + synchronization;
   const mux = sectionOf(chapter, 'sec-ch3-mux');
   const muxHtml = contents(mux);
   const [beforeDigital, digitalAndCodes] = cut(muxHtml, '<h4>准同步数字传输的局限与 SONET / SDH</h4>');
@@ -125,12 +137,10 @@ function chapter3(chapter: DeckData, network: DeckData): DeckData {
   const sections: Section[] = [
     copyWithHtml(sectionOf(chapter, 'sec-ch3-basic'),
       contents(sectionOf(chapter, 'sec-ch3-basic')), '3.1 数据通信基础与系统模型'),
-    copyWithHtml(sectionOf(chapter, 'sec-ch3-process'),
-      contents(sectionOf(chapter, 'sec-ch3-process')), '3.2 数字编码与调制'),
+    copyWithHtml(process, processInSlideOrder, '3.2 数字编码与调制'),
     copyWithHtml(sectionOf(chapter, 'sec-ch3-media'),
       contents(sectionOf(chapter, 'sec-ch3-media')), '3.3 传输介质'),
-    copyWithHtml(sectionOf(chapter, 'sec-ch3-mode'),
-      contents(sectionOf(chapter, 'sec-ch3-mode')), '3.4 数据传输方向、方式与同步'),
+    copyWithHtml(mode, modeInSlideOrder, '3.4 数据传输方向、方式与同步'),
     copyWithHtml(mux, beforeDigital + codes, '3.5 多路复用技术'),
     fromHtml('sec-ch3-digital', '3.5 数字传输系统与 SONET/SDH', digital),
     fromHtml('sec-ch3-switch', '3.6 交换技术',
