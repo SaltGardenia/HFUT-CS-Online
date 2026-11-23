@@ -6,7 +6,7 @@ import { findNetPaper, type NetPaper } from '../../content/net';
 import PracticeCard from '../../components/practice/PracticeCard';
 import { IconChevronUp } from '../../components/icons';
 import { useProgressStore } from '../../lib/sync';
-import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './NetPracticeListPage';
+import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
 
 /** 右侧进度轨的分段大小 */
 const SEGMENT = 10;

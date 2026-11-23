@@ -11,7 +11,7 @@ import { netChapters, netPapers, netAllQuestions } from '../content/net';
 import { netHomework } from '../content/net/homework';
 import { netHighlights } from '../content/net/highlights';
 import { readProgress } from '../lib/sync/local';
-import { NET_PRACTICE_STORE_KEY } from '../pages/net/NetPracticeListPage';
+import { NET_PRACTICE_STORE_KEY } from '../pages/net/netPracticeState';
 import type { PracticeKind } from '../content/practice/types';
 
 const ENTITY_RE = /&(#x?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/;

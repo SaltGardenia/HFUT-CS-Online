@@ -5,18 +5,7 @@ import { NET_BASE } from '../../courses/registry';
 import { netPapers } from '../../content/net';
 import { IconArrowRight, IconX } from '../../components/icons';
 import { useProgressStore } from '../../lib/sync';
-
-/** 作答结果持久化 key（qid = `${paperId}:${questionId}`） */
-export const NET_PRACTICE_STORE_KEY = 'net-practice-progress-v1';
-export type NetResult = 'right' | 'wrong' | 'revealed';
-
-export function netPaperStats(paperId: string, results: Record<string, NetResult>) {
-  const paper = netPapers.find((p) => p.id === paperId);
-  if (!paper) return { done: 0, right: 0, total: 0 };
-  const done = paper.questions.filter((q) => results[`${paperId}:${q.id}`]).length;
-  const right = paper.questions.filter((q) => results[`${paperId}:${q.id}`] === 'right').length;
-  return { done, right, total: paper.questions.length };
-}
+import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
 
 /** 「计算机网络」在线练习 · 试卷列表：多份试卷先选卷，再进入答题页 */
 export default function NetPracticeListPage() {

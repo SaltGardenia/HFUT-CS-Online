@@ -7,29 +7,10 @@ import { NET_BASE } from '../../courses/registry';
 import { netChapters } from '../../content/net';
 import type { PracticeQuestion } from '../../content/practice';
 import type { NetHomeworkQuestion } from '../../content/net/homework';
-
-/** 与历年试卷及其他课程独立，但复用同一组 right/wrong/revealed 结果。 */
-export type HomeworkResult = 'right' | 'wrong' | 'revealed';
-export type HomeworkResults = Record<string, HomeworkResult>;
-export const NET_HOMEWORK_STORE_KEY = 'net-homework-progress-v1';
-
-export function homeworkId(chapterNo: number, questionNo: number): string {
-  return `${chapterNo}:${questionNo}`;
-}
-
-export function loadHomeworkResults(): HomeworkResults {
-  try {
-    const saved = JSON.parse(localStorage.getItem(NET_HOMEWORK_STORE_KEY) ?? 'null');
-    if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return {};
-    return Object.fromEntries(
-      Object.entries(saved).filter(([key, value]) =>
-        /^\d+:\d+$/.test(key) && (value === 'right' || value === 'wrong' || value === 'revealed'),
-      ),
-    ) as HomeworkResults;
-  } catch {
-    return {};
-  }
-}
+import {
+  homeworkId, loadHomeworkResults, NET_HOMEWORK_STORE_KEY,
+  type HomeworkResult, type HomeworkResults,
+} from './netHomeworkState';
 
 /** 原文件答案为纯文本；转入网站可信 HTML 题卡前必须转义。 */
 function escapeHtml(text: string): string {

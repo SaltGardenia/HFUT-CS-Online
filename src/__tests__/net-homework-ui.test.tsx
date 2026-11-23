@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import NetHomework, { homeworkId, loadHomeworkResults, NET_HOMEWORK_STORE_KEY } from '../pages/net/NetHomework';
+import NetHomework from '../pages/net/NetHomework';
+import { homeworkId, loadHomeworkResults, NET_HOMEWORK_STORE_KEY } from '../pages/net/netHomeworkState';
 import { netHomework } from '../content/net/homework';
 
 beforeEach(() => localStorage.removeItem(NET_HOMEWORK_STORE_KEY));
