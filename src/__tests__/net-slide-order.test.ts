@@ -74,6 +74,20 @@ describe('2025 版计算机网络课件顺序', () => {
       .toBe('网络核心中的路由器与分组交换');
   });
 
+  it('第1章拓扑结构保留课件中点、线抽象及拓扑定义', () => {
+    const chapter = netChapters[0];
+    const section = chapter.sections.find((item) => item.id === 'sec-ch1-topology');
+    const html = section?.blocks
+      .filter((block) => block.type === 'html')
+      .map((block) => block.html).join('\\n') ?? '';
+    expect(html).toContain('服务器、工作站等网络单元抽象为“点”');
+    expect(html).toContain('电缆、双绞线等传输介质抽象为“线”');
+    expect(html).toContain('通信线路和结点相互连接的几何排列方法和模式');
+    expect(html.indexOf('服务器、工作站等网络单元抽象为“点”'))
+      .toBeLessThan(html.indexOf('按拓扑结构分类'));
+    expect(chapter.toc.some((item) => item.id === 'sec-ch1-classify-h2')).toBe(true);
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');
