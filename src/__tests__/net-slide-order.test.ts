@@ -132,6 +132,31 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).toContain('技术说明：');
   });
 
+  it('第1章分组交换首先突出课件中的三项核心思想与宏观资源共享', () => {
+    const section = netChapters[0].sections.find((item) => item.id === 'sec-ch1-classify');
+    const html = section?.blocks
+      .filter((block) => block.type === 'html')
+      .map((block) => block.html).join('\\n') ?? '';
+    const heading = html.indexOf('分组交换技术：三个核心思想');
+    const groups = [
+      '<strong>分组：</strong>',
+      '<strong>存储转发：</strong>',
+      '<strong>资源共享：</strong>',
+    ].map((phrase) => html.indexOf(phrase));
+    expect(heading).toBeGreaterThanOrEqual(0);
+    expect(groups.every((pos) => pos > heading)).toBe(true);
+    for (let i = 1; i < groups.length; i++) {
+      expect(groups[i]).toBeGreaterThan(groups[i - 1]);
+    }
+    expect(html).toContain('核心思想是：分组、存储转发、资源共享');
+    expect(html).toContain('先存储到缓存中');
+    expect(html).toContain('排队等待处理');
+    expect(html).toContain('最后选择输出链路转发出去');
+    expect(html).toContain('多个用户可以共享一段链路');
+    expect(html).toContain('一个时刻只能一个用户占有链路，因此资源共享是宏观的');
+    expect(html.indexOf('计算机数据传输的特点')).toBeLessThan(heading);
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');
