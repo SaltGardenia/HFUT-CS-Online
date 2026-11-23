@@ -88,6 +88,31 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(chapter.toc.some((item) => item.id === 'sec-ch1-classify-h2')).toBe(true);
   });
 
+  it('第1章五类拓扑都有课件顺序的独立展开，而不只是比较表格', () => {
+    const chapter = netChapters[0];
+    const section = chapter.sections.find((item) => item.id === 'sec-ch1-topology');
+    const html = section?.blocks
+      .filter((block) => block.type === 'html')
+      .map((block) => block.html).join('\\n') ?? '';
+    const titles = [
+      '总线型拓扑结构', '星型拓扑结构', '树型拓扑结构',
+      '环型拓扑结构', '网状型拓扑结构',
+    ];
+    const positions = titles.map((title) => html.indexOf('<h4>' + title + '</h4>'));
+    expect(positions.every((pos) => pos >= 0)).toBe(true);
+    for (let i = 1; i < positions.length; i++) {
+      expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+    }
+    expect(html).toContain('共享一根传输总线');
+    expect(html).toContain('中央结点');
+    expect(html).toContain('由根结点和各级分支结点构成');
+    expect(html).toContain('两个相邻结点');
+    expect(html).toContain('需要路由选择和流量控制功能');
+    expect(html.indexOf('<h4>五种拓扑结构对照速览</h4>'))
+      .toBeGreaterThan(positions[positions.length - 1]);
+    expect(html).toContain('不限定使用令牌协议');
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');
