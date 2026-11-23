@@ -270,6 +270,20 @@ describe('2025 版计算机网络课件顺序', () => {
     }
   });
 
+  it('第2、3、6、7章包含沙漏结构、自同步码、IP 分片与 TCP 字节序号例题', () => {
+    const all = (n: number) => netChapters[n - 1].sections
+      .flatMap((section) => section.blocks)
+      .filter((block) => block.type === 'html')
+      .map((block) => block.html).join('\\n');
+    expect(all(2)).toContain('Everything over IP');
+    expect(all(2)).toContain('IP over Everything');
+    expect(all(3)).toContain('自同步码');
+    expect(all(6)).toContain('floor((1500 − 20) ÷ 8) × 8 = 1480 B');
+    expect(all(6)).toContain('2960 ÷ 8 = 370');
+    expect(all(7)).toContain('1000～1199');
+    expect(all(7)).toContain('ack = 1200');
+  });
+
   it('第3章编码调制与数据传输三种方向按幻灯片内部顺序出现', () => {
     const html = allHtml(3);
     const ordered = [

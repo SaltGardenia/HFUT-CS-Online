@@ -192,6 +192,9 @@ const ch: NetChapter = {
             正是基于这样的关系，计算机在通信时才得以保持高度默契。
           </p>
           <h3 id="sec-ch2-protocol-h2">协议数据单元 PDU</h3>
+          <p><strong>协议可以有两种表达形式：</strong><strong>文字描述</strong>便于人阅读和理解；
+            <strong>程序代码</strong>便于计算机执行。无论采用哪一种形式，都应能对信息交换的格式、含义和过程作出精确说明。</p>
+          
           <p>
             计算机网络体系结构中，对等层之间交换的信息报文统称为<strong>协议数据单元</strong>（Protocol Data Unit，PDU）。
             PDU 由协议控制信息（<strong>协议头</strong>）和数据（<strong>SDU</strong>）组成。协议头中一般含有完成传输数据所需的控制信息，
@@ -380,6 +383,13 @@ const ch: NetChapter = {
             </tbody>
           </table>
           <h3 id="sec-ch2-tcpip-h2">Internet 模型特点</h3>
+          <h4>TCP/IP 协议族的“沙漏”结构</h4>
+          <p>沙漏中部是统一的<strong>IP 网际层</strong>：上方可以运行 TCP、UDP 等运输层协议，以及 HTTP、SMTP、DNS 等应用层协议；
+            下方可以使用以太网、无线局域网等不同网络接口技术。</p>
+          <p><strong>Everything over IP：</strong>各种应用都能通过 IP 网络传送；
+            <strong>IP over Everything：</strong>IP 又能够运行在多种不同底层网络之上。
+            <strong>速记：</strong>中间统一用 IP，上层多种应用，下层多种接入。</p>
+          
           <ul>
             <li><strong>免费开放</strong>：协议标准完全开放，可以供普通用户和相关厂商自由、免费使用；</li>
             <li><strong>平台无关</strong>：可在任意硬件平台和操作系统环境中运行；</li>

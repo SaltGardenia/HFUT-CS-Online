@@ -417,6 +417,23 @@ const ch: NetChapter = {
           <p><strong>IP 报头校验和的计算</strong>：校验和字段置 0 → 对 IP 头部按每 16bit 分割成不同单元 → 将所有单元相加，结果分为进位单元和本体单元 →
             若进位单元非零则将进位单元与本体单元相加并再次分割，如此循环直至进位单元为零 → 将本体单元的值取反并存入校验和字段。
             <strong>检验</strong>：接收 IP 包时按同样算法计算，若最终本体单元的结果取反后为零，则认为收到的 IP 头正确，否则有错。</p>
+                    <h4>IPv4 分片例题：MTU、片偏移与 MF</h4>
+          <p>假设原始 IPv4 数据报<strong>总长度 4000 B</strong>，固定首部 <strong>20 B</strong>，
+            因而数据部分为 3980 B；要通过 MTU = 1500 B 的链路，且允许分片（DF = 0）。
+            每个非最后分片可携带的最大数据量为
+            <strong>floor((1500 − 20) ÷ 8) × 8 = 1480 B</strong>。</p>
+          <table class="tbl">
+            <thead><tr><th>分片</th><th>数据部分</th><th>总长度（含首部）</th><th>片偏移（8 B 为单位）</th><th>MF</th></tr></thead>
+            <tbody>
+              <tr><td>第 1 片</td><td>1480 B</td><td>1500 B</td><td>0</td><td>1</td></tr>
+              <tr><td>第 2 片</td><td>1480 B</td><td>1500 B</td><td>185</td><td>1</td></tr>
+              <tr><td>第 3 片</td><td>1020 B</td><td>1040 B</td><td>370</td><td>0</td></tr>
+            </tbody>
+          </table>
+          <p><strong>为什么是 185？</strong>第 2 片之前已有 1480 B 数据，因此偏移是 1480 ÷ 8 = 185；
+            第 3 片之前已有 2960 B 数据，因此偏移是 2960 ÷ 8 = 370。
+            所有分片的<strong>标识字段相同</strong>；MF = 0 表示最后一片。
+            <strong>记忆：</strong>先减首部，再按 8 B 对齐，最后算偏移。</p>
           <h3 id="sec-ch5-ip-h2">分类 IP 地址</h3>
           <div class="callout key">
             <p class="callout-h">重点 A｜A/B/C 类地址与主机数</p>

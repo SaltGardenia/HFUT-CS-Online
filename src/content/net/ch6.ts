@@ -313,6 +313,15 @@ const ch: NetChapter = {
             <strong>被动等待连接建立的应用进程称为服务器</strong>（server）。
           </p>
           <h3 id="sec-ch6-tcp-h2">TCP 报文段的首部结构</h3>
+          <div class="callout tip">
+            <p class="callout-h">TCP 序号与确认号：字节编号例题</p>
+            <p>如果某 TCP 数据段的首个数据字节序号为 <strong>1000</strong>，连续携带 <strong>200 B</strong>，
+              则字节序号覆盖 <strong>1000～1199</strong>；
+              接收方全部按序收到后可返回确认号 <strong>ack = 1200</strong>。
+              <strong>确认号指下一个期望收到的字节</strong>，不是最后一个已收到字节。
+              SYN 和 FIN 也会占用一个序号，不能将它们当作零长度数据字节流直接忽略。</p>
+          </div>
+          
           <div class="callout key">
             <p class="callout-h">重点 A｜字节编号与累计确认</p>
             <p>TCP 为字节编号：ACK 确认号通常表示下一个期望收到的字节序号，而不是已收最后一个字节序号。</p>
