@@ -1,0 +1,86 @@
+/** 按课程课件的实际讲解路径检查章节次序与稳定锚点。 */
+import { describe, it, expect } from 'vitest';
+import { netChapters } from '../content/net';
+import { netDemoPlacements } from '../content/net/enhance';
+
+const REQUIRED_ORDER: Record<number, string[]> = {
+  1: ['sec-ch1-history', 'sec-ch1-definition', 'sec-ch1-structure',
+    'sec-ch1-internet', 'sec-ch1-work', 'sec-ch1-topology',
+    'sec-ch1-classify', 'sec-ch1-performance', 'sec-ch1-trend'],
+  2: ['sec-ch2-protocol', 'sec-ch2-idea', 'sec-ch2-arch', 'sec-ch2-osi', 'sec-ch2-tcpip'],
+  3: ['sec-ch3-basic', 'sec-ch3-process', 'sec-ch3-media', 'sec-ch3-mode',
+    'sec-ch3-mux', 'sec-ch3-digital', 'sec-ch3-switch', 'sec-ch3-vc',
+    'sec-ch3-phy', 'sec-ch3-access'],
+  4: ['sec-ch4-basic', 'sec-ch4-frame', 'sec-ch4-error', 'sec-ch4-flow', 'sec-ch4-p2p'],
+  5: ['sec-ch5-lan-basic', 'sec-ch5-broadcast', 'sec-ch5-lan-current',
+    'sec-ch5-mac', 'sec-ch5-expand', 'sec-ch5-vlan',
+    'sec-ch5-evolve', 'sec-ch5-lan-gigabit'],
+  6: ['sec-ch6-vc', 'sec-ch6-ip', 'sec-ch6-arp', 'sec-ch6-icmp',
+    'sec-ch6-routing', 'sec-ch6-protocol', 'sec-ch6-switch'],
+  7: ['sec-ch7-overview', 'sec-ch7-udp', 'sec-ch7-tcp', 'sec-ch7-reliable',
+    'sec-ch7-tcp-header', 'sec-ch7-impl', 'sec-ch7-flow',
+    'sec-ch7-tcp-connection', 'sec-ch7-congestion'],
+  8: ['sec-ch8-overview', 'sec-ch8-dns', 'sec-ch8-ftp',
+    'sec-ch8-http', 'sec-ch8-email'],
+};
+
+const allHtml = (chapterNo: number) => netChapters[chapterNo - 1].sections
+  .flatMap((section) => section.blocks)
+  .filter((block) => block.type === 'html')
+  .map((block) => block.html).join('\n');
+
+describe('2025 版计算机网络课件顺序', () => {
+  for (const [number, ids] of Object.entries(REQUIRED_ORDER)) {
+    const chapterNo = Number(number);
+    it('第' + chapterNo + '章的正文、目录、章节锚点顺序一致', () => {
+      const chapter = netChapters[chapterNo - 1];
+      expect(chapter.sections.map((section) => section.id)).toEqual(ids);
+      const sectionOrder = chapter.toc.filter((entry) => entry.level === 2 && !entry.id.endsWith('-homework'));
+      expect(sectionOrder.map((item) => item.id)).toEqual(ids);
+      const tocIds = chapter.toc.map((item) => item.id);
+      expect(new Set(tocIds).size).toBe(tocIds.length);
+      const homework = tocIds.indexOf('sec-ch' + chapterNo + '-homework');
+      expect(homework).toBeGreaterThan(tocIds.indexOf(ids[ids.length - 1]));
+    });
+  }
+
+  it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
+    const html = allHtml(1);
+    const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');
+    const topology = netChapters[0].sections.find((section) => section.id === 'sec-ch1-topology');
+    const classification = netChapters[0].sections.find((section) => section.id === 'sec-ch1-classify');
+    expect(structure?.blocks.some((block) => block.type === 'html' && block.html.includes('资源子网与通信子网'))).toBe(true);
+    expect(topology?.blocks.some((block) => block.type === 'html' && block.html.includes('按拓扑结构分类'))).toBe(true);
+    expect(classification?.blocks.some((block) => block.type === 'html' &&
+      block.html.includes('电路交换') && block.html.includes('按地理范围分类'))).toBe(true);
+    expect(html).toContain('分组丢失率');
+  });
+
+  it('第5章 CSMA/CD、传统以太网、利用率、MAC、扩展、VLAN 和高速以太网依次出现', () => {
+    const html = allHtml(5);
+    const anchors = ['sec-ch5-broadcast-h2', 'sec-ch5-broadcast-h3', 'sec-ch5-lan-current-h1',
+      'sec-ch5-broadcast-h4', 'sec-ch5-broadcast-h5', '四、虚拟局域网 VLAN', '快速以太网'];
+    const positions = anchors.map((x) => html.indexOf(x));
+    expect(positions.every((pos) => pos >= 0)).toBe(true);
+    for (let i = 1; i < positions.length; i++) expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+  });
+
+  it('第7章先理解可靠传输和首部，再学习流量控制与连接管理', () => {
+    const html = allHtml(7);
+    const ids = ['sec-ch7-tcp-h1', 'sec-ch7-reliable-h1', 'sec-ch7-tcp-h2',
+      'sec-ch7-flow-h1', 'sec-ch7-tcp-h3', 'sec-ch7-congestion-h1'];
+    const positions = ids.map((id) => html.indexOf('id="' + id + '"'));
+    expect(positions.every((pos) => pos >= 0)).toBe(true);
+    for (let i = 1; i < positions.length; i++) expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+  });
+
+  it('原有动画所绑定的标题锚点仍在对应章节内', () => {
+    for (const demo of netDemoPlacements) {
+      const chapter = netChapters[demo.chapter - 1];
+      const exists = chapter.sections.some((section) =>
+        section.id === demo.anchor ||
+        section.blocks.some((block) => block.type === 'html' && block.html.includes('id="' + demo.anchor + '"')));
+      expect(exists, demo.name + ' 的原锚点丢失').toBe(true);
+    }
+  });
+});

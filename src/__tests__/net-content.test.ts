@@ -18,13 +18,13 @@ const ENTITY_RE = /&(#x?[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/;
 
 /** 章节结构契约：8 个章，各章 section 数 */
 const EXPECT_SECTIONS: Record<string, number> = {
-  ch1: 7,
+  ch1: 9,
   ch2: 5,
-  ch3: 7,
+  ch3: 10,
   ch4: 5,
-  ch5: 4,
+  ch5: 8,
   ch6: 7,
-  ch7: 7,
+  ch7: 9,
   ch8: 5,
 };
 

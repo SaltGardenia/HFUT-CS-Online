@@ -11,6 +11,7 @@ import oldCh6 from './ch6';
 import oldCh7 from './ch7';
 import { netHomework } from './homework';
 import { enrichNetworkChapter } from './enhance';
+import { alignNetworkChapterToSlides } from './ppt-order';
 import paper2021 from './paper-2021';
 import paper2022 from './paper-2022';
 import paper2024 from './paper-2024';
@@ -56,7 +57,8 @@ const chapterMaterial: DeckData[] = [
 export const netChapters: DeckData[] = chapterMaterial.map((chapter, index) => {
   const chapterNo = index + 1;
   const questions = netHomework[chapterNo] ?? [];
-  const enriched = enrichNetworkChapter(chapter, chapterNo);
+  const ordered = alignNetworkChapterToSlides(chapter, chapterNo, oldCh5);
+  const enriched = enrichNetworkChapter(ordered, chapterNo);
   return {
     ...enriched,
     toc: [
