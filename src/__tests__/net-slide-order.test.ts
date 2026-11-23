@@ -121,7 +121,7 @@ describe('2025 版计算机网络课件顺序', () => {
       .filter((block) => block.type === 'html')
       .map((block) => block.html).join('\\n') ?? '';
     const intro = html.indexOf('<h4>计算机数据传输的特点</h4>');
-    const packet = html.indexOf('<strong>分组交换</strong>：');
+    const packet = html.indexOf('<h4>分组交换技术：三个核心思想</h4>');
     const message = html.indexOf('报文交换的主要特点');
     expect(message).toBeGreaterThanOrEqual(0);
     expect(intro).toBeGreaterThan(message);
@@ -129,7 +129,7 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).toContain('<strong>突发性：</strong>计算机数据是突发性地出现在传输线路上');
     expect(html).toContain('<strong>复杂性：</strong>可能是一对一通信，但也可能是一对多通信');
     expect(html).toContain('计算机网络使用分组交换技术');
-    expect(html).toContain('技术说明：');
+    expect(html).toContain('<strong>注意：</strong>上述结论');
   });
 
   it('第1章分组交换首先突出课件中的三项核心思想与宏观资源共享', () => {
@@ -155,6 +155,36 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).toContain('多个用户可以共享一段链路');
     expect(html).toContain('一个时刻只能一个用户占有链路，因此资源共享是宏观的');
     expect(html.indexOf('计算机数据传输的特点')).toBeLessThan(heading);
+  });
+
+  it('第1章按 LAN、MAN、WAN、AN 顺序展开覆盖范围、特点和网络层次', () => {
+    const chapter = netChapters[0];
+    const coverage = chapter.sections.find((s) => s.id === 'sec-ch1-classify');
+    const html = coverage?.blocks
+      .filter((b) => b.type === 'html')
+      .map((b) => b.html).join('\\n') ?? '';
+    const ids = [
+      'sec-ch1-classify-lan', 'sec-ch1-classify-man',
+      'sec-ch1-classify-wan', 'sec-ch1-classify-an',
+    ];
+    const positions = ids.map((id) => html.indexOf('id="' + id + '"'));
+    expect(positions.every((p) => p >= 0)).toBe(true);
+    for (let i = 1; i < positions.length; i++) expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+    for (const id of ids) expect(chapter.toc.some((t) => t.id === id)).toBe(true);
+    expect(html).toContain('10 Mb/s～10 Gb/s');
+    expect(html).toContain('通信时延短，可靠性较高');
+    expect(html).toContain('传统局域网常采用');
+    expect(html).toContain('城域网是局域网的延伸');
+    expect(html).toContain('数百公里到数千公里，甚至上万公里');
+    expect(html).toContain('接入网 AN → 城域网 MAN → 广域网 WAN');
+    expect(html).toContain('三者的界限逐渐模糊');
+    expect(html.indexOf('按覆盖范围分类速览')).toBeGreaterThan(positions[3]);
+  });
+
+  it('第1章知识点正文不再使用课件叙述性开场白', () => {
+    const html = netChapters[0].sections.flatMap((s) => s.blocks)
+      .filter((b) => b.type === 'html').map((b) => b.html).join('\\n');
+    expect(html).not.toMatch(/课件(?:明确指出|表述为|指出|强调|概括为)/);
   });
 
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {

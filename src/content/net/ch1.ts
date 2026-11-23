@@ -22,7 +22,11 @@ const ch: NetChapter = {
     { id: 'sec-ch1-definition', text: '2. 计算机网络的定义', level: 2 },
     { id: 'sec-ch1-definition-functions', text: '计算机网络的主要功能', level: 3 },
     { id: 'sec-ch1-classify', text: '3. 计算机网络的分类', level: 2 },
-    { id: 'sec-ch1-classify-h1', text: '★ 按地理范围分类', level: 3 },
+    { id: 'sec-ch1-classify-h1', text: '★ 按覆盖范围分类', level: 3 },
+    { id: 'sec-ch1-classify-lan', text: '局域网 LAN', level: 3 },
+    { id: 'sec-ch1-classify-man', text: '城域网 MAN', level: 3 },
+    { id: 'sec-ch1-classify-wan', text: '广域网 WAN', level: 3 },
+    { id: 'sec-ch1-classify-an', text: '接入网 AN', level: 3 },
     { id: 'sec-ch1-classify-h2', text: '★ 按拓扑结构分类', level: 3 },
     { id: 'sec-ch1-work', text: '4. 计算机网络的运行过程', level: 2 },
     { id: 'sec-ch1-work-h1', text: '网络边缘的主机系统：C/S 与 P2P', level: 3 },
@@ -242,22 +246,55 @@ const ch: NetChapter = {
         {
           type: 'html',
           html: `
-          <h3 id="sec-ch1-classify-h1">按地理范围分类</h3>
+          <h3 id="sec-ch1-classify-h1">按覆盖范围分类</h3>
           <div class="callout tip">
-            <p class="callout-h">重点 B｜LAN、MAN、WAN</p>
-            <p>按覆盖范围区分局域网、城域网、广域网，熟悉典型应用及网络互连。</p>
+            <p class="callout-h">局域网 LAN、城域网 MAN、广域网 WAN</p>
+            <p>重点：覆盖范围、组成与功能、主要特点，以及接入网 AN 的作用。</p>
           </div>
+          <h4 id="sec-ch1-classify-lan">局域网 LAN（Local Area Network）</h4>
+          <p><strong>作用范围：</strong>一般为<strong>几百米到几千米</strong>，通常在一座建筑或相对独立的建筑群内，常用于组建<strong>企业网、校园网</strong>。</p>
+          <p><strong>局域网的主要特点：</strong></p>
+          <ol>
+            <li><strong>覆盖范围小：</strong>通常只在一座或集中的建筑群等较小区域内。</li>
+            <li><strong>数据传输速率高：</strong>典型速率示例为 <strong>10 Mb/s～10 Gb/s</strong>。</li>
+            <li><strong>通信时延短，可靠性较高。</strong></li>
+            <li><strong>支持多种传输介质：</strong>如双绞线、光纤等，也可以采用无线传输。</li>
+            <li><strong>拓扑结构：</strong>传统局域网常采用<strong>总线型和环型</strong>；现代交换式以太网则广泛采用星型或层次化星型。</li>
+          </ol>
+          <p><strong>图 1-11（局域网连接示意图）：</strong>服务器、工作站、打印机等设备在局部范围内互连，共享数据与设备资源。</p>
+          <div class="callout tip">
+            <p class="callout-h">注意</p>
+            <p>10 Mb/s～10 Gb/s 是典型速率示例，不是局域网必须满足的速率范围；通信速率、可靠性和拓扑结构会随着技术和部署方式变化。</p>
+          </div>
+
+          <h4 id="sec-ch1-classify-man">城域网 MAN（Metropolitan Area Network）</h4>
+          <p><strong>定义与用途：</strong><strong>城域网是局域网的延伸，用于不同局域网之间的连接</strong>，网络规模通常局限在<strong>一座城市</strong>范围内。</p>
+          <p><strong>覆盖范围：</strong>通常为<strong>几十公里至几百公里</strong>，能够连接同一城市内不同区域的局域网和通信设施。</p>
+          <p><strong>图 1-12（城域网连接示意图）：</strong>计算机与路由器通过城域网络互连，体现城市范围内的网络连接。</p>
+
+          <h4 id="sec-ch1-classify-wan">广域网 WAN（Wide Area Network）</h4>
+          <p><strong>定义：</strong>广域网又称<strong>远程网</strong>，覆盖大范围地区，跨度从<strong>数百公里到数千公里，甚至上万公里</strong>。</p>
+          <p><strong>组成：</strong>广域网可以连接分布在不同地区的<strong>多个局域网</strong>和<strong>城域网</strong>；大型广域网还可以连接不同大洲的网络。</p>
+          <p><strong>实例：</strong><strong>Internet（互联网）</strong>由全球大量不同规模的网络互联形成，是理解大范围网络互连的重要实例；它并不等同于某一张单独的广域网。</p>
+          <p><strong>图 1-13（广域网连接示意图）：</strong>不同地区的 MAN、LAN 经公用交换网互连。</p>
+
+          <h4 id="sec-ch1-classify-an">接入网 AN（Access Network）</h4>
+          <p><strong>作用：</strong>接入网将<strong>家庭、校园、企业等用户侧网络接入运营商网络</strong>，是用户通往城域承载网络和互联网的重要连接部分。</p>
+          <p><strong>网络层次示意：</strong><strong>局域网／校园网／企业网 → 接入网 AN → 城域网 MAN → 广域网 WAN</strong>。这是一种典型的连接关系，实际网络不一定依次经过所有层次。</p>
+          <p><strong>常见实现：</strong>光纤接入（如 FTTH）、以太网接入、DSL、移动无线接入等。</p>
+          <p><strong>注意：</strong>LAN、MAN、WAN 主要按照<strong>覆盖范围</strong>区分，而 AN 强调<strong>接入功能</strong>，二者不是完全相同的分类维度。</p>
+
+          <h4>按覆盖范围分类速览</h4>
           <table class="tbl">
-            <thead>
-              <tr><th>类别</th><th>覆盖范围</th><th>典型场景</th></tr>
-            </thead>
+            <thead><tr><th>网络类型</th><th>典型覆盖范围</th><th>作用与示例</th></tr></thead>
             <tbody>
-              <tr><td>局域网 LAN（Local Area Network）</td><td>一般不超过数公里</td><td>通常安装在一幢大楼内、大学校园内或厂区内</td></tr>
-              <tr><td>城域网 MAN（Metropolitan Area Network）</td><td>一个大城市，大约数十公里到上百公里</td><td>城市范围</td></tr>
-              <tr><td>广域网 WAN（Wide Area Network）</td><td>一般在数百公里以上</td><td>Internet 就是目前最大的广域网</td></tr>
+              <tr><td><strong>局域网 LAN</strong></td><td>几百米到几千米</td><td>企业网、校园网；传输速率较高、时延较短</td></tr>
+              <tr><td><strong>城域网 MAN</strong></td><td>几十公里至几百公里</td><td>连接城市内的不同局域网</td></tr>
+              <tr><td><strong>广域网 WAN</strong></td><td>数百公里至上万公里</td><td>互连不同地区的局域网和城域网</td></tr>
             </tbody>
           </table>
-          <h3 id="sec-ch1-classify-h2">按拓扑结构分类</h3>
+          <p><strong>范围划分不是绝对界限：</strong>局域网、城域网、广域网的覆盖范围只是相对划分；随着网络技术的发展，三者的界限逐渐模糊。</p>
+                    <h3 id="sec-ch1-classify-h2">按拓扑结构分类</h3>
           <div class="callout tip">
             <p class="callout-h">重点 B｜总线与星形拓扑</p>
             <p>总线型共享传输介质、故障隔离困难；星形便于维护与扩展，但依赖中心设备。</p>
@@ -278,7 +315,7 @@ const ch: NetChapter = {
           <h4>总线型拓扑结构</h4>
           <p>
             <strong>结构：</strong>所有结点<strong>共享一根传输总线</strong>，所有站点都通过硬件接口连接在这根传输线上。
-            课件图 1-6 以服务器、工作站、打印机等设备连接同一总线为例，两端设有终接器。
+            图 1-6 以服务器、工作站、打印机等设备连接同一总线为例，两端设有终接器。
           </p>
           <p>
             <strong>优点：</strong>结构简单，价格低廉，安装和使用方便。
@@ -288,19 +325,19 @@ const ch: NetChapter = {
           <h4>星型拓扑结构</h4>
           <p>
             <strong>结构：</strong>以<strong>中央结点</strong>为中心，把若干外围结点分别连接起来，形成辐射式互连结构。
-            课件图 1-7 展示了多台工作站、服务器通过中心集线器连接的方式。
+            图 1-7 展示了多台工作站、服务器通过中心集线器连接的方式。
           </p>
           <p>
             <strong>优点：</strong>外围结点或其单独接入线路发生故障时，通常不会影响其他结点；
-            结构较简单，增删结点及维护管理容易，故障隔离和检测也较容易。课件还将“延迟时间较短”列为优点。
+            结构较简单，增删结点及维护管理容易，故障隔离和检测也较容易。在设备与业务条件合适时，通信时延较短。
             <strong>缺点：</strong>布线与中心设备带来较高成本，网络性能过于依赖中央结点；
-            一旦中央结点发生故障，其连接的结点可能全部无法通信。课件还列有“资源利用率低”，这与具体网络实现有关。
+            一旦中央结点发生故障，其连接的结点可能全部无法通信。资源利用率也取决于具体设备、协议与业务负载。
           </p>
 
           <h4>树型拓扑结构</h4>
           <p>
             <strong>结构：</strong>树型结构是<strong>星型结构的扩展</strong>，
-            由根结点和各级分支结点构成，形成层次化的连接方式，见课件图 1-8。
+            由根结点和各级分支结点构成，形成层次化的连接方式，见图 1-8。
           </p>
           <p>
             <strong>优点：</strong>结构比较简单，成本较低，扩充结点方便、灵活，适合按层次扩展网络。
@@ -311,11 +348,11 @@ const ch: NetChapter = {
           <p>
             <strong>结构：</strong>每个结点与<strong>两个相邻结点</strong>相连，
             所有结点通过点到点通信线路连接成<strong>闭合环路</strong>。
-            课件图 1-9 描述的传统单向环中，数据沿一个方向逐站传送，各结点地位与作用相同，并可按所采用的控制机制获得发送权。
+            图 1-9 描述的传统单向环中，数据沿一个方向逐站传送，各结点地位与作用相同，并可按所采用的控制机制获得发送权。
           </p>
           <p>
             <strong>优点：</strong>简化路径选择控制；在采用确定性访问控制的环网中，传输时延可能较为可预测。
-            课件概括为“传输延迟固定、实时性强、可靠性高”，这些特性取决于具体协议和冗余设计，并非所有环网都必然满足。
+            在确定性访问控制与冗余设计下，可获得可预测的传输时延、较好的实时性与可靠性；并非所有环网都具备这些特性。
             <strong>缺点：</strong>结点过多时可能影响传输效率；传统无冗余的单环一旦某处断开，可能导致整个环的通信中断；
             结点加入和退出的过程较复杂。
           </p>
@@ -323,7 +360,7 @@ const ch: NetChapter = {
           <h4>网状型拓扑结构</h4>
           <p>
             <strong>结构：</strong>结点之间的连接可根据需要灵活设置，不局限于总线、星型或单环结构；
-            课件图 1-10 以多个路由器与工作站之间的互连为例。广域网中常见采用部分或较丰富的网状连接。
+            图 1-10 以多个路由器与工作站之间的互连为例。广域网中常见采用部分或较丰富的网状连接。
           </p>
           <p>
             <strong>优点：</strong>可靠性较高；<strong>当存在足够的冗余结点和线路</strong>时，
@@ -333,9 +370,9 @@ const ch: NetChapter = {
           </p>
 
           <div class="callout tip">
-            <p class="callout-h">课件表述与实际技术的区分</p>
-            <p>课件将星型拓扑描述为“符合令牌协议的高速局域网络”，但<strong>星型表示物理连接形态，不限定使用令牌协议</strong>；
-              现代交换式以太网也常采用星型连接。课件所述“星型单点故障不影响全网”指外围结点或其独立线路，
+            <p class="callout-h">注意｜拓扑与协议</p>
+            <p><strong>星型表示物理连接形态，不限定使用令牌协议</strong>；
+              现代交换式以太网也常采用星型连接。外围结点或其独立线路的单点故障通常不会影响其他结点，
               <strong>不包括中心结点故障</strong>。环网的可靠性和时延、网状网的容错能力同样取决于协议与冗余条件。</p>
           </div>
           <h4>五种拓扑结构对照速览</h4>
@@ -427,9 +464,9 @@ const ch: NetChapter = {
           </p>
           <p>电路交换的特点：</p>
           <ul>
-            <li><strong>面向连接</strong>的通信方式。按照课件中的电话通信示例，分为三个阶段：<strong>建立连接（占用通信资源） → 通话（一直占用通信资源） → 释放连接（归还通信资源）</strong>。这里的“通话”是电话场景中的数据传送阶段；</li>
+            <li><strong>面向连接</strong>的通信方式。以电话通信为例，分为三个阶段：<strong>建立连接（占用通信资源） → 通话（一直占用通信资源） → 释放连接（归还通信资源）</strong>。这里的“通话”是电话场景中的数据传送阶段；</li>
             <li>通信期间<strong>独占</strong>构成连接的整个信道；</li>
-            <li>电路两端需要<strong>可互通的速率、编码与接口参数</strong>，必要时可通过适配/转换设备解决差异；“通信双方所有传输参数必须完全一致”只是课堂简化，并非普遍限制；</li>
+            <li>电路两端需要<strong>可互通的速率、编码与接口参数</strong>，必要时可通过适配/转换设备解决差异；通信双方不必在所有参数上完全一致；</li>
             <li>传输时延短，且时延稳定，<strong>实时性强</strong>；</li>
             <li><strong>信道利用率低</strong>。</li>
           </ul>
@@ -457,22 +494,22 @@ const ch: NetChapter = {
             <li><strong>复杂性：</strong>可能是一对一通信，但也可能是一对多通信（不能独占资源）。</li>
           </ul>
           <p>
-            <strong>为什么采用分组交换：</strong>课件指出，计算机网络不适合采用<strong>电路交换</strong>，
+            <strong>为什么采用分组交换：</strong>对于典型的突发式计算机数据通信，不宜采用<strong>电路交换</strong>，
             否则资源利用率很低；也不适合采用<strong>报文交换</strong>。
             因此，<strong>计算机网络使用分组交换技术</strong>。
           </p>
           <p>
-            <strong>技术说明：</strong>上述结论是课件针对典型计算机数据通信特点的概括。
+            <strong>注意：</strong>上述结论针对典型计算机数据通信的特点。
             不同应用对时延、带宽和资源利用率的要求不同，不能据此认为电路交换或报文交换在所有场景中都不可采用。
           </p>
-          <h4>分组交换技术：三个核心思想（PPT 第 60 页）</h4>
-          <p>课件明确指出，分组交换的<strong>核心思想是：分组、存储转发、资源共享</strong>。</p>
+          <h4>分组交换技术：三个核心思想</h4>
+          <p>分组交换的<strong>核心思想是：分组、存储转发、资源共享</strong>。</p>
           <ol>
             <li>
-              <strong>分组：</strong>课件表述为“将所需传输的较大文件分成多个小的报文”。
+              <strong>分组：</strong>将较大的文件或报文划分为多个较小的数据单元。
               具体来说，发送端将较长的报文划分为若干较短的数据段，在每段前加上包含地址等控制信息的<strong>首部</strong>，
               构成<strong>分组（packet）</strong>，作为网络传输和转发的数据单位。
-              课件中的“小的报文”在这里指形成的分组。
+              
             </li>
             <li>
               <strong>存储转发：</strong><strong>分组交换机（路由器）收到分组后，先存储到缓存中，
@@ -481,8 +518,8 @@ const ch: NetChapter = {
             </li>
             <li>
               <strong>资源共享：</strong><strong>多个用户可以共享一段链路。</strong>
-              课件强调：一般的链路都是串行传输的，<strong>一个时刻只能一个用户占有链路，因此资源共享是宏观的</strong>。
-              即对课件所述的单条串行共享链路，不同用户的分组在不同时间使用该链路，而不是始终为某个用户独占。
+              一般的链路都是串行传输的，<strong>一个时刻只能一个用户占有链路，因此资源共享是宏观的</strong>。
+              即对这种单条串行共享链路，不同用户的分组在不同时间使用该链路，而不是始终为某个用户独占。
             </li>
           </ol>
           <p>
