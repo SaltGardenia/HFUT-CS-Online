@@ -84,7 +84,7 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(html).toContain('电缆、双绞线等传输介质抽象为“线”');
     expect(html).toContain('通信线路和结点相互连接的几何排列方法和模式');
     expect(html.indexOf('服务器、工作站等网络单元抽象为“点”'))
-      .toBeLessThan(html.indexOf('按拓扑结构分类'));
+      .toBeLessThan(html.indexOf('<table class="tbl">'));
     expect(chapter.toc.some((item) => item.id === 'sec-ch1-classify-h2')).toBe(true);
   });
 
