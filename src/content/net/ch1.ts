@@ -26,7 +26,7 @@ const ch: NetChapter = {
     { id: 'sec-ch1-classify-h2', text: '★ 按拓扑结构分类', level: 3 },
     { id: 'sec-ch1-work', text: '4. 计算机网络的运行过程', level: 2 },
     { id: 'sec-ch1-work-h1', text: '网络边缘的主机系统：C/S 与 P2P', level: 3 },
-    { id: 'sec-ch1-work-h2', text: '网络核心中的路由器与数据交换', level: 3 },
+    { id: 'sec-ch1-work-h2', text: '网络核心中的路由器与分组交换', level: 3 },
     { id: 'sec-ch1-work-h3', text: '★ 电路交换、报文交换与分组交换', level: 3 },
     { id: 'sec-ch1-performance', text: '5. 计算机网络的性能指标', level: 2 },
     { id: 'sec-ch1-performance-h1', text: '★ 速率、带宽与吞吐量', level: 3 },
@@ -331,12 +331,12 @@ const ch: NetChapter = {
             对等连接方式从本质上看<strong>仍然是使用客户服务器方式</strong>，只是对等连接中的每一个主机<strong>既是客户又同时是服务器</strong>：
             例如主机 C 请求 D 的服务时，C 是客户，D 是服务器；但如果 C 又同时向 F 提供服务，那么 C 又同时起着服务器的作用。
           </p>
-          <h3 id="sec-ch1-work-h2">网络核心中的路由器与数据交换</h3>
+          <h3 id="sec-ch1-work-h2">网络核心中的路由器与分组交换</h3>
           <p>
             网络核心是计算机网络（特别是因特网）中最复杂的部分，要向网络边缘中的大量主机提供连通性，
-            使边缘部分中的任何一个主机都能够与其他主机通信。<strong>路由器</strong>（Router）是网络核心中最主要的设备，
-            其主要功能是<strong>数据交换</strong>——接收来自源主机系统的数据，并向目的主机系统转发。
-            在计算机网络中，路由器转发的数据称为<strong>数据分组</strong>（Packet Switching）。
+            使边缘部分中的任何一个主机都能够与其他主机通信。<strong>路由器</strong>（Router）是实现<strong>分组交换</strong>（packet switching）的关键构件，
+            其任务是<strong>转发收到的分组</strong>，这是网络核心部分最重要的功能。
+            路由器转发的数据单位称为<strong>分组</strong>（packet）。
           </p>
           <p>
             常见的数据交换方式可以分为两大类：<strong>电路（线路）交换方式</strong>（Circuit Switching）和

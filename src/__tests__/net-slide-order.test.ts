@@ -60,6 +60,20 @@ describe('2025 版计算机网络课件顺序', () => {
     }
   });
 
+  it('第1章路由器的功能严格采用课件中的分组交换与分组转发表述', () => {
+    const chapter = netChapters[0];
+    const router = chapter.sections.find((section) => section.id === 'sec-ch1-work');
+    const html = router?.blocks
+      .filter((block) => block.type === 'html')
+      .map((block) => block.html).join('\\n') ?? '';
+    expect(html).toContain('实现<strong>分组交换</strong>（packet switching）的关键构件');
+    expect(html).toContain('转发收到的分组');
+    expect(html).toContain('<strong>分组</strong>（packet）');
+    expect(html).not.toContain('其主要功能是<strong>数据交换</strong>');
+    expect(chapter.toc.find((entry) => entry.id === 'sec-ch1-work-h2')?.text)
+      .toBe('网络核心中的路由器与分组交换');
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');
