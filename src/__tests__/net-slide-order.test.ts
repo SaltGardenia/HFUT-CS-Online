@@ -245,7 +245,7 @@ describe('2025 版计算机网络课件顺序', () => {
     expect(structure?.blocks.some((block) => block.type === 'html' && block.html.includes('资源子网与通信子网'))).toBe(true);
     expect(topology?.blocks.some((block) => block.type === 'html' && block.html.includes('按拓扑结构分类'))).toBe(true);
     expect(classification?.blocks.some((block) => block.type === 'html' &&
-      block.html.includes('电路交换') && block.html.includes('按地理范围分类'))).toBe(true);
+      block.html.includes('电路交换') && block.html.includes('按覆盖范围分类'))).toBe(true);
     expect(html).toContain('分组丢失率');
   });
 
