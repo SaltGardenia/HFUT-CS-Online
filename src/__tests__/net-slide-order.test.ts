@@ -44,6 +44,22 @@ describe('2025 版计算机网络课件顺序', () => {
     });
   }
 
+  it('八章的正文标题和目录都使用章内连续的普通数字序号', () => {
+    for (const chapter of netChapters) {
+      let expected = 0;
+      for (const section of chapter.sections) {
+        const toc = chapter.toc.find((entry) => entry.id === section.id);
+        expect(toc?.text).toBe(section.heading);
+        if (section.heading.startsWith('拓展：')) {
+          expect(section.heading).not.toMatch(/^\d/);
+          continue;
+        }
+        expect(section.heading).toMatch(new RegExp(`^${++expected}\\. `));
+        expect(section.heading).not.toMatch(/^\d+\.\d+/);
+      }
+    }
+  });
+
   it('第1章中网络组成、拓扑、交换分类与性能指标顺序严格按课件', () => {
     const html = allHtml(1);
     const structure = netChapters[0].sections.find((section) => section.id === 'sec-ch1-structure');

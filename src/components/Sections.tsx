@@ -11,13 +11,15 @@ interface Props {
   scores?: Record<string, boolean>;
   /** 每题作答回调 */
   onQuizResult?: (key: string, right: boolean) => void;
+  /** 仅在需要显示「1.」格式的页面保留序号末尾句点。 */
+  keepNumberDot?: boolean;
 }
 
 /** 把 h2 标题里已有的编号（"1." / "2.1" / "一、"）拆出来单独渲染成主题色刻度 */
 const H2_NO_RE = /^((?:[0-9０-９一二三四五六七八九十]+)(?:[.\-]\d+)*[.、．]?)\s*(.+)$/u;
 
 /** 把 content 模块的 sections 渲染成正文（html / demo / quiz 三类 block） */
-export default function Sections({ sections, scores, onQuizResult }: Props) {
+export default function Sections({ sections, scores, onQuizResult, keepNumberDot = false }: Props) {
   const reduced = useReducedMotion();
   return (
     <>
@@ -34,7 +36,7 @@ export default function Sections({ sections, scores, onQuizResult }: Props) {
               {m ? (
                 <>
                   <span className="h2-no" aria-hidden="true">
-                    {m[1].replace(/[.、．]$/, '')}
+                    {keepNumberDot ? m[1] : m[1].replace(/[.、．]$/, '')}
                   </span>
                   <span className="h2-title">{m[2]}</span>
                 </>

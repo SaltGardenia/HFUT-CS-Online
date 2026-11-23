@@ -32,12 +32,26 @@ function cut(html: string, marker: string): [string, string] {
   return [html.slice(0, index), html.slice(index)];
 }
 
+/** 仅展示章内连续序号，不把课件章节号（如 1.1.1）作为页面标题编号。 */
+function numberSections(sections: Section[]): Section[] {
+  let number = 0;
+  return sections.map((section) => {
+    const title = section.heading
+      .replace(/^\d+(?:\.\d+)*\.?\s+/, '')
+      .replace(/\s+\d+(?:\.\d+)+\s+/g, '');
+    // “拓展”是补充知识，不占用本章的主线序号。
+    if (title.startsWith('拓展：')) return { ...section, heading: title };
+    return { ...section, heading: `${++number}. ${title}` };
+  });
+}
+
 function rename(chapter: DeckData, sections: Section[]): DeckData {
+  const numberedSections = numberSections(sections);
   // 目录与正文由同一排序生成；子标题仍使用原有 ID，练习题和动画锚点不变。
   const original = chapter.toc.filter((entry) => entry.level === 3);
   const toc: TocEntry[] = [];
   const seen = new Set<string>();
-  for (const section of sections) {
+  for (const section of numberedSections) {
     toc.push({ id: section.id, text: section.heading, level: 2 });
     seen.add(section.id);
     const html = contents(section);
@@ -54,7 +68,7 @@ function rename(chapter: DeckData, sections: Section[]): DeckData {
   }
   const missing = chapter.toc.filter((entry) => !seen.has(entry.id));
   if (missing.length) throw new Error('移动正文时遗漏目录锚点：' + missing.map((entry) => entry.id).join(', '));
-  return { ...chapter, toc, sections };
+  return { ...chapter, toc, sections: numberedSections };
 }
 
 function chapter1(chapter: DeckData): DeckData {

@@ -86,7 +86,7 @@ function NetUnitInner({ chapter }: { chapter: (typeof netChapters)[number] }) {
       )}
       {chapter.sections.map((section) => (
         <Fragment key={section.id}>
-          <Sections sections={[section]} />
+          <Sections sections={[section]} keepNumberDot />
           {(questionsForSection.get(section.id) ?? []).length > 0 && (
             <nav className="net-hw-context" aria-label="本节相关课程作业">
               <span>对应课程作业</span>
