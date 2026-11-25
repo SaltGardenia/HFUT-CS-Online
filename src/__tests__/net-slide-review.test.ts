@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { netChapters } from '../content/net';
 import { netHomework } from '../content/net/homework';
+import { buildNetSupplement } from '../content/net/supplement';
 import { buildSlideReview, sourceExtraNotes, originalHighlightTargets } from '../content/net/slide-review';
 
 describe('2025 计网课件主线', () => {
@@ -175,6 +176,23 @@ describe('2025 计网课件主线', () => {
     ordered(5, ['物理层扩展','数据链路层扩展','自学习算法','单台四端口交换机','两台交换机互连']);
     ordered(7, ['为何单独增加一种资源','开环控制与闭环控制','慢开始与拥塞避免','慢开始的逐报文确认','快重传、快恢复','原始拥塞控制曲线','第134页 TCP 拥塞控制流程图']);
     ordered(8, ['面向事务、请求响应与 TCP 连接','点击链接后的完整访问实例','三种 HTTP 连接方式','HTTP 流水线图示']);
+  });
+  it('独立补充区不占主线编号、不混入荧光笔重点，未知锚点不误跳', () => {
+    let count=0;
+    for(const original of netChapters){
+      const review=buildSlideReview(original);
+      const supplemental=buildNetSupplement(original);
+      expect(supplemental.sections.length).toBeGreaterThan(0);
+      count+=supplemental.sections.length;
+      for(const section of supplemental.sections){
+        expect(section.id).toContain('-supp-');
+        expect(review.resolve(section.id)).toBeUndefined();
+        expect(section.heading).not.toContain('★');
+      }
+      expect(review.resolve('sec-'+original.id+'-performance-unknown')).toBeUndefined();
+    }
+    expect(count).toBe(25);
+    expect(buildSlideReview(netChapters[4]).resolve('sec-ch5-detail-extend-1wewhgl')).toBe('sec-ch5-detail-extend-18dxxsm');
   });
   it('详细主线不能退化成知识点摘要，且保留课内互动演示', () => {
     for (const original of netChapters) {
