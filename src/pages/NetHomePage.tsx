@@ -1,7 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { NET_BASE } from '../courses/registry';
 import { netHome } from '../content/net';
+import { buildNetHomeSections } from '../content/net/home';
+import { READING_KEY } from '../lib/sync/keys';
+import { readReading, subscribeStore } from '../lib/sync/local';
 import { useToc } from '../lib/toc';
 import HtmlContent from '../components/HtmlContent';
 import Sections from '../components/Sections';
@@ -17,6 +20,15 @@ export default function NetHomePage() {
   const [params] = useSearchParams();
   const section = params.get('s');
   const pageRef = useRef<HTMLDivElement>(null);
+  const [reading, setReading] = useState(readReading);
+
+  // 复用阅读记录：本机记录、跨标签页更新及账号同步合并均走同一订阅。
+  useEffect(() => {
+    const refresh = () => setReading(readReading());
+    const unsubscribe = subscribeStore(READING_KEY, refresh);
+    refresh();
+    return unsubscribe;
+  }, []);
 
   const jump = (id: string) => {
     scrollToId(id);
@@ -44,7 +56,7 @@ export default function NetHomePage() {
       <div className="lede">
         <HtmlContent html={netHome.lede} />
       </div>
-      <Sections sections={netHome.sections} />
+      <Sections sections={buildNetHomeSections(reading)} />
       <SectionCapsule />
     </div>
   );

@@ -1,5 +1,7 @@
 /* 计算机网络总览：2025 版八章，与旧版七章知识点兼容 */
-import type { DeckData } from './types';
+import type { DeckData, Section } from './types';
+import type { ReadingMap } from '../../lib/sync/types';
+import { NET_BASE } from '../../courses/registry';
 import { netHomework } from './homework';
 
 /** 按 2025 版章节正文顺序归纳；卡片计数直接读取作业数据。 */
@@ -14,12 +16,27 @@ const chapterMap = [
   { no: 8, title: '应用层', summary: '网络应用及应用层协议体系架构；DNS 域名服务器与解析过程、FTP 控制连接和数据连接；<strong>WWW、URL、HTTP 请求与响应</strong>；HTML 与动态文档、电子邮件 SMTP / POP3 / IMAP。' },
 ] as const;
 
-const chapterCards = chapterMap.map(({ no, title, summary }) => `
-  <a class="card" href="/net/deck/ch${no}">
-    <h3>第 ${no} 章 · ${title}</h3>
-    <p>${summary}</p>
-    <p class="card-meta">${(netHomework[no] ?? []).length} 道课程作业</p>
-  </a>`).join('');
+/** 阅读进度沿用 ReadingMark 的路径键；只展示最近一次记录，不把滚动百分比当成掌握率。 */
+function chapterCards(reading: ReadingMap): string {
+  return chapterMap.map(({ no, title, summary }) => {
+    const path = `${NET_BASE}/deck/ch${no}`;
+    const entry = reading[path];
+    const hasProgress = !!entry && Number.isFinite(entry.p);
+    const percent = hasProgress ? Math.round(Math.min(1, Math.max(0, entry.p)) * 100) : 0;
+    return `
+      <a class="card" href="${path}">
+        <h3>第 ${no} 章 · ${title}</h3>
+        <p>${summary}</p>
+        <p class="card-meta">${(netHomework[no] ?? []).length} 道课程作业</p>
+        <p style="display:flex;justify-content:space-between;gap:8px;margin:8px 0 5px;font-variant-numeric:tabular-nums">
+          <span>${hasProgress ? '上次读到' : '暂无阅读记录'}</span><strong>${percent}%</strong>
+        </p>
+        <div class="pq-progress-bar" role="progressbar" aria-label="第${no}章阅读位置" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}">
+          <span style="width:${percent}%;background:var(--deck-accent)"></span>
+        </div>
+      </a>`;
+  }).join('');
+}
 
 const home: DeckData = {
   id: 'home', no: '', title: '计算机网络 · 2025 课件复习手册', subtitle: '',
@@ -34,15 +51,19 @@ const home: DeckData = {
     { id: 'sec-net-map-h1', text: '章节内容与作业', level: 3 },
     { id: 'sec-net-map-h2', text: '课件表述与现行实践', level: 3 },
   ],
-  sections: [{
+  sections: buildNetHomeSections(),
+};
+/** 首页在阅读记录发生变化时重新生成卡片；目录索引使用默认的无记录版本。 */
+export function buildNetHomeSections(reading: ReadingMap = {}): Section[] {
+  return [{
     id: 'sec-net-map', heading: '八章内容地图', blocks: [{
       type: 'html', html: `
       <div class="callout tip"><p class="callout-h">复习顺序</p>
-      <p>先阅读知识点与标出的重点，再做每章末的作业。
+      <p>先阅读知识点与标出的重点，再做每章末的作业。卡片中的百分比表示上次保存的阅读位置，并非知识掌握程度。
       答案区分别注明<strong>教师答案（整理）</strong>与<strong>补充参考解答</strong>，
       便于区分已给结论和推导解释；2025 课件未布置的题不虚构为教师作业。</p></div>
       <h3 id="sec-net-map-h1">章节内容与作业</h3>
-      <div class="card-grid deck-map">${chapterCards}</div>
+      <div class="card-grid deck-map">${chapterCards(reading)}</div>
       <h3 id="sec-net-map-h2">课件表述与现行实践</h3>
       <p>按照课件复习时注意<strong>适用前提</strong>：例如 CSMA/CD 属于经典半双工共享以太网，
       不应推广至常见的全双工交换式链路；IPv4 分类编址是教学基础，但实际路由以 CIDR
@@ -50,6 +71,7 @@ const home: DeckData = {
       “所有 HTTP 都运行于 TCP”。如遇版本差异，各章用双轨说明。</p>
       `,
     }],
-  }],
-};
+  }];
+}
+
 export default home;
