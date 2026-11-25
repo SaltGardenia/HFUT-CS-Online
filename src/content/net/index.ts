@@ -73,11 +73,225 @@ export const netChapters: DeckData[] = chapterMaterial.map((chapter, index) => {
   };
 });
 
-/** 将 2024 版试卷知识点标签转换为 2025 版八章，保证原有题号/答案不变。 */
+/** 历年题按实际知识内容定位，而非仅平移章节编号；独立课外内容仍链接原讲义。 */
+const practiceTagOverrides: Record<string, PracticeQuestion['tags']> = {
+  "p1-s3": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-switch",
+      "text": "ATM（拓展）"
+    }
+  ],
+  "p1-e2": [
+    {
+      "deck": 8,
+      "sec": "sec-ch8-src-ftp",
+      "text": "FTP 文件传送"
+    }
+  ],
+  "p1-e3": [
+    {
+      "deck": 3,
+      "sec": "sec-ch3-access-h1",
+      "text": "ADSL（拓展）"
+    }
+  ],
+  "p1-e5": [
+    {
+      "deck": 8,
+      "sec": "sec-ch8-email-h2",
+      "text": "SMTP（拓展）"
+    }
+  ],
+  "p1-e6": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-ip",
+      "text": "IPv4 与 IPv6（拓展：过渡机制见本题解析）"
+    }
+  ],
+  "p1-e8": [
+    {
+      "deck": 1,
+      "sec": "sec-ch1-trend",
+      "text": "网络安全（拓展）"
+    }
+  ],
+  "p2-e5": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-mac",
+      "text": "MAC 地址"
+    },
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-mac",
+      "text": "IP 与 MAC 地址"
+    }
+  ],
+  "p2-e8": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-vlan",
+      "text": "VLAN"
+    }
+  ],
+  "p2-f8": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-traditional",
+      "text": "10BASE-T"
+    },
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-fast",
+      "text": "100BASE-TX"
+    }
+  ],
+  "p2-f10": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-traditional",
+      "text": "10BASE-T"
+    }
+  ],
+  "p2-f13": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-vlan",
+      "text": "VLAN 划分"
+    }
+  ],
+  "p2-f14": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-services",
+      "text": "IP 数据报服务"
+    }
+  ],
+  "p2-s4": [
+    {
+      "deck": 2,
+      "sec": "sec-ch2-src-pdu",
+      "text": "对等层与协议数据单元"
+    }
+  ],
+  "p2-s7": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-lan",
+      "text": "局域网特点"
+    }
+  ],
+  "p2-s10": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-csma",
+      "text": "CSMA 接入（非坚持式为拓展）"
+    }
+  ],
+  "p2-s16": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-vlan",
+      "text": "VLAN"
+    }
+  ],
+  "p3-s3": [
+    {
+      "deck": 3,
+      "sec": "sec-ch3-src-modulation",
+      "text": "调制与解调"
+    }
+  ],
+  "p3-s7": [
+    {
+      "deck": 2,
+      "sec": "sec-ch2-src-pdu",
+      "text": "各层 PDU"
+    },
+    {
+      "deck": 4,
+      "sec": "sec-ch4-src-basic",
+      "text": "帧"
+    }
+  ],
+  "p3-s9": [
+    {
+      "deck": 3,
+      "sec": "sec-ch3-src-modulation",
+      "text": "数字调制"
+    }
+  ],
+  "p3-s10": [
+    {
+      "deck": 3,
+      "sec": "sec-ch3-src-modulation",
+      "text": "数字数据的模拟调制"
+    }
+  ],
+  "p3-s11": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-services",
+      "text": "IP 数据报服务"
+    }
+  ],
+  "p3-s19": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-protocol-h2",
+      "text": "BGP（拓展）"
+    }
+  ],
+  "p3-e3": [
+    {
+      "deck": 3,
+      "sec": "sec-ch3-src-capacity",
+      "text": "奈氏准则与香农公式"
+    }
+  ],
+  "p3-e6": [
+    {
+      "deck": 1,
+      "sec": "sec-ch1-src-performance",
+      "text": "发送与传播时延"
+    },
+    {
+      "deck": 1,
+      "sec": "sec-ch1-src-switch",
+      "text": "存储转发"
+    }
+  ],
+  "p3-e7": [
+    {
+      "deck": 4,
+      "sec": "sec-ch4-src-window",
+      "text": "滑动窗口"
+    },
+    {
+      "deck": 4,
+      "sec": "sec-ch4-src-sw",
+      "text": "停止等待"
+    },
+    {
+      "deck": 4,
+      "sec": "sec-ch4-src-arq",
+      "text": "GBN"
+    },
+    {
+      "deck": 4,
+      "sec": "sec-ch4-src-srp",
+      "text": "SRP"
+    }
+  ]
+};
+
+/** 将旧版试卷知识点标签转换为 2025 版八章，保证原有题号/答案不变。 */
 function remapQuestion(question: PracticeQuestion): PracticeQuestion {
   return {
     ...question,
-    tags: question.tags.map((tag) => {
+    tags: practiceTagOverrides[question.id] ?? question.tags.map((tag) => {
       const old = tag.deck;
       const movedLan = old === 4 && /^sec-ch4-(broadcast|evolve)/.test(tag.sec);
       const target = movedLan ? 5 : old >= 5 ? old + 1 : old;
