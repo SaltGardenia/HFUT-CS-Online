@@ -314,10 +314,11 @@ describe('计算机网络试卷题库', () => {
 });
 
 describe('2025版计网作业与知识点跳转', () => {
-  it('八章共54道来源作业，未虚构第八章作业', () => {
-    const counts = [6, 3, 2, 7, 11, 16, 9, 0];
+  it('八章共56道来源作业，未虚构第八章作业', () => {
+    const counts = [6, 3, 2, 7, 13, 16, 9, 0];
     counts.forEach((count, i) => expect(netHomework[i + 1].length).toBe(count));
-    expect(counts.reduce((sum, n) => sum + n, 0)).toBe(54);
+    expect(Object.values(netHomework).reduce((sum, questions) => sum + questions.length, 0)).toBe(56);
+    expect(netHomework[5].map((q) => q.no)).toEqual(Array.from({ length: 13 }, (_, i) => i + 1));
   });
   it('每题均有同章知识点锚点和独立题号锚点', () => {
     netChapters.forEach((chapter, i) => {
