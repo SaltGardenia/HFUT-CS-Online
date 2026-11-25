@@ -31,6 +31,50 @@ const askProviders: AskProvider[] = [
 ];
 const ASK_PROVIDER_KEY = 'hfut-net-ask-ai-provider';
 
+const providerColors: Record<string, string> = {
+  chatgpt: '#168575', kimi: '#5359df', deepseek: '#4d6bfe', qwen: '#7654ed',
+  doubao: '#3378f5', yuanbao: '#158c79', claude: '#c56e4c', gemini: '#4977e9',
+  grok: '#6b7280', perplexity: '#20808d',
+};
+
+function providerIcon(provider: AskProvider) {
+  const icon = document.createElement('span');
+  icon.className = 'net-ask-ai-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.style.setProperty('--provider-color', providerColors[provider.id] ?? '#64748b');
+  icon.textContent = provider.name.slice(0, 1);
+  const img = document.createElement('img');
+  img.alt = '';
+  img.width = 18;
+  img.height = 18;
+  img.loading = 'lazy';
+  img.referrerPolicy = 'no-referrer';
+  img.hidden = true;
+  img.addEventListener('load', () => { img.hidden = false; });
+  img.addEventListener('error', () => { img.remove(); });
+  img.src = new URL('/favicon.ico', provider.home).href;
+  icon.appendChild(img);
+  return icon;
+}
+
+function askAiGlyph(path: string, className = '') {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '1.7');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('class', 'net-ask-ai-glyph ' + className);
+  const p = document.createElementNS(ns, 'path');
+  p.setAttribute('d', path);
+  svg.appendChild(p);
+  return svg;
+}
+
+
 function providerUrl(provider: AskProvider, prompt: string) {
   const url = new URL(provider.home);
   if (provider.param) url.searchParams.set(provider.param, prompt);
@@ -95,12 +139,18 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'net-ask-ai-toggle';
-    toggle.textContent = '▾';
+    toggle.appendChild(askAiGlyph('m6 9 6 6 6-6'));
     toggle.setAttribute('aria-label', '选择 AI 平台');
     toggle.setAttribute('aria-expanded', 'false');
     const menu = document.createElement('span');
     menu.className = 'net-ask-ai-menu';
     menu.hidden = true;
+    const menuHeader = document.createElement('span');
+    menuHeader.className = 'net-ask-ai-menu-header';
+    menuHeader.textContent = '选择 AI 助手';
+    const grid = document.createElement('span');
+    grid.className = 'net-ask-ai-grid';
+    menu.append(menuHeader, grid);
 
     const status = document.createElement('span');
     status.className = 'net-ask-ai-status';
@@ -127,12 +177,19 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
 
     const refresh = () => {
       primary.href = providerUrl(preferred, prompt);
-      primary.textContent = '问问 AI · ' + preferred.name + ' ↗';
+      const label = document.createElement('span');
+      label.textContent = '问问 AI';
+      const model = document.createElement('span');
+      model.className = 'net-ask-ai-current';
+      model.textContent = preferred.name;
+      primary.replaceChildren(askAiGlyph('M12 3 13.9 8.1 19 10 13.9 11.9 12 17 10.1 11.9 5 10 10.1 8.1 12 3 M19 13v6 M16 16h6 M5 3v4 M3 5h4'), label, model);
       primary.title = preferred.param ? '将知识点标题传入 ' + preferred.name : '复制简短问题并打开 ' + preferred.name;
       primary.setAttribute('aria-label', '向 ' + preferred.name + ' 提问：' + title);
       for (const link of Array.from(menu.querySelectorAll<HTMLAnchorElement>('a[data-provider]'))) {
         const active = link.dataset.provider === preferred.id;
         link.classList.toggle('is-selected', active);
+        if (active) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
       }
     };
 
@@ -144,7 +201,15 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
       const willOpen = menu.hidden;
       controls.forEach((item) => item.close());
       menu.hidden = !willOpen;
+      status.hidden = true;
       toggle.setAttribute('aria-expanded', String(willOpen));
+      if (willOpen) {
+        menu.classList.remove('opens-up');
+        const rect = wrap.getBoundingClientRect();
+        const below = window.innerHeight - rect.bottom - 12;
+        const above = rect.top - 12;
+        if (below < menu.offsetHeight && above > below) menu.classList.add('opens-up');
+      }
     });
 
     for (const provider of askProviders) {
@@ -153,21 +218,27 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
       link.href = providerUrl(provider, prompt);
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
+      link.className = 'net-ask-ai-option';
+      const labels = document.createElement('span');
+      labels.className = 'net-ask-ai-labels';
       const name = document.createElement('span');
+      name.className = 'net-ask-ai-name';
       name.textContent = provider.name;
       const mode = document.createElement('small');
-      mode.textContent = provider.param ? '传入问题' : '复制并打开';
-      link.append(name, mode);
+      mode.textContent = provider.param ? '直接提问' : '复制并打开';
+      labels.append(name, mode);
+      link.append(providerIcon(provider), labels, askAiGlyph('m5 12 4 4L19 6', 'net-ask-ai-check'));
       link.addEventListener('click', () => {
         remember(provider);
         if (!provider.param) copyQuestion();
         close();
       });
-      menu.appendChild(link);
+      grid.appendChild(link);
     }
     const copy = document.createElement('button');
     copy.type = 'button';
-    copy.textContent = '仅复制问题';
+    copy.className = 'net-ask-ai-copy';
+    copy.append(askAiGlyph('M8 8h12v12H8z M16 8V4H4v12h4'), document.createTextNode('仅复制问题'));
     copy.addEventListener('click', () => {
       copyQuestion();
       close();
@@ -201,19 +272,38 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
 }
 
 const askAiStyles = `
-.net-ask-ai-heading { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
-.net-ask-ai { margin-inline-start: auto; position: relative; display: inline-flex; align-items: center; flex-shrink: 0; font-family: inherit; font-size: .75rem; font-weight: 500; line-height: 1.5; color: var(--deck-accent, currentColor); white-space: nowrap; }
-.net-ask-ai-primary, .net-ask-ai-toggle { font: inherit; color: inherit; background: transparent; border: 1px solid currentColor; padding: .2rem .6rem; cursor: pointer; text-decoration: none; }
-.net-ask-ai-primary { border-radius: 999px 0 0 999px; }
-.net-ask-ai-toggle { border-inline-start: 0; border-radius: 0 999px 999px 0; padding-inline: .45rem; }
-.net-ask-ai-primary:hover, .net-ask-ai-primary:focus-visible, .net-ask-ai-toggle:hover { text-decoration: underline; }
-.net-ask-ai-menu { position: absolute; inset-inline-end: 0; top: calc(100% + .35rem); z-index: 30; width: 15rem; max-width: calc(100vw - 2rem); max-height: min(60vh, 25rem); overflow: auto; padding: .35rem; border: 1px solid currentColor; border-radius: 10px; background: Canvas; color: CanvasText; box-shadow: 0 6px 24px #0002; }
-.net-ask-ai-menu[hidden], .net-ask-ai-status[hidden] { display: none !important; }
-.net-ask-ai-menu a, .net-ask-ai-menu button { display: flex; align-items: center; justify-content: space-between; gap: .5rem; width: 100%; box-sizing: border-box; padding: .45rem .6rem; border: 0; border-radius: 5px; font: inherit; color: inherit; background: transparent; cursor: pointer; text-decoration: none; text-align: start; }
-.net-ask-ai-menu a:hover, .net-ask-ai-menu a:focus-visible, .net-ask-ai-menu button:hover, .net-ask-ai-menu a.is-selected { background: color-mix(in srgb, currentColor 10%, transparent); }
-.net-ask-ai-menu small { opacity: .7; font-size: .68rem; }
-.net-ask-ai-status { position: absolute; inset-inline-end: 0; top: calc(100% + .35rem); z-index: 29; width: max-content; max-width: min(20rem, calc(100vw - 2rem)); padding: .4rem .6rem; border-radius: 6px; background: Canvas; color: CanvasText; border: 1px solid currentColor; white-space: normal; user-select: text; }
-@media print { .net-ask-ai { display: none !important; } }
+
+.page h2.net-ask-ai-heading, .page h3.net-ask-ai-heading, .page h4.net-ask-ai-heading { display:flex; align-items:center; flex-wrap:wrap; gap:.45rem; }
+.page h3.net-ask-ai-heading::before { flex:none; margin-right:.15rem; }
+.page .net-ask-ai { --ask-accent:var(--deck-accent); margin-inline-start:auto; position:relative; display:inline-flex; align-items:center; flex:none; font-family:inherit; font-size:12px; font-weight:500; line-height:1.4; letter-spacing:0; color:var(--ink-2); white-space:nowrap; border:1px solid var(--hairline); border-radius:9px; background:var(--panel-solid); }
+.page .net-ask-ai .net-ask-ai-glyph { display:block; width:15px; height:15px; flex:none; }
+.page a.net-ask-ai-primary:not(.ext-card):not(.card):not(.btn):not(.net-paper-card), .page .net-ask-ai .net-ask-ai-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:30px; margin:0; padding:0 9px; border:0; background:transparent; color:var(--ink-2); font:inherit; text-decoration:none; cursor:pointer; box-sizing:border-box; }
+.page a.net-ask-ai-primary:not(.ext-card):not(.card):not(.btn):not(.net-paper-card) { border-radius:8px 0 0 8px; }
+.page .net-ask-ai .net-ask-ai-primary > .net-ask-ai-glyph { color:var(--ask-accent); }
+.page .net-ask-ai .net-ask-ai-current { color:var(--ink-3); font-size:11px; }
+.page .net-ask-ai .net-ask-ai-toggle { border-inline-start:1px solid var(--hairline-soft); border-radius:0 8px 8px 0; padding:0 7px; }
+.page .net-ask-ai .net-ask-ai-toggle[aria-expanded="true"] .net-ask-ai-glyph { transform:rotate(180deg); }
+.page a.net-ask-ai-primary:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):hover, .page .net-ask-ai .net-ask-ai-toggle:hover { background:var(--panel-2); color:var(--ink); text-decoration:none; }
+.page .net-ask-ai-menu { position:absolute; inset-inline-end:0; top:calc(100% + 8px); z-index:80; display:block; width:340px; max-width:calc(100vw - 28px); max-height:min(65vh,420px); overflow:auto; box-sizing:border-box; padding:10px; border:1px solid var(--hairline); border-radius:14px; background:var(--panel-solid); color:var(--ink); box-shadow:var(--shadow-2); white-space:normal; text-align:start; }
+.page .net-ask-ai-menu.opens-up { top:auto; bottom:calc(100% + 8px); }
+.page .net-ask-ai-menu[hidden], .page .net-ask-ai-status[hidden], .page .net-ask-ai-icon img[hidden] { display:none !important; }
+.page .net-ask-ai-menu-header { display:block; padding:3px 5px 9px; color:var(--ink-3); font-size:11px; font-weight:600; }
+.page .net-ask-ai-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px; }
+.page a.net-ask-ai-option:not(.ext-card):not(.card):not(.btn):not(.net-paper-card) { display:flex; align-items:center; justify-content:flex-start; gap:8px; min-width:0; min-height:48px; box-sizing:border-box; margin:0; padding:7px 8px; border:1px solid transparent; border-radius:9px; color:var(--ink); background:transparent; font:inherit; text-decoration:none; }
+.page .net-ask-ai-icon { display:grid; place-items:center; position:relative; width:25px; height:25px; flex:none; border-radius:7px; background:color-mix(in srgb,var(--provider-color) 12%,var(--panel-solid)); color:var(--provider-color); font-size:13px; font-weight:700; overflow:hidden; }
+.page .net-ask-ai-icon img { position:absolute; inset:0; margin:auto; display:block; width:18px; height:18px; object-fit:contain; background:var(--panel-solid); border-radius:3px; }
+.page .net-ask-ai-labels { display:flex; flex:1; min-width:0; flex-direction:column; gap:2px; }
+.page .net-ask-ai-name { color:var(--ink); font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.page .net-ask-ai-labels small { color:var(--ink-3); font-size:10px; font-weight:400; white-space:nowrap; }
+.page .net-ask-ai .net-ask-ai-check { width:12px; height:12px; color:var(--ask-accent); visibility:hidden; }
+.page a.net-ask-ai-option:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):hover { background:var(--panel-2); color:var(--ink); text-decoration:none; }
+.page a.net-ask-ai-option.is-selected:not(.ext-card):not(.card):not(.btn):not(.net-paper-card) { background:color-mix(in srgb,var(--ask-accent) 8%,var(--panel-solid)); border-color:color-mix(in srgb,var(--ask-accent) 22%,transparent); }
+.page .net-ask-ai-option.is-selected .net-ask-ai-check { visibility:visible; }
+.page .net-ask-ai-copy { display:flex; align-items:center; gap:8px; width:100%; margin-top:8px; padding:10px 8px 4px; border-top:1px solid var(--hairline-soft); color:var(--ink-2); font:inherit; text-align:start; }
+.page .net-ask-ai-copy:hover { color:var(--ask-accent); }
+.page .net-ask-ai-status { position:absolute; inset-inline-end:0; top:calc(100% + 8px); z-index:79; width:max-content; max-width:min(250px,calc(100vw - 28px)); padding:8px 10px; border-radius:9px; background:var(--panel-solid); color:var(--ink); border:1px solid var(--hairline); box-shadow:var(--shadow-1); white-space:normal; user-select:text; }
+@media (max-width:380px) { .page .net-ask-ai-grid { grid-template-columns:1fr; } .page .net-ask-ai-menu { width:220px; } }
+@media print { .page .net-ask-ai { display:none !important; } }
 `;
 
 /** 「计算机网络」章节页：/net/deck/chN */
