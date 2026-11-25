@@ -96,7 +96,7 @@ export default function NetHomework({
   return (
     <section className="net-hw-section" aria-label={`第${chapterNo}章作业`}>
       <h2 id={`sec-ch${chapterNo}-homework`}>本章作业 · {questions.length} 题</h2>
-      <p className="net-hw-intro">本章按原题编号整理。原文件答案按 PDF 文字转录；补充参考解析单独列示。可自评掌握情况，进度保存在当前浏览器。</p>
+      <p className="net-hw-intro">本章按原题编号整理。原文件答案按作业资料文字转录；补充参考解析单独列示。可自评掌握情况，进度保存在当前浏览器。</p>
       {questions.length > 0 && (
         <div className="pq-progress material net-hw-progress">
           <div className="pq-progress-text">
@@ -135,7 +135,7 @@ export default function NetHomework({
       )}
       {questions.length === 0 ? (
         <div className="net-hw-empty material">
-          <p>本次提供的三份作业文件中<strong>没有单列第 {chapterNo} 章的作业</strong>，因此不将自编题误标为教师布置。</p>
+          <p>现有作业资料中<strong>没有单列第 {chapterNo} 章的作业</strong>，因此不将自编题误标为教师布置。</p>
           <p>可继续阅读本章 DNS、邮件协议和 HTTP，并用历年试卷自测。</p>
           <Link to={`${NET_BASE}/practice`}>前往在线练习</Link>
         </div>
