@@ -9,6 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import Sections from '../components/Sections';
 import { netChapters, netPapers, netAllQuestions } from '../content/net';
 import { netHomework } from '../content/net/homework';
+import { buildSlideReview } from '../content/net/slide-review';
 import { netHighlights } from '../content/net/highlights';
 import { readProgress } from '../lib/sync/local';
 import { NET_PRACTICE_STORE_KEY } from '../pages/net/netPracticeState';
@@ -291,12 +292,30 @@ describe('计算机网络试卷题库', () => {
         expect(t.deck, q.id).toBeGreaterThanOrEqual(1);
         expect(t.deck, q.id).toBeLessThanOrEqual(8);
         const chapter = netChapters[t.deck - 1];
-        const hit = chapter.toc.find((e) => e.id === t.sec) ?? chapter.sections.some((s) => s.id === t.sec);
+        const review = buildSlideReview(chapter);
+        const hit = review.resolve(t.sec) ?? chapter.toc.find((e) => e.id === t.sec) ?? chapter.sections.some((s) => s.id === t.sec);
         expect(hit, `${q.id} → ch${t.deck}/${t.sec} 不存在`).toBeTruthy();
         expect(t.text.length, q.id).toBeGreaterThan(0);
         expect(ENTITY_RE.test(t.text), `${q.id} 标签文本残留实体`).toBe(false);
       }
     }
+  });
+
+  it('重要历年题标签按实际知识点跳转，而非仅迁移旧章号', () => {
+    const expected: Record<string, string[]> = {
+      'p1-e2': ['sec-ch8-src-ftp'],
+      'p2-e8': ['sec-ch5-src-vlan'],
+      'p2-f13': ['sec-ch5-src-vlan'],
+      'p2-f14': ['sec-ch6-src-services'],
+      'p3-e3': ['sec-ch3-src-capacity'],
+      'p3-e7': ['sec-ch4-src-window','sec-ch4-src-sw','sec-ch4-src-arq','sec-ch4-src-srp'],
+    };
+    for (const [id, anchors] of Object.entries(expected)) {
+      expect(netAllQuestions.find(q => q.id === id)?.tags.map(t => t.sec), id).toEqual(anchors);
+    }
+    const bgp = netAllQuestions.find(q => q.id === 'p3-s19')!.tags[0];
+    expect(bgp.text).toContain('拓展');
+    expect(buildSlideReview(netChapters[5]).resolve(bgp.sec)).toBeUndefined();
   });
 
   it('知识点覆盖 8 个章（没有落单的章）', () => {
