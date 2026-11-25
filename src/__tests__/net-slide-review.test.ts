@@ -39,10 +39,9 @@ describe('2025 计网课件主线', () => {
       const ids=chapter.toc.map(e=>e.id);
       expect(new Set(ids).size).toBe(ids.length);
       for(const section of chapter.sections) {
-        const first=section.blocks[0];
-        if(first.type!=='html') throw new Error('缺少主线正文');
-        expect(first.html).not.toMatch(/<h3>/);
-        for(const m of first.html.matchAll(/<h3 id="([^"]+)">/g)) {
+        const html=section.blocks.filter(b=>b.type==='html').map(b=>b.html).join('');
+        expect(html).not.toMatch(/<h3>/);
+        for(const m of html.matchAll(/<h3 id="([^"]+)">/g)) {
           expect(ids).toContain(m[1]);
           expect(resolve(m[1])).toBe(m[1]);
         }
@@ -56,6 +55,28 @@ describe('2025 计网课件主线', () => {
     }
     const {chapter}=buildSlideReview(netChapters[2]);
     expect(chapter.sections.find(s=>s.id==='sec-ch3-src-capacity')!.blocks.some(b=>b.type==='demo' && b.name==='net-nyquist')).toBe(true);
+  });
+  it('八章旧标题仅映射至现有知识点，重点不重复创建目录', () => {
+    for (const original of netChapters) {
+      const {chapter,resolve}=buildSlideReview(original);
+      const legacy=new Set(original.toc.filter(e=>e.level===3&&!e.id.includes('-hw-')).map(e=>e.id));
+      for(const entry of chapter.toc)expect(legacy.has(entry.id)).toBe(false);
+      const text=chapter.sections.flatMap(s=>s.blocks).filter(b=>b.type==='html').map(b=>b.html).join('');
+      expect(text).not.toContain('原有讲义中的详细图解与补充说明');
+      for(const m of text.matchAll(/<h3 id="([^"]+)">/g))expect(legacy.has(m[1])).toBe(false);
+      for(const old of legacy) {
+        const mapped=resolve(old);
+        if(mapped)expect(chapter.toc.some(e=>e.id===mapped)).toBe(true);
+      }
+    }
+    const {chapter,resolve}=buildSlideReview(netChapters[3]);
+    const id=resolve('sec-ch4-flow-h1')!;
+    expect(chapter.toc.find(e=>e.id===id)?.text).toContain('四种典型情形');
+    expect(chapter.toc.some(e=>e.text.includes('停—等协议'))).toBe(false);
+    expect(chapter.toc.some(e=>e.text.includes('四种情况分别画时间线'))).toBe(false);
+    const sw=chapter.sections.find(s=>s.id==='sec-ch4-src-sw')!;
+    expect(sw.heading).toContain('★');
+    expect(sw.blocks.some(b=>b.type==='demo'&&b.name==='net-stop-wait')).toBe(true);
   });
   it('全部课程作业仍可在主线定位且题目锚点不变', () => {
     for (const [i, original] of netChapters.entries()) {

@@ -3,6 +3,7 @@
  * 旧 URL 锚点通过别名映射到新的主题，作业 ID 与原始题库不变。
  */
 import type { Block, DeckData, Section, TocEntry } from './types';
+import { netHighlights } from './highlights';
 
 interface SourceTopic {
   key: string;
@@ -351,7 +352,7 @@ const topics: Record<number, SourceTopic[]> = {
         "flow",
         "flow-h1"
       ],
-      "html": "<h3>完全理想化的数据传输</h3><p>设主机A、B之间存在一条数据链路，两端数据链路层各有缓存。A的高层交付数据后，发送方构造帧并经链路发给B，B再把数据向上交付。先提出两个假定：</p><ol><li>链路是理想的传输信道，所传送的任何数据既不会出错，也不会丢失。</li><li>无论发送方以多快的速率发送数据，接收方总来得及接收，并及时上交主机。即接收端向高层交付数据的速率始终不低于发送端发送数据的速率。</li></ol><pre>发送方 A                     接收方 B\n   DATA0 ─────────────────→ 收下并交付 DATA0\n   DATA1 ─────────────────→ 收下并交付 DATA1\n   DATA2 ─────────────────→ 收下并交付 DATA2\n   …</pre><p>两项假定都成立时，发送方可以不间断发送帧，接收方不必返回确认，不需要差错控制或流量控制。这个模型是推导后续协议的起点，并不是实际链路通常具有的性能。</p><h3>具有最简单流量控制的数据链路层协议</h3><p>只取消第二项假定，仍保留无差错、无丢失的理想信道。B可能无法及时把每个到达的帧交给高层，如果A仍连续发送，B的缓存就可能被占满。基本思想是由接收方控制发送方的数据流：A发送一个帧后暂停；B收到帧并交付给主机后，返回一个表示任务已完成的信息；A收到该信息才发送下一帧。此时接收缓存只需要能容纳一个数据帧。</p><pre>不需要流量控制：          需要流量控制：\nA → DATA0 → B             A → DATA0 → B\nA → DATA1 → B             A ← 确认   ← B（已交付）\nA → DATA2 → B             A → DATA1 → B\n                           A ← 确认   ← B（已交付）</pre><p>这一阶段的确认主要表示接收方已经完成接收与交付，可以继续接受数据，还不需要处理错误帧、丢失帧和重复帧。</p><h3>实用停止等待协议</h3><p>再取消第一个假定，使信道可能出错或丢失。接收方B利用CRC检验收到的帧：如果正确，交给主机B并返回确认帧ACK（Acknowledgement）；如果出错，不交付错误数据，返回否认帧NAK（Negative Acknowledgement），要求A重传。发送端收到ACK继续发送下一帧，收到NAK则重传原帧。若重传次数超过协议规定上限，应停止尝试并向上一层报告失败。</p><p>发送方必须保留尚未获确认的数据帧副本，否则收到NAK或超时后无法重传。仅使用ACK和NAK仍不够，因为数据帧、确认帧也可能完全丢失。</p><h3>第一个实际问题：死锁与超时重传</h3><p>若数据帧丢失，B根本没有收到帧，不能返回ACK或NAK；若ACK丢失，B已经完成接收，但A不知道。两种情况下A都在等待确认，B又等待A发送后续帧，通信将无法继续。课内称这种相互等待的现象为死锁。解决方法是设置超时计时器：发完一个数据帧后开始等待，若规定时间内未收到有效应答，重传该数据帧并重新计时。</p><p>重传时间过短，正常应答尚未到达时就会触发不必要的重发；重传时间过长，真实丢失时又会等待太久。课内选择原则是略大于从发完数据帧到收到确认帧所需的平均时间。</p><h3>第二个实际问题：重复帧与帧编号</h3><p>假设B已正确收到DATA0并交付，但返回的ACK丢失。A超时重传DATA0，B就会连续收到两个相同的帧。若没有编号，B无法判断这是旧帧的副本，还是数据内容恰好相同的新帧。解决办法是为数据帧编号，停止等待最多只有一个未确认帧，经典交替位模型仅需1 bit，依次使用0、1、0、1……。B接受正确且符合期待序号的帧后更新期待序号；收到重复帧则丢弃其数据并重新发送确认，不能再次向上交付。</p><p><strong>理解辅助：</strong>确认也需要能与当前等待的数据帧相对应，避免把迟到的旧ACK当成新帧的确认。序号长度的结论建立在通常的交替位协议和信道模型下。</p><h3>四种典型情形的完整时序</h3><table class=\"tbl\"><thead><tr><th>情况</th><th>时序与结果</th></tr></thead><tbody><tr><td>正常</td><td>A发送DATA0 → B检验正确、交付 → B返回ACK → A发送DATA1</td></tr><tr><td>数据帧出错</td><td>A发送DATA0 → B检出错误、不交付 → B返回NAK → A重传DATA0 → B正确交付并确认</td></tr><tr><td>数据帧丢失</td><td>A发送DATA0但未到达 → B无应答 → A超时 → 重传DATA0 → B交付并确认</td></tr><tr><td>确认帧丢失</td><td>B正确接收DATA0并交付 → ACK丢失 → A超时重传DATA0 → B识别重复、丢弃并重发ACK → A发送DATA1</td></tr></tbody></table><pre>确认丢失的具体过程：\nA ─────── DATA0 ──────→ B：正确，交付\nA ←────── ACK ──×───── B：确认丢失\nA：超时\nA ─────── DATA0 ──────→ B：重复，丢弃\nA ←────── ACK ───────── B：重新确认\nA ─────── DATA1 ──────→ B</pre><p>正确收到的帧只交付一次。NAK可以加快错误帧恢复，超时重传负责处理完全丢失及确认丢失，序号防止重复交付。三者不是可以相互替代的机制。</p><h3>停止等待的信道利用率</h3><div class=\"callout key\"><p class=\"callout-h\">重点｜停等协议利用率</p><p>T_D/(T_D+RTT+T_A)，注意题目对RTT的定义，不能重复计算确认发送时间。</p></div><p>设T<sub>D</sub>为A发送数据帧需要的时间，T<sub>A</sub>为B发送确认帧需要的时间，RTT为往返传播时间。在忽略结点处理及排队时延且无差错的情况下，一次发送周期为T<sub>D</sub>+RTT+T<sub>A</sub>。</p><pre>A：发送数据（TD） ── 单程传播 ──→ B\nA ←── 单程传播 ── B：发送确认（TA）\nA：收到确认后才开始下一帧</pre><p class=\"formula\">U = T<sub>D</sub> / (T<sub>D</sub> + RTT + T<sub>A</sub>)</p><p>设帧长L、链路速率R，则T<sub>D</sub>=L/R。若单程传播时间为t，RTT=2t；忽略ACK发送时间时，U=L/(L+2Rt)。这里的RTT不包含已单列的发送时间，否则会重复计算。</p><p><strong>理解辅助例题：</strong>数据帧1000 bit、速率1 Mbit/s，ACK长40 bit，往返传播10 ms，确认与数据使用相同发送速率，则T<sub>D</sub>=1 ms，T<sub>A</sub>=0.04 ms，U=1/11.04≈9.06%，按整帧计算吞吐量约90.6 kbit/s。若要求利用率至少50%，则T<sub>D</sub>≥RTT+T<sub>A</sub>。实际有帧头、重传等开销时，有效载荷吞吐量会进一步降低。这正是引入连续ARQ的原因。</p><h3>四种情况分别画时间线</h3><p>以下时序以纵向为时间推进方向；箭头表示帧实际传送，×表示丢失或出错。四种情形均使用DATA0作为当前数据帧。</p><pre>正常：                   数据帧出错：\nA             B          A             B\nDATA0 ──────→ 交付       DATA0 ──────→ 检出差错\n      ←─ ACK                  ←─ NAK\nDATA1 ──────→ 交付       DATA0 ──────→ 交付\n      ←─ ACK                  ←─ ACK\n                         DATA1 ──────→\n\n数据帧丢失：             确认帧丢失：\nA             B          A             B\nDATA0 ───×               DATA0 ──────→ 交付\n等待、超时                      ×─ ACK\nDATA0 ──────→ 交付       等待、超时\n      ←─ ACK             DATA0 ──────→ 重复，丢弃\nDATA1 ──────→                  ←─ ACK\n                         DATA1 ──────→</pre><table class=\"tbl\"><thead><tr><th>机制</th><th>解决的问题</th><th>不能单独解决的问题</th></tr></thead><tbody><tr><td>CRC</td><td>发现帧内比特差错</td><td>完全丢失、重复及顺序</td></tr><tr><td>ACK</td><td>让发送方知道接收结果</td><td>ACK本身丢失</td></tr><tr><td>NAK</td><td>检测到错误后及时请求重传</td><td>完全未收到的帧</td></tr><tr><td>超时计时器</td><td>没有有效应答时恢复传输</td><td>重传可能造成重复帧</td></tr><tr><td>帧编号</td><td>识别新帧与重复帧</td><td>不能独自发现帧中比特错误</td></tr></tbody></table><p>理解辅助：如果发送方只使用NAK而无超时计时器，DATA0完全丢失时B无法知道有帧需要否认；若只有超时重传却没有编号，ACK丢失后B会重复交付DATA0。完整协议是各机制共同工作的结果。</p>"
+      "html": "<h3>完全理想化的数据传输</h3><p>设主机A、B之间存在一条数据链路，两端数据链路层各有缓存。A的高层交付数据后，发送方构造帧并经链路发给B，B再把数据向上交付。先提出两个假定：</p><ol><li>链路是理想的传输信道，所传送的任何数据既不会出错，也不会丢失。</li><li>无论发送方以多快的速率发送数据，接收方总来得及接收，并及时上交主机。即接收端向高层交付数据的速率始终不低于发送端发送数据的速率。</li></ol><pre>发送方 A                     接收方 B\n   DATA0 ─────────────────→ 收下并交付 DATA0\n   DATA1 ─────────────────→ 收下并交付 DATA1\n   DATA2 ─────────────────→ 收下并交付 DATA2\n   …</pre><p>两项假定都成立时，发送方可以不间断发送帧，接收方不必返回确认，不需要差错控制或流量控制。这个模型是推导后续协议的起点，并不是实际链路通常具有的性能。</p><h3>具有最简单流量控制的数据链路层协议</h3><p>只取消第二项假定，仍保留无差错、无丢失的理想信道。B可能无法及时把每个到达的帧交给高层，如果A仍连续发送，B的缓存就可能被占满。基本思想是由接收方控制发送方的数据流：A发送一个帧后暂停；B收到帧并交付给主机后，返回一个表示任务已完成的信息；A收到该信息才发送下一帧。此时接收缓存只需要能容纳一个数据帧。</p><pre>不需要流量控制：          需要流量控制：\nA → DATA0 → B             A → DATA0 → B\nA → DATA1 → B             A ← 确认   ← B（已交付）\nA → DATA2 → B             A → DATA1 → B\n                           A ← 确认   ← B（已交付）</pre><p>这一阶段的确认主要表示接收方已经完成接收与交付，可以继续接受数据，还不需要处理错误帧、丢失帧和重复帧。</p><h3>实用停止等待协议</h3><p>再取消第一个假定，使信道可能出错或丢失。接收方B利用CRC检验收到的帧：如果正确，交给主机B并返回确认帧ACK（Acknowledgement）；如果出错，不交付错误数据，返回否认帧NAK（Negative Acknowledgement），要求A重传。发送端收到ACK继续发送下一帧，收到NAK则重传原帧。若重传次数超过协议规定上限，应停止尝试并向上一层报告失败。</p><p>发送方必须保留尚未获确认的数据帧副本，否则收到NAK或超时后无法重传。仅使用ACK和NAK仍不够，因为数据帧、确认帧也可能完全丢失。</p><h3>第一个实际问题：死锁与超时重传</h3><p>若数据帧丢失，B根本没有收到帧，不能返回ACK或NAK；若ACK丢失，B已经完成接收，但A不知道。两种情况下A都在等待确认，B又等待A发送后续帧，通信将无法继续。课内称这种相互等待的现象为死锁。解决方法是设置超时计时器：发完一个数据帧后开始等待，若规定时间内未收到有效应答，重传该数据帧并重新计时。</p><p>重传时间过短，正常应答尚未到达时就会触发不必要的重发；重传时间过长，真实丢失时又会等待太久。课内选择原则是略大于从发完数据帧到收到确认帧所需的平均时间。</p><h3>第二个实际问题：重复帧与帧编号</h3><p>假设B已正确收到DATA0并交付，但返回的ACK丢失。A超时重传DATA0，B就会连续收到两个相同的帧。若没有编号，B无法判断这是旧帧的副本，还是数据内容恰好相同的新帧。解决办法是为数据帧编号，停止等待最多只有一个未确认帧，经典交替位模型仅需1 bit，依次使用0、1、0、1……。B接受正确且符合期待序号的帧后更新期待序号；收到重复帧则丢弃其数据并重新发送确认，不能再次向上交付。</p><p><strong>理解辅助：</strong>确认也需要能与当前等待的数据帧相对应，避免把迟到的旧ACK当成新帧的确认。序号长度的结论建立在通常的交替位协议和信道模型下。</p><h3>四种典型情形的完整时序</h3><table class=\"tbl\"><thead><tr><th>情况</th><th>时序与结果</th></tr></thead><tbody><tr><td>正常</td><td>A发送DATA0 → B检验正确、交付 → B返回ACK → A发送DATA1</td></tr><tr><td>数据帧出错</td><td>A发送DATA0 → B检出错误、不交付 → B返回NAK → A重传DATA0 → B正确交付并确认</td></tr><tr><td>数据帧丢失</td><td>A发送DATA0但未到达 → B无应答 → A超时 → 重传DATA0 → B交付并确认</td></tr><tr><td>确认帧丢失</td><td>B正确接收DATA0并交付 → ACK丢失 → A超时重传DATA0 → B识别重复、丢弃并重发ACK → A发送DATA1</td></tr></tbody></table><pre>确认丢失的具体过程：\nA ─────── DATA0 ──────→ B：正确，交付\nA ←────── ACK ──×───── B：确认丢失\nA：超时\nA ─────── DATA0 ──────→ B：重复，丢弃\nA ←────── ACK ───────── B：重新确认\nA ─────── DATA1 ──────→ B</pre><p>正确收到的帧只交付一次。NAK可以加快错误帧恢复，超时重传负责处理完全丢失及确认丢失，序号防止重复交付。三者不是可以相互替代的机制。</p><p>以下时序以纵向为时间推进方向；箭头表示帧实际传送，×表示丢失或出错。四种情形均使用DATA0作为当前数据帧。</p><pre>正常：                   数据帧出错：\nA             B          A             B\nDATA0 ──────→ 交付       DATA0 ──────→ 检出差错\n      ←─ ACK                  ←─ NAK\nDATA1 ──────→ 交付       DATA0 ──────→ 交付\n      ←─ ACK                  ←─ ACK\n                         DATA1 ──────→\n\n数据帧丢失：             确认帧丢失：\nA             B          A             B\nDATA0 ───×               DATA0 ──────→ 交付\n等待、超时                      ×─ ACK\nDATA0 ──────→ 交付       等待、超时\n      ←─ ACK             DATA0 ──────→ 重复，丢弃\nDATA1 ──────→                  ←─ ACK\n                         DATA1 ──────→</pre><table class=\"tbl\"><thead><tr><th>机制</th><th>解决的问题</th><th>不能单独解决的问题</th></tr></thead><tbody><tr><td>CRC</td><td>发现帧内比特差错</td><td>完全丢失、重复及顺序</td></tr><tr><td>ACK</td><td>让发送方知道接收结果</td><td>ACK本身丢失</td></tr><tr><td>NAK</td><td>检测到错误后及时请求重传</td><td>完全未收到的帧</td></tr><tr><td>超时计时器</td><td>没有有效应答时恢复传输</td><td>重传可能造成重复帧</td></tr><tr><td>帧编号</td><td>识别新帧与重复帧</td><td>不能独自发现帧中比特错误</td></tr></tbody></table><p>理解辅助：如果发送方只使用NAK而无超时计时器，DATA0完全丢失时B无法知道有帧需要否认；若只有超时重传却没有编号，ACK丢失后B会重复交付DATA0。完整协议是各机制共同工作的结果。</p><h3>停止等待的信道利用率</h3><div class=\"callout key\"><p class=\"callout-h\">重点｜停等协议利用率</p><p>T_D/(T_D+RTT+T_A)，注意题目对RTT的定义，不能重复计算确认发送时间。</p></div><p>设T<sub>D</sub>为A发送数据帧需要的时间，T<sub>A</sub>为B发送确认帧需要的时间，RTT为往返传播时间。在忽略结点处理及排队时延且无差错的情况下，一次发送周期为T<sub>D</sub>+RTT+T<sub>A</sub>。</p><pre>A：发送数据（TD） ── 单程传播 ──→ B\nA ←── 单程传播 ── B：发送确认（TA）\nA：收到确认后才开始下一帧</pre><p class=\"formula\">U = T<sub>D</sub> / (T<sub>D</sub> + RTT + T<sub>A</sub>)</p><p>设帧长L、链路速率R，则T<sub>D</sub>=L/R。若单程传播时间为t，RTT=2t；忽略ACK发送时间时，U=L/(L+2Rt)。这里的RTT不包含已单列的发送时间，否则会重复计算。</p><p><strong>理解辅助例题：</strong>数据帧1000 bit、速率1 Mbit/s，ACK长40 bit，往返传播10 ms，确认与数据使用相同发送速率，则T<sub>D</sub>=1 ms，T<sub>A</sub>=0.04 ms，U=1/11.04≈9.06%，按整帧计算吞吐量约90.6 kbit/s。若要求利用率至少50%，则T<sub>D</sub>≥RTT+T<sub>A</sub>。实际有帧头、重传等开销时，有效载荷吞吐量会进一步降低。这正是引入连续ARQ的原因。</p>"
     },
     {
       "key": "arq",
@@ -802,7 +803,6 @@ const detailedRoutes: Record<number, Record<string, string>> = {
   7: { 'overview-h3':'overview','overview-h4':'tcp','udp-h3':'@extra','tcp-h6':'connect','tcp-h5':'@extra','impl-h3':'@extra','flow-h2':'@extra','tcp-header':'header','tcp-connection':'connect' },
   8: { 'overview-h3':'@extra','overview-h4':'@extra','dns-h4':'@extra','dns-h5':'@extra','ftp-h3':'@extra','http-h5':'@extra','email':'@extra','http':'www' },
 };
-const detailLabel = '<p class="quiz-note"><strong>原有讲义中的详细图解与补充说明</strong></p>';
 const extraLabel = (message: string) => '<p class="quiz-note"><strong>拓展：</strong>' + message + '</p>';
 const pendingLabel = '<p class="quiz-note"><strong>待核：</strong>以下保留原讲义解释，具体细节尚未全部与原课件逐段对应。</p>';
 type Detail = { anchor: string; block: Block };
@@ -912,68 +912,799 @@ export interface SlideReview {
   resolve: (anchor: string) => string | undefined;
 }
 
-/** 课件顺序作为目录骨架，保留对应的详细原讲义内容与图解。 */
+
+/** 旧标题仅作为兼容别名；补充内容按现有知识点归位，不再建立第二套目录。 */
+const integratedTargets: Record<number, Record<string, [string,string]>> = {
+  "1": {
+    "history-phases": [
+      "history",
+      ""
+    ],
+    "history-remote": [
+      "history",
+      "第一阶段：远程联机系统"
+    ],
+    "history-multi": [
+      "history",
+      "第二阶段：多机互联网络"
+    ],
+    "history-standard": [
+      "history",
+      "第三阶段：标准化网络"
+    ],
+    "history-fast": [
+      "history",
+      "第四阶段：互联与高速网络"
+    ],
+    "definition-functions": [
+      "function",
+      "五项网络功能"
+    ],
+    "classify-h1": [
+      "classify",
+      ""
+    ],
+    "classify-h2": [
+      "topology",
+      ""
+    ],
+    "work-h1": [
+      "structure",
+      "因特网的边缘部分和核心部分"
+    ],
+    "work-h2": [
+      "structure",
+      "因特网的边缘部分和核心部分"
+    ],
+    "work-h3": [
+      "switch",
+      ""
+    ],
+    "performance-h1": [
+      "performance",
+      "1. 速率"
+    ],
+    "performance-throughput": [
+      "performance",
+      "2. 带宽；3. 吞吐量"
+    ],
+    "performance-h2": [
+      "performance",
+      "4. 四种时延"
+    ],
+    "performance-loss": [
+      "performance",
+      "5. 丢包率"
+    ],
+    "performance-bdp": [
+      "performance",
+      "6. 时延带宽积"
+    ],
+    "performance-rtt": [
+      "performance",
+      "RTT 的定义"
+    ],
+    "performance-h3": [
+      "performance",
+      "7. 利用率"
+    ]
+  },
+  "2": {
+    "idea-h1": [
+      "layer",
+      ""
+    ],
+    "idea-h2": [
+      "layer",
+      "分层的优点"
+    ],
+    "arch-h1": [
+      "layer",
+      ""
+    ],
+    "arch-h2": [
+      "services",
+      "层、实体"
+    ],
+    "arch-h3": [
+      "layer",
+      ""
+    ],
+    "protocol-h1": [
+      "protocol",
+      "协议三要素"
+    ],
+    "osi-h3": [
+      "osi",
+      "七层功能"
+    ],
+    "protocol-h2": [
+      "pdu",
+      "PDU、SDU"
+    ],
+    "osi-env": [
+      "pdu",
+      "PDU、SDU"
+    ],
+    "osi-market": [
+      "formation",
+      "OSI/RM 标准"
+    ],
+    "osi-h1": [
+      "five",
+      ""
+    ],
+    "osi-h2": [
+      "five",
+      "计算机1向计算机2"
+    ],
+    "tcpip-h2": [
+      "tcpip",
+      ""
+    ],
+    "tcpip-h1": [
+      "tcpip",
+      "TCP/IP 四层"
+    ],
+    "tcpip-services": [
+      "tcpip",
+      "OSI/RM 与 TCP/IP"
+    ],
+    "tcpip-transfer": [
+      "tcpip",
+      "TCP/IP 四层"
+    ],
+    "tcpip-hourglass": [
+      "tcpip",
+      ""
+    ]
+  },
+  "3": {
+    "basic-h1": [
+      "system",
+      "通信过程的三个组成部分"
+    ],
+    "basic-h2": [
+      "system",
+      "模拟数据、数字数据"
+    ],
+    "basic-h3": [
+      "capacity",
+      "信道带宽、信噪比"
+    ],
+    "media-h1": [
+      "media",
+      "同轴电缆"
+    ],
+    "media-h2": [
+      "media",
+      "光导纤维"
+    ],
+    "media-h3": [
+      "media",
+      "无线传输与卫星"
+    ],
+    "mode-h1": [
+      "serial",
+      "并行与串行"
+    ],
+    "mode-h2": [
+      "sync",
+      "字符同步、位同步"
+    ],
+    "mode-h3": [
+      "direction",
+      "三种传输方向"
+    ],
+    "process-h1": [
+      "pcm",
+      "抽样、量化"
+    ],
+    "process-h2": [
+      "encoding",
+      "同一比特序列"
+    ],
+    "process-h3": [
+      "modulation",
+      "基带传输"
+    ],
+    "mux-h1": [
+      "mux",
+      ""
+    ],
+    "mux-h2": [
+      "mux",
+      "频分与同步时分"
+    ],
+    "mux-h3": [
+      "stDM",
+      "统计时分复用的寻址"
+    ],
+    "digital-h1": [
+      "sonet",
+      ""
+    ],
+    "switch-h1": [
+      "switch",
+      "电路交换"
+    ],
+    "switch-h2": [
+      "switch",
+      "报文交换"
+    ],
+    "switch-h3": [
+      "switch",
+      "分组交换"
+    ]
+  },
+  "4": {
+    "basic-h1": [
+      "basic",
+      "链路、数据链路"
+    ],
+    "basic-h2": [
+      "basic",
+      ""
+    ],
+    "basic-h3": [
+      "basic",
+      "从层次结构"
+    ],
+    "frame-h1": [
+      "frame",
+      "最大传送单元"
+    ],
+    "frame-h2": [
+      "frame",
+      "字符填充和比特填充"
+    ],
+    "error-h1": [
+      "crc",
+      "检错结果"
+    ],
+    "error-h4": [
+      "crc",
+      "第19页原始算例"
+    ],
+    "flow-h1": [
+      "sw",
+      "四种典型情形"
+    ],
+    "flow-h2": [
+      "window",
+      "发送窗口四阶段"
+    ],
+    "p2p-h2": [
+      "ppp",
+      "PPP 的三个组成部分"
+    ]
+  },
+  "5": {
+    "broadcast-h1": [
+      "lan",
+      "MAC 与 LLC"
+    ],
+    "broadcast-h2": [
+      "csma",
+      "碰撞检测、强化碰撞"
+    ],
+    "broadcast-h3": [
+      "traditional",
+      ""
+    ],
+    "broadcast-h4": [
+      "mac",
+      "前同步码"
+    ],
+    "broadcast-h5": [
+      "extend",
+      "自学习算法"
+    ],
+    "lan-current-h1": [
+      "util",
+      "以太网信道利用率"
+    ],
+    "lan-gigabit": [
+      "fast",
+      "快速以太网"
+    ]
+  },
+  "6": {
+    "vc-h1": [
+      "services",
+      ""
+    ],
+    "vc-h2": [
+      "services",
+      ""
+    ],
+    "vc-h3": [
+      "services",
+      "网络层两种服务"
+    ],
+    "routing-h1": [
+      "routing",
+      "路由选择为何复杂"
+    ],
+    "routing-h2": [
+      "routing",
+      "路由选择为何复杂"
+    ],
+    "routing-h3": [
+      "rip",
+      "距离向量更新"
+    ],
+    "routing-h4": [
+      "ospf",
+      "OSPF 三项主要特点"
+    ],
+    "protocol-h1": [
+      "rip",
+      "距离向量更新"
+    ],
+    "ip-h1": [
+      "header",
+      "IPv4 固定首部"
+    ],
+    "ip-h2": [
+      "address",
+      "分类 IP 地址"
+    ],
+    "ip-h3": [
+      "subnet",
+      ""
+    ],
+    "ip-h4": [
+      "cidr",
+      "完整地址块计算"
+    ],
+    "ip-h5": [
+      "cidr",
+      ""
+    ],
+    "ip-h6": [
+      "forward",
+      "分类编址模型下的六步"
+    ],
+    "arp-h0": [
+      "mac",
+      "逐跳硬件地址"
+    ],
+    "arp-h1": [
+      "arp",
+      "ARP 请求、应答"
+    ],
+    "arp-h2": [
+      "arp",
+      "ARP 请求、应答"
+    ]
+  },
+  "7": {
+    "overview-h1": [
+      "overview",
+      "运输层在整个体系结构"
+    ],
+    "overview-h2": [
+      "overview",
+      ""
+    ],
+    "overview-h3": [
+      "overview",
+      "端口与不同应用协议"
+    ],
+    "overview-h4": [
+      "tcp",
+      "TCP 五项特点"
+    ],
+    "udp-h1": [
+      "udp",
+      ""
+    ],
+    "udp-h2": [
+      "udp",
+      "UDP 检验和：TESTING"
+    ],
+    "tcp-h1": [
+      "tcp",
+      "TCP 五项特点"
+    ],
+    "tcp-h2": [
+      "header",
+      "首部控制位"
+    ],
+    "tcp-h3": [
+      "connect",
+      "三次握手"
+    ],
+    "tcp-h4": [
+      "connect",
+      "连接释放"
+    ],
+    "tcp-h6": [
+      "connect",
+      "连接建立和释放的 TCP 状态"
+    ],
+    "reliable-h1": [
+      "reliable",
+      ""
+    ],
+    "reliable-compare": [
+      "reliable",
+      ""
+    ],
+    "reliable-h2": [
+      "reliable",
+      "四种停止等待"
+    ],
+    "reliable-h3": [
+      "reliable",
+      "四种停止等待"
+    ],
+    "impl-h1": [
+      "window",
+      "四个缓存"
+    ],
+    "impl-h2": [
+      "rtt",
+      "RTTS、RTTD"
+    ],
+    "flow-h1": [
+      "flow",
+      "流量控制完整时序"
+    ],
+    "congestion-h1": [
+      "congestion",
+      "开环控制"
+    ],
+    "congestion-h2": [
+      "congestion",
+      "慢开始与拥塞避免"
+    ],
+    "congestion-h3": [
+      "congestion",
+      "快重传、快恢复"
+    ]
+  },
+  "8": {
+    "overview-h1": [
+      "overview",
+      "应用进程之间"
+    ],
+    "overview-h2": [
+      "overview",
+      "应用进程之间"
+    ],
+    "dns-h1": [
+      "dns",
+      "域名树的构成"
+    ],
+    "dns-h2": [
+      "dns",
+      "域名服务器的分工"
+    ],
+    "dns-h3": [
+      "dns",
+      "两种查询方式"
+    ],
+    "ftp-h1": [
+      "ftp",
+      "文件传送与联机访问"
+    ],
+    "ftp-h2": [
+      "ftp",
+      "控制进程和数据传送"
+    ],
+    "http-h1": [
+      "www",
+      "URL 四个组成"
+    ],
+    "http-h2": [
+      "http",
+      "三种 HTTP 连接方式"
+    ],
+    "http-h3": [
+      "message",
+      "请求首部与状态行"
+    ],
+    "http-h4": [
+      "documents",
+      "HTML 标签在文档中的作用"
+    ],
+    "http-h6": [
+      "dynamic-docs",
+      "动态文档与 CGI"
+    ],
+    "http-h7": [
+      "search",
+      "全文检索和分类目录检索"
+    ]
+  }
+};
+const focusTargets: Record<number, string[][]> = {
+  "1": [
+    [
+      "definition",
+      "structure"
+    ],
+    [
+      "switch",
+      "classify"
+    ],
+    [
+      "performance:1. 速率",
+      "performance:2. 带宽"
+    ],
+    [
+      "performance:4. 四种时延",
+      "performance:RTT 的定义"
+    ],
+    [
+      "performance:1000 km",
+      "performance:7. 利用率"
+    ]
+  ],
+  "2": [
+    [
+      "protocol",
+      "services"
+    ],
+    [
+      "pdu",
+      "five"
+    ],
+    [
+      "osi",
+      "tcpip"
+    ],
+    [
+      "layer"
+    ]
+  ],
+  "3": [
+    [
+      "encoding",
+      "system:模拟数据"
+    ],
+    [
+      "modulation"
+    ],
+    [
+      "media:光导纤维",
+      "media:光的折射"
+    ],
+    [
+      "mux",
+      "stDM"
+    ],
+    [
+      "serial"
+    ],
+    [
+      "system",
+      "pcm",
+      "media",
+      "sync",
+      "switch"
+    ]
+  ],
+  "4": [
+    [
+      "frame"
+    ],
+    [
+      "crc"
+    ],
+    [
+      "sw",
+      "arq",
+      "srp"
+    ],
+    [
+      "window"
+    ],
+    [
+      "ppp",
+      "ppp-frame",
+      "ppp-transparent",
+      "ppp-state"
+    ]
+  ],
+  "5": [
+    [
+      "csma:碰撞检测"
+    ],
+    [
+      "csma",
+      "util"
+    ],
+    [
+      "mac"
+    ],
+    [
+      "extend:自学习算法"
+    ],
+    [
+      "vlan"
+    ],
+    [
+      "lan:适配器"
+    ]
+  ],
+  "6": [
+    [
+      "address",
+      "subnet"
+    ],
+    [
+      "cidr"
+    ],
+    [
+      "arp",
+      "mac"
+    ],
+    [
+      "header:分片算例"
+    ],
+    [
+      "rip"
+    ],
+    [
+      "ospf"
+    ],
+    [
+      "forward",
+      "header:IPv4 首部检验和"
+    ]
+  ],
+  "7": [
+    [
+      "overview",
+      "tcp",
+      "udp"
+    ],
+    [
+      "header",
+      "window",
+      "flow"
+    ],
+    [
+      "congestion"
+    ],
+    [
+      "congestion:第134页"
+    ]
+  ],
+  "8": []
+};
+
+type TopicPart = { id: string; title: string; html: string; additions: Block[]; focus: boolean };
+function splitTopic(section: Section, html: string): TopicPart[] {
+  const matches=[...html.matchAll(/<h3 id="([^"]+)">([\s\S]*?)<\/h3>/g)];
+  return [
+    {id:section.id,title:section.heading,html:html.slice(0,matches[0]?.index??html.length),additions:[],focus:false},
+    ...matches.map((m,i)=>({id:m[1],title:m[2].replace(/<[^>]+>/g,''),html:html.slice(m.index!,matches[i+1]?.index??html.length),additions:[],focus:false})),
+  ];
+}
+const visible = (html:string) => html.replace(/<svg\b[\s\S]*?<\/svg>/gi,'').replace(/<[^>]*>/g,'').replace(/[\s\p{P}\p{S}]/gu,'').toLowerCase();
+/** 只删除完全相同的段落；不同表述、数据、图示及拓展保留。 */
+function integrateLegacyHtml(html:string, main:string, no:number, anchor:string):string {
+  html=html.replace(/<h3 id="sec-ch[^"]+">[\s\S]*?<\/h3>/g,'')
+    .replace(/<div class="callout (?:key|tip)">\s*<p class="callout-h">本章荧光笔重点<\/p>[\s\S]*?<\/div>/g,'');
+  // 旧停等正文已由新正文逐项覆盖，只保留原有图示；利用率和确认时序已在正文中完整讲解。
+  if(no===4 && anchor==='flow-h1') {
+    return [...html.matchAll(/<figure\b[\s\S]*?<\/figure>|<svg\b[\s\S]*?<\/svg>/gi)].map(m=>m[0]).join('');
+  }
+  const seen=new Set([...main.matchAll(/<p(?:\s[^>]*)?>[\s\S]*?<\/p>/g)].map(m=>visible(m[0])));
+  // HTML 片段中的表格、列表、图解保持原样；仅去重普通独立段落。
+  return html.replace(/<p(?:\s[^>]*)?>[\s\S]*?<\/p>/g,m=>{
+    const v=visible(m);
+    if(v.length>=16 && seen.has(v) && !/class=|<img\b|<svg\b|<a\b/i.test(m))return '';
+    return m;
+  });
+}
 export function buildSlideReview(original: DeckData): SlideReview {
   const no=Number(original.id.slice(2));
-  const source=topics[no] ?? [];
+  const source=topics[no]??[];
   const prefix='sec-ch'+no+'-';
-  const sections:Section[]=source.map(({key,heading,html})=>({
-    id:prefix+'src-'+key,heading,blocks:[{type:'html',html:withTopicAnchors(prefix,key,html)}],
-  }));
+  const sections:Section[]=source.map(({key,heading})=>({id:prefix+'src-'+key,heading,blocks:[]}));
   const byKey=new Map(source.map((topic,i)=>[topic.key,sections[i]]));
+  const parts=new Map(source.map((topic,i)=>[topic.key,splitTopic(sections[i],withTopicAnchors(prefix,topic.key,topic.html))]));
   const aliases=source.flatMap(topic=>topic.aliases.map(alias=>({alias,key:topic.key}))).sort((a,b)=>b.alias.length-a.alias.length);
   const exact=detailedRoutes[no]??{};
+  const integrated=integratedTargets[no]??{};
   const oldKey=(anchor:string)=>{
     const a=anchor.startsWith(prefix)?anchor.slice(prefix.length):anchor;
     const route=Object.entries(exact).sort((a,b)=>b[0].length-a[0].length).find(([name])=>a===name||a.startsWith(name+'-'));
     const alias=aliases.find(x=>a===x.alias||a.startsWith(x.alias+'-'));
-    // A precise explicit mapping wins, but a more specific existing alias overrides a broad parent.
     if(route&&(!alias||route[0].length>=alias.alias.length))return route[1];
     return alias?.key;
   };
-  const inserted=new Set<string>();
+  const partAt=(key:string, title='')=>{
+    const list=parts.get(key);
+    return (title?list?.find(p=>p.title.startsWith(title)):undefined)??list?.[0];
+  };
+  const choose=(key:string,anchor:string)=>{
+    const mapping=integrated[anchor.replace(/^sec-ch\d+-/,'')];
+    return mapping?.[0]===key?partAt(key,mapping[1]):partAt(key);
+  };
+  const originalEntries=new Map(original.toc.map(entry=>[entry.id,entry]));
   const legacyTargets=new Map<string,string>();
+  const markedByLegacy=new Set<string>();
+  const usedDemos=new Set<string>();
   for(const item of oldDetails(original)){
     const key=oldKey(item.anchor)??'@extra';
     if(key==='@extra' && item.block.type==='html')continue;
     for(const piece of detailedPieces(no,item,key)){
       if(piece.key==='@extra')continue;
-      const section=byKey.get(piece.key);
-      if(!section)continue;
-      if(!inserted.has(piece.key)){
-        section.blocks.push({type:'html',html:detailLabel});
-        inserted.add(piece.key);
+      let target=choose(piece.key,item.anchor);
+      if(!target)continue;
+      const local=item.anchor.replace(/^sec-ch\d+-/,'');
+      // PPP legacy content contains all four subtopics; preserve its detailed negotiation in the state section.
+      if(no===4&&local==='p2p-h2'&&piece.key==='ppp-state')target=partAt('ppp-state','PPP 链路初始化')??target;
+      if(no===4&&local==='flow-h1')target=partAt('sw','四种典型情形')??target;
+      if(!legacyTargets.has(item.anchor))legacyTargets.set(item.anchor,integrated[local]?partAt(...integrated[local])?.id??target.id:target.id);
+      if(originalEntries.get(item.anchor)?.text.includes('★'))markedByLegacy.add(legacyTargets.get(item.anchor)!);
+      if(piece.block.type==='html'){
+        const main=parts.get(piece.key)!.map(p=>p.html).join('');
+        const html=integrateLegacyHtml(piece.block.html,main,no,local);
+        if(html.trim())target.additions.push({type:'html',html});
+      }else{
+        if(piece.block.type==='demo'){
+          if(usedDemos.has(piece.block.name))continue;
+          usedDemos.add(piece.block.name);
+        }
+        target.additions.push(piece.block);
       }
-      section.blocks.push(piece.block);
-      if(!legacyTargets.has(item.anchor))legacyTargets.set(item.anchor,section.id);
     }
   }
-  // Preserve exact h3 anchors for existing homework, highlights, practice and in-text links.
-  const originalEntries=new Map(original.toc.map(entry=>[entry.id,entry]));
-  const homework=original.toc.filter(entry=>entry.id===prefix+'homework'||entry.id.startsWith(prefix+'hw-'));
+  // A heading can be mapped even when its entire old text was already covered.
+  for(const entry of original.toc){
+    if(legacyTargets.has(entry.id))continue;
+    const key=oldKey(entry.id);
+    if(!key||key==='@extra')continue;
+    const target=choose(key,entry.id);
+    if(target){legacyTargets.set(entry.id,target.id);if(entry.text.includes('★'))markedByLegacy.add(target.id);}
+  }
+  // Highlight the existing heading only; no parallel highlight index or duplicated heading.
+  for(const [i,group] of (netHighlights[no]?.groups??[]).entries()){
+    const targets=focusTargets[no]?.[i]??[];
+    for(const spec of targets){
+      const colon=spec.indexOf(':');
+      const target=partAt(colon<0?spec:spec.slice(0,colon),colon<0?'':spec.slice(colon+1));
+      if(target&&group.priority==='A')target.focus=true;
+    }
+  }
+  for(const list of parts.values())for(const part of list)if(markedByLegacy.has(part.id))part.focus=true;
   const toc:TocEntry[]=[];
-  const seen=new Set<string>();
-  for(const section of sections){
-    toc.push({id:section.id,text:section.heading,level:2});seen.add(section.id);
-    for(const block of section.blocks){
-      if(block.type!=='html')continue;
-      for(const m of block.html.matchAll(/<h3 id="(sec-ch[^"]+)">([\s\S]*?)<\/h3>/g)){
-        if(seen.has(m[1]))continue;
-        seen.add(m[1]);
-        const old=originalEntries.get(m[1]);
-        toc.push({id:m[1],text:old?.text??m[2].replace(/<[^>]+>/g,''),level:3});
-      }
+  for(const topic of source){
+    const section=byKey.get(topic.key)!;
+    for(const [i,part] of parts.get(topic.key)!.entries()){
+      const text=part.focus?(i===0?part.title.replace(/^(\d+\.\s*)/,'$1★ '):'★ '+part.title):part.title;
+      if(i===0)section.heading=text;
+      toc.push({id:part.id,text,level:i===0?2:3});
+      const html=i>0&&part.focus?part.html.replace(/(<h3 id="[^"]+">)/,'$1★ '):part.html;
+      // Inline the content after its corresponding canonical heading, with no redundant old heading.
+      // Keep interactive demos as separate render blocks directly in that subsection.
+      if(html.trim())section.blocks.push({type:'html',html});
+      section.blocks.push(...part.additions);
     }
+    if(!section.blocks.length)section.blocks.push({type:'html',html:''});
   }
-  toc.push(...homework);
+  toc.push(...original.toc.filter(entry=>entry.id===prefix+'homework'||entry.id.startsWith(prefix+'hw-')));
   const direct=new Set(toc.map(entry=>entry.id));
+  // Preserve the anchor of the former duplicate SWP time-line subsection.
+  if(no===4){
+    const obsolete=withTopicAnchors(prefix,'sw','<h3>四种情况分别画时间线</h3>').match(/id="([^"]+)"/)?.[1];
+    const canonical=partAt('sw','四种典型情形')?.id;
+    if(obsolete&&canonical)legacyTargets.set(obsolete,canonical);
+  }
   const resolve=(anchor:string)=>{
     if(direct.has(anchor))return anchor;
     const target=oldKey(anchor);
     if(target==='@extra')return undefined;
-    return legacyTargets.get(anchor)??(target?byKey.get(target)?.id:undefined);
+    return legacyTargets.get(anchor)??(target?choose(target,anchor)?.id:undefined);
   };
   return {chapter:{...original,
-    lede:'<p>按<strong>'+sourceNames[no]+'</strong>顺序组织完整复习讲义：保留相应的详细定义、公式推导、图示、例题和交互演示；另补入旧讲义缺失的课内知识。独立的课外专题可切换到完整原讲义查阅，混合段落明确标注拓展或待核。</p>',
+    lede:'<p>按<strong>'+sourceNames[no]+'</strong>顺序组织复习讲义。定义、公式、例题、图解与复习重点集中在相应知识点内；★ 表示复习重点，不是额外知识单元。独立拓展可切换到完整原讲义查阅。</p>',
     toc,sections},resolve};
 }

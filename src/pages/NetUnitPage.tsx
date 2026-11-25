@@ -5,7 +5,6 @@ import { netChapters } from '../content/net';
 import { netHomework } from '../content/net/homework';
 import { buildSlideReview, sourceExtraNotes } from '../content/net/slide-review';
 import NetHomework from './net/NetHomework';
-import NetHighlights from './net/NetHighlights';
 import { useToc } from '../lib/toc';
 import { decodeEntities } from '../lib/text';
 import HtmlContent from '../components/HtmlContent';
@@ -391,10 +390,6 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
         <p className="callout-h">{extra ? '原有讲义与拓展（非课件主线）' : '拓展与待核内容说明'}</p>
         <p>{sourceExtraNotes[chapterNo]} {extra ? '以下为原有讲义，含与主线重复的解释、拓展及尚未逐段核实的内容，不代表全部属于课件。' : '详细正文保留相关原有图解、例题和交互演示。「理解辅助」用于解释课内概念；「拓展」及「待核」不当作课件原有知识点。'}</p>
       </div>
-      <details>
-        <summary>荧光笔重点索引（辅助索引，不按正文顺序）</summary>
-        <NetHighlights chapterNo={chapterNo} />
-      </details>
       {level2.length > 1 && (
         <nav className="topic-map" aria-label="本章知识点导航">
           <span className="topic-map-label">本章脉络</span>
