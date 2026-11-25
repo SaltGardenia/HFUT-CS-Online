@@ -147,7 +147,7 @@ const questions: PracticeQuestion[] = [
     kind: 'fill',
     question: '在用双绞线进行组网时，连接计算机和计算机应采用____UTP 电缆，连接计算机和集线器用____UTP 电缆。',
     answer: '交叉、直通｜交叉线、直通线',
-    explanation: '同类设备交叉（一端 568A 一端 568B），异类设备平行（两端同用 568A/B）：计算机—计算机用交叉电缆，计算机—集线器用直通电缆。',
+    explanation: '传统 MDI/MDI-X 设备：同类端口使用交叉线（一端T568A、一端T568B），不同类端口使用直通线（两端同一标准）。故计算机—计算机用交叉线，计算机—集线器用直通线。支持 Auto-MDI-X 的现代设备通常可自动识别线对，不必手动区分。',
     tags: [{ deck: 3, sec: 'sec-ch3-media-h1', text: '双绞线连接方式' }],
   },
   {
