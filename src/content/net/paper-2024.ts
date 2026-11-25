@@ -286,7 +286,7 @@ const questions: PracticeQuestion[] = [
     <p class="formula">C<sub>1</sub> = 2B log<sub>2</sub>V = 2 × 50k × 4 = 400 kb/s</p>
     <p><strong>② 香农公式（有噪声）</strong>：信噪比 20dB 意味着 S/N = 10<sup>20/10</sup> = 100：</p>
     <p class="formula">C<sub>2</sub> = B log<sub>2</sub>(1 + S/N) = 50k × log<sub>2</sub>101 ≈ 50k × 6.66 ≈ 332.9 kb/s</p>
-    <p><strong>③ 取两者中较小者</strong>：信道的最大数据传输速率由受限的一方决定——</p>
+    <p><strong>③ 取两者中较小者</strong>：按本题采用的理想化计算模型，取两种理论上界中的较小者；实际可达速率还取决于调制、编码等条件——</p>
     <p class="formula">C = min(400, 332.9) ≈ <strong>332.9 kb/s</strong></p>`,
     explanation: `要点：16 状态 → 奈奎斯特 400kb/s；20dB → S/N=100 → 香农 ≈332.9kb/s；取小者 ≈332.9 kb/s。`,
     tags: [
@@ -364,13 +364,13 @@ const questions: PracticeQuestion[] = [
     kind: 'essay',
     question: '试述滑动窗口协议的基本原理，并比较基于该协议所产生的各种协议。（8 分）',
     answer: `
-    <p><strong>基本原理</strong>：滑动窗口是一种流控方法，用于约束发送方可发送报文的数量——「窗口」是指发送方最多可发送未被确认报文的数量，「滑动」是指每收到一个确认报文，窗口可向前滑动一个报文，从而纳入新的待发送的报文。发送窗口内的帧才有资格发送；接收窗口内的帧序号才被接收；收发窗口按确认与递交逐格前移。</p>
-    <p><strong>基于滑动窗口的三种协议</strong>（差别仅在窗口尺寸）：</p>
+    <p><strong>基本原理</strong>：滑动窗口是一种流控方法，用于约束发送方可发送报文的数量——「窗口」是指发送方最多可发送未被确认报文的数量，「滑动」是指发送端根据确认结果推进窗口左边界，可一次跨过多个已确认帧；选择重传中收到失序确认不一定立即推进窗口。发送窗口内的帧才有资格发送；接收窗口内的帧序号才被接收；收发窗口按确认与递交逐格前移。</p>
+    <p><strong>基于滑动窗口的三种协议</strong>（窗口尺寸、确认、缓存和重传策略均有差异）：</p>
     <table class="tbl">
       <thead><tr><th>协议</th><th>发送窗口</th><th>接收窗口</th><th>要点</th></tr></thead>
       <tbody>
-        <tr><td>停—等协议</td><td>1</td><td>1</td><td>发送一帧后停止等待确认，简单但信道利用率极低（U = T<sub>D</sub>/(T<sub>D</sub>+RTT+T<sub>A</sub>)）</td></tr>
-        <tr><td>回退 n（GO-Back-N）</td><td>&gt;1</td><td>1</td><td>连续发送 n 帧不出错时信道利用率高；某帧出错时其后已发帧全部重传，接收方只需 1 个缓存</td></tr>
+        <tr><td>停—等协议</td><td>1</td><td>1</td><td>发送一帧后停止等待确认，简单，但传播时延相对发送时延较大时信道利用率较低（U = T<sub>D</sub>/(T<sub>D</sub>+RTT+T<sub>A</sub>)）</td></tr>
+        <tr><td>回退 n（GO-Back-N）</td><td>&gt;1</td><td>1</td><td>连续发送 n 帧不出错时信道利用率高；最早未确认帧超时后重传该帧及随后仍未确认的帧；接收方仅按序接收，不缓存失序帧</td></tr>
         <tr><td>选择重传</td><td>&gt;1</td><td>&gt;1</td><td>出错的帧单独重传，后面正确到达的帧先存入接收窗口，缓存开销大但重传少</td></tr>
       </tbody>
     </table>
