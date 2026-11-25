@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.2 (2026-11-25)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### 修复
+* fix(code): 修复「查看完整代码」覆盖层仍被折叠截断（#22） by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/23
+### 其他改动
+* 继续完善计网内容(已核对到第四章) by @Junpgle in https://github.com/SaltGardenia/HFUT-CS-Online/pull/21
+
+
+**Full Changelog**: https://github.com/SaltGardenia/HFUT-CS-Online/compare/v2.2.1...v2.2.2
+
 ## 2.2.1 (2026-11-25)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
