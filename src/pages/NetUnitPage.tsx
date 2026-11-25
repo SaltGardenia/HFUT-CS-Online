@@ -323,8 +323,8 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
   const supplement = useMemo(() => buildNetSupplement(original), [original]);
   const supplementAnchor = !!requested && isNetSupplementAnchor(requested) && supplement.toc.some(e => e.id === requested);
   const legacyAnchor = !!requested && !review.resolve(requested) && original.toc.some(e => e.id === requested);
-  const mode = supplementAnchor || params.get('view') === 'supplement' ? 'supplement'
-    : params.get('view') === 'extra' || legacyAnchor ? 'extra' : 'main';
+  const mode = supplementAnchor ? 'supplement' : legacyAnchor ? 'extra'
+    : params.get('view') === 'supplement' ? 'supplement' : params.get('view') === 'extra' ? 'extra' : 'main';
   const extra = mode === 'extra';
   const isSupplement = mode === 'supplement';
   const chapter = isSupplement ? supplement : extra ? original : review.chapter;
@@ -358,7 +358,7 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
     return () => window.clearTimeout(t);
   }, [section, mode]);
 
-  useScrollSpy(pageRef, [chapter.id, extra]);
+  useScrollSpy(pageRef, [chapter.id, mode]);
 
   useEffect(() => {
     if (!pageRef.current) return;
