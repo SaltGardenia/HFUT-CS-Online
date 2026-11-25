@@ -459,7 +459,7 @@ const topics: Record<number, SourceTopic[]> = {
         "expand",
         "broadcast-h5"
       ],
-      "html": "<h3>物理层扩展</h3><p>多个集线器扩大覆盖范围，使原来不同碰撞域的站通信；但合成更大碰撞域，总吞吐量不增加，不能直接互连不同速率的共享网段。</p><h3>光纤扩展局域网与三个隔离的碰撞域</h3><p>第59页物理层扩展示例中，主机通过光纤及一对光纤调制解调器连接到以太网集线器，允许主机和集线器相隔更远。它改变物理连接距离，而不根据MAC地址进行帧过滤；使用集线器扩展共享以太网时仍需满足相应时序限制。</p><h3>数据链路层扩展</h3><p>网桥根据目的 MAC 转发或过滤帧，隔离碰撞域，能互连不同速率/介质的网段；缓存和处理引入时延，仍会转发广播。交换机是多接口网桥，每端口独立碰撞域，通常全双工，多对端口可并行通信，有缓存、CAM 地址表、硬件交换结构。集线器 N 用户共享带宽 B，平均 B/N；交换机每端口可独占 B，在端口与交换结构不构成瓶颈时可并行转发，不能仅凭端口数保证实际总吞吐量 N×B。</p><p>存储转发先缓存整帧再处理，可检错；直通方式读到目的地址后即转发，时延小但可能转发错误帧。</p><h3>集线器扩展与网桥扩展的差别</h3><p>第66页两个网桥连接三个共享网段，A、B与C、D及E、F分别构成三个独立碰撞域：某个网段发生的物理层碰撞不应由网桥扩散到其他网段，而普通广播帧仍可能跨网桥转发。碰撞域与广播域是不同范围。</p><p>假设大学三个系各有一个独立以太网。用主干集线器把它们连接后，各系原本独立的碰撞域合成一个更大的碰撞域。它们能够互相通信，但所有站共享同一个信道，碰撞可能涉及多个系，原来独立使用的链路带宽不能简单相加。</p><p>网桥工作于数据链路层，根据收到帧的目的MAC地址进行转发或过滤。其内部设有接口、缓存、站表、接口管理软件与网桥协议实体。连接两个网段后，两侧仍为相互隔离的碰撞域，不需要把只在一侧通信的帧转发到另一侧。</p><table class=\"tbl\"><thead><tr><th>网桥的好处</th><th>网桥的缺点</th></tr></thead><tbody><tr><td>过滤不必要的通信量</td><td>存储转发引入处理及等待时延</td></tr><tr><td>扩大网络的物理覆盖范围</td><td>MAC子层本身没有流量控制功能</td></tr><tr><td>隔离碰撞域，提高网络可靠性</td><td>桥接不同MAC子层的网段时可能增加额外时延</td></tr><tr><td>可互连不同物理层、MAC子层及速率的局域网</td><td>网络过大或通信量过高时，广播传播可能引起广播风暴</td></tr></tbody></table><p>交换机实质上是多端口网桥，借助专用交换结构实现较高的转发速率。交换机隔离碰撞域不等于隔离广播域；广播域的进一步划分见VLAN。</p><h3>从共享总线到交换式星形以太网</h3><table class=\"tbl\"><thead><tr><th>比较</th><th>早期总线以太网</th><th>交换式星形以太网</th></tr></thead><tbody><tr><td>拓扑结构</td><td>无源共享总线</td><td>交换机为中心</td></tr><tr><td>双工</td><td>半双工</td><td>通常全双工</td></tr><tr><td>介质接入</td><td>使用CSMA/CD</td><td>独立点对点全双工链路不使用CSMA/CD</td></tr><tr><td>碰撞</td><td>共享线路可能发生碰撞</td><td>独立全双工链路无碰撞</td></tr><tr><td>帧结构</td><td>以太网MAC帧</td><td>继续采用以太网MAC帧</td></tr></tbody></table><p>STP（Spanning Tree Protocol，生成树协议）不改变实际布线，而是在逻辑上阻断某些冗余链路的转发，使当前活动路径构成无环的树状结构，防止帧反复转发。物理上保留冗余链路与逻辑上避免环路并不矛盾。交换机并不因为学习了所有单播地址就能自动消除广播环路。</p><h3>自学习算法</h3><ol><li>收到帧时记录源 MAC 与入端口，更新转发表。</li><li>目的地址未知时，除入端口外泛洪；已知且出端口不同，定向转发；已知且与入端口相同，过滤。</li><li>动态表项定时老化。多个交换机连接时每台独立学习。</li></ol><h3>单台四端口交换机的自学习、老化与转发</h3><p>初始交换表为空，主机A接接口1、主机B接接口3。A向B发送帧，交换机记录源MAC A与入口1，因为不知道B所在接口，向其余接口泛洪；C、D的网卡判断目的MAC不属于自己而丢弃。随后B向A发送帧，交换机记录B与接口3，查到A在接口1，只从接口1转发。</p><table class=\"tbl\"><thead><tr><th>事件</th><th>交换表</th><th>动作</th></tr></thead><tbody><tr><td>A→B，入口1</td><td>A→1</td><td>未知单播，向其他接口泛洪</td></tr><tr><td>B→A，入口3</td><td>A→1；B→3</td><td>已知单播，仅接口1</td></tr><tr><td>再次A→B</td><td>A→1；B→3</td><td>更新A的有效时间，仅接口3</td></tr></tbody></table><p>交换表除了MAC及接口还包含有效时间；超时项自动删除，便于主机移动或更换网卡。</p><h3>两台交换机互连：课内自学习算例</h3><p>两台交换机 S1、S2 的表最初为空，A 接 S1 的1号端口，C 接 S1 的2号端口，E 接 S2 的1号端口，两台交换机分别以5号端口互连。依次发送 A→B、C→E、E→A。</p><table class=\"tbl\"><thead><tr><th>发送次序</th><th>S1 新增项</th><th>S2 新增项</th><th>转发过程</th></tr></thead><tbody><tr><td>A→B</td><td>A→1</td><td>A→5</td><td>B 未知，S1 泛洪；S2 从互连接口收到帧并学习 A</td></tr><tr><td>C→E</td><td>C→2</td><td>C→5</td><td>E 未知，S1 泛洪；S2 学习 C，并向其他接口泛洪</td></tr><tr><td>E→A</td><td>E→5</td><td>E→1</td><td>S2 已知 A 在5号端口，定向送给 S1；S1 已知 A 在1号端口</td></tr></tbody></table><p>最终 S1 为 {A:1，C:2，E:5}，S2 为 {A:5，C:5，E:1}。B 虽然收到过帧，但没有作为源站发送，故两个交换机均不因 A→B 而学习 B 的地址。</p>"
+      "html": "<h3>物理层扩展</h3><p>多个集线器扩大覆盖范围，使原来不同碰撞域的站通信；但合成更大碰撞域，总吞吐量不增加，不能直接互连不同速率的共享网段。</p><h3>光纤扩展局域网</h3><p>第59页物理层扩展示例中，主机通过光纤及一对光纤调制解调器连接到以太网集线器，允许主机和集线器相隔更远。它改变物理连接距离，而不根据MAC地址进行帧过滤；使用集线器扩展共享以太网时仍需满足相应时序限制。</p><h3>数据链路层扩展</h3><p>网桥根据目的 MAC 转发或过滤帧，隔离碰撞域，能互连不同速率/介质的网段；缓存和处理引入时延，仍会转发广播。交换机是多接口网桥，每端口独立碰撞域，通常全双工，多对端口可并行通信，有缓存、CAM 地址表、硬件交换结构。集线器 N 用户共享带宽 B，平均 B/N；交换机每端口可独占 B，在端口与交换结构不构成瓶颈时可并行转发，不能仅凭端口数保证实际总吞吐量 N×B。</p><p>存储转发先缓存整帧再处理，可检错；直通方式读到目的地址后即转发，时延小但可能转发错误帧。</p><h3>集线器扩展与网桥扩展的差别</h3><p>第66页两个网桥连接三个共享网段，A、B与C、D及E、F分别构成三个独立碰撞域：某个网段发生的物理层碰撞不应由网桥扩散到其他网段，而普通广播帧仍可能跨网桥转发。碰撞域与广播域是不同范围。</p><p>假设大学三个系各有一个独立以太网。用主干集线器把它们连接后，各系原本独立的碰撞域合成一个更大的碰撞域。它们能够互相通信，但所有站共享同一个信道，碰撞可能涉及多个系，原来独立使用的链路带宽不能简单相加。</p><p>网桥工作于数据链路层，根据收到帧的目的MAC地址进行转发或过滤。其内部设有接口、缓存、站表、接口管理软件与网桥协议实体。连接两个网段后，两侧仍为相互隔离的碰撞域，不需要把只在一侧通信的帧转发到另一侧。</p><table class=\"tbl\"><thead><tr><th>网桥的好处</th><th>网桥的缺点</th></tr></thead><tbody><tr><td>过滤不必要的通信量</td><td>存储转发引入处理及等待时延</td></tr><tr><td>扩大网络的物理覆盖范围</td><td>MAC子层本身没有流量控制功能</td></tr><tr><td>隔离碰撞域，提高网络可靠性</td><td>桥接不同MAC子层的网段时可能增加额外时延</td></tr><tr><td>可互连不同物理层、MAC子层及速率的局域网</td><td>网络过大或通信量过高时，广播传播可能引起广播风暴</td></tr></tbody></table><p>交换机实质上是多端口网桥，借助专用交换结构实现较高的转发速率。交换机隔离碰撞域不等于隔离广播域；广播域的进一步划分见VLAN。</p><h3>从共享总线到交换式星形以太网</h3><table class=\"tbl\"><thead><tr><th>比较</th><th>早期总线以太网</th><th>交换式星形以太网</th></tr></thead><tbody><tr><td>拓扑结构</td><td>无源共享总线</td><td>交换机为中心</td></tr><tr><td>双工</td><td>半双工</td><td>通常全双工</td></tr><tr><td>介质接入</td><td>使用CSMA/CD</td><td>独立点对点全双工链路不使用CSMA/CD</td></tr><tr><td>碰撞</td><td>共享线路可能发生碰撞</td><td>独立全双工链路无碰撞</td></tr><tr><td>帧结构</td><td>以太网MAC帧</td><td>继续采用以太网MAC帧</td></tr></tbody></table><p>STP（Spanning Tree Protocol，生成树协议）不改变实际布线，而是在逻辑上阻断某些冗余链路的转发，使当前活动路径构成无环的树状结构，防止帧反复转发。物理上保留冗余链路与逻辑上避免环路并不矛盾。交换机并不因为学习了所有单播地址就能自动消除广播环路。</p><h3>自学习算法</h3><ol><li>收到帧时记录源 MAC 与入端口，更新转发表。</li><li>目的地址未知时，除入端口外泛洪；已知且出端口不同，定向转发；已知且与入端口相同，过滤。</li><li>动态表项定时老化。多个交换机连接时每台独立学习。</li></ol><h3>单台四端口交换机的自学习、老化与转发</h3><p>初始交换表为空，主机A接接口1、主机B接接口3。A向B发送帧，交换机记录源MAC A与入口1，因为不知道B所在接口，向其余接口泛洪；C、D的网卡判断目的MAC不属于自己而丢弃。随后B向A发送帧，交换机记录B与接口3，查到A在接口1，只从接口1转发。</p><table class=\"tbl\"><thead><tr><th>事件</th><th>交换表</th><th>动作</th></tr></thead><tbody><tr><td>A→B，入口1</td><td>A→1</td><td>未知单播，向其他接口泛洪</td></tr><tr><td>B→A，入口3</td><td>A→1；B→3</td><td>已知单播，仅接口1</td></tr><tr><td>再次A→B</td><td>A→1；B→3</td><td>更新A的有效时间，仅接口3</td></tr></tbody></table><p>交换表除了MAC及接口还包含有效时间；超时项自动删除，便于主机移动或更换网卡。</p><h3>两台交换机互连：课内自学习算例</h3><p>两台交换机 S1、S2 的表最初为空，A 接 S1 的1号端口，C 接 S1 的2号端口，E 接 S2 的1号端口，两台交换机分别以5号端口互连。依次发送 A→B、C→E、E→A。</p><table class=\"tbl\"><thead><tr><th>发送次序</th><th>S1 新增项</th><th>S2 新增项</th><th>转发过程</th></tr></thead><tbody><tr><td>A→B</td><td>A→1</td><td>A→5</td><td>B 未知，S1 泛洪；S2 从互连接口收到帧并学习 A</td></tr><tr><td>C→E</td><td>C→2</td><td>C→5</td><td>E 未知，S1 泛洪；S2 学习 C，并向其他接口泛洪</td></tr><tr><td>E→A</td><td>E→5</td><td>E→1</td><td>S2 已知 A 在5号端口，定向送给 S1；S1 已知 A 在1号端口</td></tr></tbody></table><p>最终 S1 为 {A:1，C:2，E:5}，S2 为 {A:5，C:5，E:1}。B 虽然收到过帧，但没有作为源站发送，故两个交换机均不因 A→B 而学习 B 的地址。</p>"
     },
     {
       "key": "vlan",
@@ -788,10 +788,7 @@ export const sourceExtraNotes: Record<number, string> = {
 };
 
 
-/** 按知识点保留原讲义的段落、表格、SVG、课件原图及交互演示。
- * 独立的课外主题仍留在完整原讲义模式；混合主题按可辨识的段落边界拆分。
- * 不能确认来源的旧解释标为待核，而不是直接删除或当作课内原文。
- */
+/** 历史锚点兼容及交互演示归位；历史正文不再参与主线合成。 */
 const detailedRoutes: Record<number, Record<string, string>> = {
   1: { 'definition-functions':'function', 'work':'structure','work-h1':'structure','work-h2':'structure','work-h3':'switch','classify-h2':'topology','classify':'classify','internet':'structure','trend':'@extra' },
   2: { 'idea':'layer','arch':'layer','arch-h2':'services','protocol-h2':'pdu','osi-env':'pdu','osi-market':'formation','osi-h1':'five','osi-h2':'five','osi-h3':'osi' },
@@ -803,96 +800,30 @@ const detailedRoutes: Record<number, Record<string, string>> = {
   8: { 'overview-h3':'@extra','overview-h4':'@extra','dns-h4':'@extra','dns-h5':'@extra','ftp-h3':'@extra','http-h5':'@extra','email':'@extra','http':'www' },
 };
 const extraLabel = (message: string) => '<p class="quiz-note"><strong>拓展：</strong>' + message + '</p>';
-const pendingLabel = '<p class="quiz-note"><strong>待核：</strong>以下保留原讲义解释，具体细节尚未全部与原课件逐段对应。</p>';
-type Detail = { anchor: string; block: Block };
-function oldDetails(original: DeckData): Detail[] {
-  const result: Detail[] = [];
+/** Legacy HTML is read only to locate each demo's preceding anchor; no text is split or re-merged. */
+function oldInteractiveBlocks(original: DeckData): {anchor:string;block:Exclude<Block,{type:'html'}>}[] {
+  const result: {anchor:string;block:Exclude<Block,{type:'html'}>}[] = [];
   for (const section of original.sections) {
     let anchor = section.id;
     for (const block of section.blocks) {
-      if (block.type !== 'html') { result.push({ anchor, block }); continue; }
-      const html = block.html;
-      const boundaries = [...html.matchAll(/<h3 id="(sec-ch[^"]+)">/g)];
-      let at = 0;
-      for (const match of boundaries) {
-        const pos = match.index!;
-        if (pos > at && html.slice(at,pos).trim()) result.push({anchor,block:{type:'html',html:html.slice(at,pos)}});
-        anchor = match[1];
-        at = pos;
-      }
-      if (html.slice(at).trim()) result.push({anchor,block:{type:'html',html:html.slice(at)}});
+      if (block.type !== 'html') { result.push({anchor,block}); continue; }
+      for (const heading of block.html.matchAll(/<h3 id="(sec-ch[^"]+)">/g)) anchor = heading[1];
     }
   }
   return result;
 }
-
-/** Find a complete paragraph boundary before a strong label. */
-function paragraphAt(html: string, phrase: string): number {
-  const i = html.indexOf(phrase);
-  return i < 0 ? -1 : html.lastIndexOf('<p',i);
-}
-function detailedPieces(no: number, item: Detail, key: string): {key:string;block:Block}[] {
-  const b=item.block;
-  if(b.type !== 'html') {
-    // Existing interactive content is preserved, with non-course features explicitly labeled.
-    if(b.type === 'demo' && ['net-nat','net-email'].includes(b.name)) return [{key:'@extra',block:b}];
-    const demoRoutes: Record<string,string> = {'net-nyquist':'capacity','net-vlan':'vlan','net-longest-prefix':'cidr','net-prefix-match-2025':'cidr','net-gbn':no===4?'arq':'reliable','net-sr':no===4?'srp':'reliable','net-stop-wait':no===4?'sw':'reliable','net-ppp':'ppp-state','net-tcp-flow':'flow','net-tcp-handshake':'connect','net-tcp-close':'connect','net-udp-checksum-2025':'udp'};
-    const target=b.type==='demo' ? demoRoutes[b.name] ?? key : key;
-    const out:{key:string;block:Block}[]=[];
-    if (b.type==='demo' && ['net-multiplex','net-http','net-tcp-flow'].includes(b.name)) {
-      out.push({key:target,block:{type:'html',html:extraLabel('演示包含与当前课件主线相关的内容，也可能涉及码分复用、TLS/QUIC 或零窗口等延伸机制。')}})
-    }
-    out.push({key:target,block:b});return out;
-  }
-  let html=b.html;
-  const id=item.anchor.replace(/^sec-ch\d+-/,'');
-  const pieces:{key:string;block:Block}[]=[];
-  const push=(k:string,h:string)=>{if(h.trim())pieces.push({key:k,block:{type:'html',html:h}})};
-  if(no===3 && id==='mux-h2'){
-    const s=paragraphAt(html,'<strong>统计时分复用</strong>');
-    const t=html.indexOf('<div class="callout tip">');
-    if(s>=0 && t>s && html.slice(t).includes('T1 / E1 帧长与周期')){
-      push('mux',html.slice(0,s).replace('时分复用 TDM 与统计时分复用 STDM','同步时分复用 TDM'));
-      push('t1e1',html.slice(t));push('stDM',html.slice(s,t));return pieces;
-    }
-  }
-  if(no===3 && id==='mux-h3'){
-    const p=paragraphAt(html,'<strong>波分复用</strong>');
-    if(p>0){push('@extra',html.slice(0,p));push('stDM',html.slice(p));return pieces;}
-  }
-  if(no===5 && id==='broadcast-h2'){
-    const p=paragraphAt(html,'<strong>CSMA/CA</strong>');
-    if(p>=0){push(key,html.slice(0,p).replace('CSMA/CD 与 CSMA/CA','CSMA/CD 详细原理'));push('@extra',html.slice(p));return pieces;}
-  }
-  if(no===6 && id==='protocol-h1'){
-    const p=paragraphAt(html,'<strong>开放式最短路径优先 OSPF</strong>');
-    if(p>0){push('rip',html.slice(0,p).replace('RIP 与 OSPF','RIP 协议详细讲解'));push('ospf',html.slice(p));return pieces;}
-  }
-  if(no===8 && id==='http-h2'){
-    if(/HTTPS|TLS|QUIC|HTTP\/3/.test(html))html=extraLabel('本段中的HTTPS、TLS、QUIC和HTTP/3属于拓展；经典HTTP操作及连接方式属于主线。')+html;
-    const p=paragraphAt(html,'<strong>代理服务器（proxy server）</strong>');
-    if(p>0){push('http',html.slice(0,p));push('proxy',html.slice(p));return pieces;}
-  }
-  if(no===1 && id==='work-h1')html=extraLabel('C/S、P2P的详细比较为理解网络边缘工作方式的扩展。')+html;
-  if(no===3 && id==='basic-h3')html=pendingLabel+html;
-  if(no===4 && id==='error-h1')html=pendingLabel+html;
-  if(no===7 && id==='tcp-h6')html=extraLabel('正常建立与释放状态已在第97页出现；同时打开、同时关闭等特殊状态路径属于拓展。')+html;
-  if(no===4 && id==='flow')html=html.replace(/<p><em>本节属于拓展自学内容。<\/em><\/p>/g,'');
-  if(no===4 && id==='flow-h2'){
-    html=html.replace('并返回否认信息，请求对方从出错帧开始重发；','并重复发送最后一个确认（采用下一期待序号的约定）；');
-    const a=paragraphAt(html,'<strong>顺序接收管道协议（回退 n）</strong>');
-    const z=paragraphAt(html,'<strong>选择重传协议</strong>');
-    if(a>0 && z>a){
-      push('window',html.slice(0,a));push('arq',html.slice(a,z));push('srp',html.slice(z));return pieces;
-    }
-  }
-  if(no===4 && id==='p2p-h2'){html=extraLabel('以下原有讲义保留PPP细节与图解，其中LCP具体报文、PAP/CHAP鉴别过程、IPCP选项、字段压缩等属于2025版课件未展开的拓展；基础课内知识分别见本节及后续PPP帧格式、透明传输和工作状态。')+html;
-    push('ppp-state',html);return pieces;
-  }
-  if(no===6 && id==='arp-h2')html=pendingLabel+html;
-  if(no===8 && id==='http-h2')html=extraLabel('涉及HTTPS、TLS与QUIC的现代网页访问细节为扩展，经典HTTP过程仍属于主线。')+html;
-  push(key,html);return pieces;
-}
+const demoRoutes: Record<string,string> = {
+  'net-nyquist':'capacity','net-vlan':'vlan','net-longest-prefix':'cidr',
+  'net-prefix-match-2025':'cidr','net-ppp':'ppp-state','net-tcp-flow':'flow',
+  'net-tcp-handshake':'connect','net-tcp-close':'connect','net-udp-checksum-2025':'udp',
+  'net-nat':'@extra','net-email':'@extra',
+};
+const demoScope: Record<string,string> = {
+  'net-multiplex':'演示还包含码分复用，属于补充考点。',
+  'net-http':'演示还包含 TLS/QUIC 等现代访问机制，属于补充考点。',
+  'net-tcp-flow':'演示还包含零窗口探测，详细计时器机制属于补充考点。',
+  'net-ppp':'演示还包含详细 LCP/NCP 与鉴别协商，超出基础课内要求。',
+};
 
 /** 为新正文中的知识点生成稳定锚点，不能只把旧讲义标题加入目录。 */
 function withTopicAnchors(prefix: string, key: string, html: string): string {
@@ -1073,7 +1004,7 @@ const integratedTargets: Record<number, Record<string, [string,string]>> = {
     ],
     "media-h1": [
       "media",
-      "同轴电缆"
+      "双绞线"
     ],
     "media-h2": [
       "media",
@@ -1891,38 +1822,28 @@ export function buildSlideReview(original: DeckData): SlideReview {
   };
   const legacyTargets=new Map<string,string>();
   const usedDemos=new Set<string>();
-  for(const item of oldDetails(original)){
-    const key=oldKey(item.anchor)??'@extra';
-    if(key==='@extra' && item.block.type==='html')continue;
-    for(const piece of detailedPieces(no,item,key)){
-      if(piece.key==='@extra')continue;
-      let target=choose(piece.key,item.anchor);
-      if(!target)continue;
-      const local=item.anchor.replace(/^sec-ch\d+-/,'');
-      // PPP legacy content contains all four subtopics; preserve its detailed negotiation in the state section.
-      if(no===4&&local==='p2p-h2'&&piece.key==='ppp-state')target=partAt('ppp-state','PPP 链路初始化')??target;
-      if(no===4&&local==='flow-h1')target=partAt('sw','四种典型情形')??target;
-      if(!legacyTargets.has(item.anchor))legacyTargets.set(item.anchor,integrated[local]?partAt(...integrated[local])?.id??target.id:target.id);
-      if(piece.block.type==='html'){
-        // 正文只使用独立整理的主题；旧讲义文字、表格和图示在原讲义模式完整保留。
-        // 不再自动拼接近义段落或未经核实的混合拓展。交互演示仍按知识点路由。
-        if(piece.block.html.startsWith(extraLabel('演示包含'))){target.additions.push(piece.block);}
-      }else{
-        if(piece.block.type==='demo'){
-          if(usedDemos.has(piece.block.name))continue;
-          usedDemos.add(piece.block.name);
-        }
-        target.additions.push(piece.block);
-      }
-    }
-  }
-  // A heading can be mapped even when its entire old text was already covered.
+  // Only real historical TOC entries can be resolved. Unknown IDs do not fall through to a broad prefix.
   for(const entry of original.toc){
-    if(legacyTargets.has(entry.id))continue;
     const key=oldKey(entry.id);
     if(!key||key==='@extra')continue;
     const target=choose(key,entry.id);
     if(target)legacyTargets.set(entry.id,target.id);
+  }
+  for(const {anchor,block} of oldInteractiveBlocks(original)){
+    const name=block.type==='demo'?block.name:'';
+    const key=name==='net-gbn'?(no===4?'arq':'reliable')
+      : name==='net-sr'?(no===4?'srp':'reliable')
+      : name==='net-stop-wait'?(no===4?'sw':'reliable')
+      : demoRoutes[name]??oldKey(anchor);
+    if(!key||key==='@extra')continue;
+    const target=choose(key,anchor);
+    if(!target)continue;
+    if(block.type==='demo'){
+      if(usedDemos.has(name))continue;
+      usedDemos.add(name);
+      if(demoScope[name])target.additions.push({type:'html',html:extraLabel(demoScope[name])});
+    }
+    target.additions.push(block);
   }
   // Apply only actual highlighter marks, including previously omitted marked pages.
   for(const [spec,pages,scope] of originalHighlightTargets[no]??[]){
@@ -1960,12 +1881,11 @@ export function buildSlideReview(original: DeckData): SlideReview {
   }
   const resolve=(anchor:string)=>{
     if(no===8&&anchor==='sec-ch8-detail-documents-1wu6iek')return 'sec-ch8-detail-documents-1q8s1b9';
+    if(no===5&&anchor==='sec-ch5-detail-extend-1wewhgl')return 'sec-ch5-detail-extend-18dxxsm';
     if(direct.has(anchor))return anchor;
-    const target=oldKey(anchor);
-    if(target==='@extra')return undefined;
-    return legacyTargets.get(anchor)??(target?choose(target,anchor)?.id:undefined);
+    return legacyTargets.get(anchor);
   };
   return {chapter:{...original,
-    lede:'<p>按<strong>'+sourceNames[no]+'</strong>顺序组织复习讲义。定义、公式、例题、图解与复习重点集中在相应知识点内；旧讲义不再自动重复拼接，补充材料在完整原讲义模式查阅；★ 仅表示2025版原PDF上实际黄色荧光笔标记；具体划线范围和页码在对应正文中注明，未划线内容保持普通样式。独立拓展可切换到完整原讲义查阅。</p>',
+    lede:'<p>按<strong>'+sourceNames[no]+'</strong>顺序组织复习讲义。定义、公式、例题、图解与复习重点集中在相应知识点内；旧讲义不再自动重复拼接，历年考点与课外拓展单独查阅；★ 仅表示2025版原PDF上实际黄色荧光笔标记；具体划线范围和页码在对应正文中注明，未划线内容保持普通样式。历史原讲义仅供对照。</p>',
     toc,sections},resolve};
 }
