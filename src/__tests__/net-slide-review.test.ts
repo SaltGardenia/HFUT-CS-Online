@@ -5,7 +5,7 @@ import { buildSlideReview, sourceExtraNotes } from '../content/net/slide-review'
 
 describe('2025 计网课件主线', () => {
   it('八章知识单元顺序独立于旧讲义', () => {
-    const orders = [["history","definition","function","structure","topology","classify-intro","switch","classify","performance"],["formation","protocol","layer","services","osi","pdu","five","tcpip"],["system","encoding","modulation","pcm","capacity","media","direction","serial","sync","mux","t1e1","stDM","sonet","switch","vc","physical"],["basic","frame","crc","reliable","sw","arq","window","srp","ppp"],["lan","csma","traditional","util","mac","extend","vlan","fast"],["services","ip","address","mac","arp","header","forward","subnet","cidr","icmp","routing","rip","ospf"],["overview","udp","tcp","reliable","header","window","rtt","connect","congestion"],["overview","dns","ftp","www","http","proxy","message","documents","search"]];
+    const orders = [["history","definition","function","structure","topology","classify-intro","switch","classify","performance"],["formation","protocol","layer","services","osi","pdu","five","tcpip"],["system","encoding","modulation","pcm","capacity","media","direction","serial","sync","mux","t1e1","stDM","sonet","switch","vc","physical"],["basic","frame","crc","reliable","sw","arq","window","srp","ppp","ppp-frame","ppp-transparent","ppp-state","crc-practice"],["lan","csma","traditional","util","mac","extend","vlan","fast"],["services","ip","address","mac","arp","header","forward","subnet","cidr","icmp","routing","rip","ospf"],["overview","udp","tcp","reliable","header","window","flow","rtt","connect","congestion"],["overview","dns","ftp","www","http","proxy","message","cookie","documents","dynamic-docs","search"]];
     expect(netChapters).toHaveLength(8);
     for (const [i, original] of netChapters.entries()) {
       const no = i + 1;
@@ -26,9 +26,28 @@ describe('2025 计网课件主线', () => {
     expect(html('arq')).toContain('DATA0～DATA5');
     expect(html('window')).toContain('接收窗口三阶段');
     expect(html('srp')).toContain('选择重传窗口的限制');
-    expect(html('ppp')).toContain('本章最后一页的 CRC 练习');
+    expect(html('crc-practice')).toContain('本章最后一页的 CRC 练习');
+    expect(html('ppp-transparent')).toContain('第67—68页原例');
+    expect(byKey('arq').blocks.some(b=>b.type==='demo' && b.name==='net-gbn')).toBe(true);
+    expect(byKey('srp').blocks.some(b=>b.type==='demo' && b.name==='net-sr')).toBe(true);
     expect(resolve('sec-ch4-flow-h2')).toBeDefined();
     expect(html('sw')).not.toContain('本节属于拓展自学内容');
+  });
+  it('新正文三级标题均有目录锚点且无重复ID', () => {
+    for (const original of netChapters) {
+      const {chapter,resolve}=buildSlideReview(original);
+      const ids=chapter.toc.map(e=>e.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      for(const section of chapter.sections) {
+        const first=section.blocks[0];
+        if(first.type!=='html') throw new Error('缺少主线正文');
+        expect(first.html).not.toMatch(/<h3>/);
+        for(const m of first.html.matchAll(/<h3 id="([^"]+)">/g)) {
+          expect(ids).toContain(m[1]);
+          expect(resolve(m[1])).toBe(m[1]);
+        }
+      }
+    }
   });
   it('全部课程作业仍可在主线定位且题目锚点不变', () => {
     for (const [i, original] of netChapters.entries()) {
