@@ -77,8 +77,8 @@ export const netChapters: DeckData[] = chapterMaterial.map((chapter, index) => {
 const practiceTagOverrides: Record<string, PracticeQuestion['tags']> = {
   "p1-s3": [
     {
-      "deck": 6,
-      "sec": "sec-ch6-switch",
+      "deck": 3,
+      "sec": "sec-ch3-supp-atm",
       "text": "ATM（拓展）"
     }
   ],
@@ -92,28 +92,28 @@ const practiceTagOverrides: Record<string, PracticeQuestion['tags']> = {
   "p1-e3": [
     {
       "deck": 3,
-      "sec": "sec-ch3-access-h1",
+      "sec": "sec-ch3-supp-adsl",
       "text": "ADSL（拓展）"
     }
   ],
   "p1-e5": [
     {
       "deck": 8,
-      "sec": "sec-ch8-email-h2",
+      "sec": "sec-ch8-supp-smtp",
       "text": "SMTP（拓展）"
     }
   ],
   "p1-e6": [
     {
       "deck": 6,
-      "sec": "sec-ch6-src-ip",
-      "text": "IPv4 与 IPv6（拓展：过渡机制见本题解析）"
+      "sec": "sec-ch6-supp-ipv6",
+      "text": "IPv6 过渡技术（拓展）"
     }
   ],
   "p1-e8": [
     {
       "deck": 1,
-      "sec": "sec-ch1-trend",
+      "sec": "sec-ch1-supp-security",
       "text": "网络安全（拓展）"
     }
   ],
@@ -160,6 +160,11 @@ const practiceTagOverrides: Record<string, PracticeQuestion['tags']> = {
       "deck": 5,
       "sec": "sec-ch5-src-vlan",
       "text": "VLAN 划分"
+    },
+    {
+      "deck": 5,
+      "sec": "sec-ch5-supp-vlan-modes",
+      "text": "静态与动态 VLAN（补充）"
     }
   ],
   "p2-f14": [
@@ -186,8 +191,8 @@ const practiceTagOverrides: Record<string, PracticeQuestion['tags']> = {
   "p2-s10": [
     {
       "deck": 5,
-      "sec": "sec-ch5-src-csma",
-      "text": "CSMA 接入（非坚持式为拓展）"
+      "sec": "sec-ch5-supp-csma",
+      "text": "CSMA 三种坚持策略（补充）"
     }
   ],
   "p2-s16": [
@@ -240,7 +245,7 @@ const practiceTagOverrides: Record<string, PracticeQuestion['tags']> = {
   "p3-s19": [
     {
       "deck": 6,
-      "sec": "sec-ch6-protocol-h2",
+      "sec": "sec-ch6-supp-bgp",
       "text": "BGP（拓展）"
     }
   ],
@@ -283,6 +288,111 @@ const practiceTagOverrides: Record<string, PracticeQuestion['tags']> = {
       "deck": 4,
       "sec": "sec-ch4-src-srp",
       "text": "SRP"
+    }
+  ],
+  "p1-s9": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-supp-forwarding",
+      "text": "全双工端口与转发（补充）"
+    }
+  ],
+  "p1-s13": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-subnet",
+      "text": "子网划分"
+    },
+    {
+      "deck": 6,
+      "sec": "sec-ch6-supp-subnet-legacy",
+      "text": "旧式子网约定"
+    }
+  ],
+  "p1-e9": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-subnet",
+      "text": "子网划分"
+    },
+    {
+      "deck": 6,
+      "sec": "sec-ch6-supp-subnet-legacy",
+      "text": "旧式子网约定"
+    }
+  ],
+  "p1-e13": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-subnet",
+      "text": "子网划分"
+    },
+    {
+      "deck": 6,
+      "sec": "sec-ch6-supp-subnet-legacy",
+      "text": "旧式子网约定"
+    }
+  ],
+  "p2-f4": [
+    {
+      "deck": 2,
+      "sec": "sec-ch2-src-tcpip",
+      "text": "网际层协议"
+    },
+    {
+      "deck": 2,
+      "sec": "sec-ch2-supp-rarp",
+      "text": "RARP 与相关协议（补充）"
+    }
+  ],
+  "p2-f9": [
+    {
+      "deck": 3,
+      "sec": "sec-ch3-supp-cabling",
+      "text": "双绞线连接（补充）"
+    }
+  ],
+  "p2-f12": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-supp-forwarding",
+      "text": "交换机三种转发方式（补充）"
+    }
+  ],
+  "p2-e9": [
+    {
+      "deck": 5,
+      "sec": "sec-ch5-src-extend",
+      "text": "共享与交换式以太网"
+    },
+    {
+      "deck": 5,
+      "sec": "sec-ch5-supp-fddi",
+      "text": "FDDI（补充）"
+    }
+  ],
+  "p3-e4": [
+    {
+      "deck": 6,
+      "sec": "sec-ch6-supp-planes",
+      "text": "数据平面与控制平面（补充）"
+    },
+    {
+      "deck": 6,
+      "sec": "sec-ch6-src-forward",
+      "text": "IP 分组转发"
+    }
+  ],
+  "p3-s14": [
+    {
+      "deck": 7,
+      "sec": "sec-ch7-src-congestion",
+      "text": "快重传与快恢复"
+    },
+    {
+      "deck": 7,
+      "sec": "sec-ch7-supp-reno",
+      "text": "Reno 与 Tahoe（补充）"
     }
   ]
 };
