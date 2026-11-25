@@ -31,8 +31,6 @@ function buildOsIndex(): SearchIndexItem[] {
   return items;
 }
 
-const OS_SUGGESTIONS = ['银行家算法', 'PV 操作', '页面置换', '快表', 'SPOOLing', '死锁'];
-
 /** 操作系统课程根组件 —— 挂在 /os/* 下，布局与算法课同构（顶栏 + 侧栏 + 章节页/练习页） */
 export default function OsCourse() {
   const location = useLocation();
@@ -185,7 +183,6 @@ export default function OsCourse() {
         tabs={tabs}
         searchIndex={searchIndex}
         searchLinkTo={searchLinkTo}
-        suggestions={OS_SUGGESTIONS}
         onOpenSidebar={() => setDrawerOpen(true)}
       />
 

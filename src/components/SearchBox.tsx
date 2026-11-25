@@ -14,18 +14,6 @@ export interface SearchIndexItem {
   text: string;
 }
 
-/** 空搜索结果时给出的示例关键词 */
-const ALGO_SUGGESTIONS = ['Θ 记号', 'LCS', '主方法', '哈夫曼', '循环不变式', 'BFPRT'];
-
-/** 概览行里每种条目的计数文案（固定顺序） */
-const KIND_UNITS: Record<SearchIndexItem['kind'], string> = {
-  章节: '个章节',
-  动画: '个动画',
-  题目: '道自测题',
-  试卷: '份试卷',
-  方向: '个方向',
-};
-
 const stripTags = (s: string) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 
 /** 结果文本里的命中片段：主题色加重标出（不铺底色），扫读时直接定位 */
@@ -87,15 +75,13 @@ interface Props {
   index: SearchIndexItem[];
   /** 条目 → 跳转路由 */
   linkTo: (item: SearchIndexItem) => string;
-  /** 空结果时的示例关键词 */
-  suggestions?: string[];
 }
 
 /**
- * 顶栏内联搜索框：点击在原位展开输入框，下拉菜单展示结果 / 概览，
- * 不再弹出居中的覆盖层。索引与跳转由课程注入，本组件只管交互与样式。
+ * 顶栏内联搜索框：点击在原位展开输入框，有搜索词时下拉展示匹配结果。
+ * 索引与跳转由课程注入，本组件只管交互与样式。
  */
-export default function SearchBox({ index, linkTo, suggestions = ALGO_SUGGESTIONS }: Props) {
+export default function SearchBox({ index, linkTo }: Props) {
   const navigate = useNavigate();
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -104,21 +90,6 @@ export default function SearchBox({ index, linkTo, suggestions = ALGO_SUGGESTION
   const [active, setActive] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const counts = useMemo(() => {
-    const c: Record<string, number> = {};
-    for (const it of index) c[it.kind] = (c[it.kind] ?? 0) + 1;
-    return c;
-  }, [index]);
-
-  const statsLabel = useMemo(
-    () =>
-      (Object.keys(KIND_UNITS) as SearchIndexItem['kind'][])
-        .filter((k) => counts[k])
-        .map((k) => `${counts[k]} ${KIND_UNITS[k]}`)
-        .join(' · '),
-    [counts],
-  );
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -211,7 +182,7 @@ export default function SearchBox({ index, linkTo, suggestions = ALGO_SUGGESTION
         </button>
       )}
       <AnimatePresence>
-        {open && (
+        {open && query.trim() !== '' && (
           <motion.div
             className="search-drop"
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: -6, scaleY: 0.96 }}
@@ -223,35 +194,7 @@ export default function SearchBox({ index, linkTo, suggestions = ALGO_SUGGESTION
             aria-label="搜索结果"
           >
             <ul className="search-list">
-              {results.length === 0 && (
-                <li className="palette-empty">
-                  {query ? (
-                    <>
-                      没有匹配的内容
-                      <span className="palette-suggest">
-                        试试：
-                        {suggestions.map((s) => (
-                          <button key={s} type="button" className="palette-chip" onClick={() => setQuery(s)}>
-                            {s}
-                          </button>
-                        ))}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="palette-overview">
-                      {statsLabel && <span className="palette-stats">{statsLabel}</span>}
-                      <span className="palette-suggest">
-                        热门：
-                        {suggestions.map((s) => (
-                          <button key={s} type="button" className="palette-chip" onClick={() => setQuery(s)}>
-                            {s}
-                          </button>
-                        ))}
-                      </span>
-                    </span>
-                  )}
-                </li>
-              )}
+              {results.length === 0 && query.trim() && <li className="palette-empty">没有匹配的内容</li>}
               {results.map((item, i) => (
                 <li
                   key={`${item.unit}-${item.sectionId}-${i}`}

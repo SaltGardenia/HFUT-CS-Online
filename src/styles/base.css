@@ -2298,39 +2298,6 @@ pre.code .cl-code:empty + .cl-com {
   color: var(--ink-3);
   font-size: 0.8438rem;
 }
-.palette-suggest {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 12px;
-}
-/* 空态概览：先告诉用户「能搜到什么」，chips 给出可直接点的入口 */
-.palette-overview {
-  display: block;
-}
-.palette-stats {
-  display: block;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-.palette-chip {
-  height: 26px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 0.7813rem;
-  color: var(--deck-accent);
-  background: color-mix(in srgb, var(--deck-accent) 10%, transparent);
-  transition: background 140ms var(--press-ease), color 140ms, transform 100ms var(--press-ease);
-}
-.palette-chip:hover {
-  background: var(--deck-accent);
-  color: #fff;
-}
-.palette-chip:active {
-  transform: scale(0.95);
-}
-
 /* ------------------------------------------------- 4e. 章节导航胶囊 */
 .section-capsule {
   position: fixed;

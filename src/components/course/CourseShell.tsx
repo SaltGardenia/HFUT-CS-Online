@@ -270,7 +270,6 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
         tabs={tabs}
         searchIndex={searchIndex}
         searchLinkTo={searchLinkTo}
-        suggestions={config.suggestions}
         onOpenSidebar={() => setDrawerOpen(true)}
       />
 

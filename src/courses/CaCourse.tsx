@@ -40,8 +40,6 @@ function buildCaIndex(): SearchIndexItem[] {
   return items;
 }
 
-const CA_SUGGESTIONS = ['Amdahl', 'CPI', '流水线', 'Tomasulo', 'MESI', 'TLB', 'Cache'];
-
 /** 计算机体系结构课程根组件 —— 挂在 /ca/* 下，布局与算法课同构（顶栏 + 侧栏 + 章节页/练习页） */
 export default function CaCourse() {
   const location = useLocation();
@@ -183,7 +181,6 @@ export default function CaCourse() {
         tabs={tabs}
         searchIndex={searchIndex}
         searchLinkTo={searchLinkTo}
-        suggestions={CA_SUGGESTIONS}
         onOpenSidebar={() => setDrawerOpen(true)}
       />
 

@@ -31,8 +31,6 @@ function buildMathIndex(): SearchIndexItem[] {
   return items;
 }
 
-const MATH_SUGGESTIONS = ['偏导数', '方向导数', '二重积分', '曲线积分', '高斯公式', '傅里叶'];
-
 /** 高等数学课程根组件 —— 挂在 /math/* 下，布局与算法课同构（顶栏 + 侧栏 + 章节页/练习页） */
 export default function MathCourse() {
   const location = useLocation();
@@ -173,7 +171,6 @@ export default function MathCourse() {
         tabs={tabs}
         searchIndex={searchIndex}
         searchLinkTo={searchLinkTo}
-        suggestions={MATH_SUGGESTIONS}
         onOpenSidebar={() => setDrawerOpen(true)}
       />
 

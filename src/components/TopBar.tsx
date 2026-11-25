@@ -45,8 +45,6 @@ interface Props {
   /** 搜索索引与条目跳转路由（各课程自行构建） */
   searchIndex: SearchIndexItem[];
   searchLinkTo: (item: SearchIndexItem) => string;
-  /** 空结果时的示例关键词（缺省用算法课的一组） */
-  suggestions?: string[];
   onOpenSidebar: () => void;
 }
 
@@ -165,7 +163,6 @@ export default function TopBar({
   tabs,
   searchIndex,
   searchLinkTo,
-  suggestions,
   onOpenSidebar,
 }: Props) {
   return (
@@ -201,7 +198,7 @@ export default function TopBar({
         {/* 纯附件/无内容课程（如课程设计）没有可检索的索引，不渲染搜索胶囊 */}
         {searchIndex.length > 0 && (
           <div className="topbar-ctl nav-pill">
-            <SearchBox index={searchIndex} linkTo={searchLinkTo} suggestions={suggestions} />
+            <SearchBox index={searchIndex} linkTo={searchLinkTo} />
           </div>
         )}
         <div className="topbar-ctl nav-pill">
