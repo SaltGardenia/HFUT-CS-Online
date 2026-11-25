@@ -146,6 +146,36 @@ describe('2025 计网课件主线', () => {
     expect(buildSlideReview(netChapters[3]).resolve('sec-ch4-p2p-h1')).toBeUndefined();
     expect(buildSlideReview(netChapters[7]).resolve('sec-ch8-http-h5')).toBeUndefined();
   });
+  it('主线不再自动混入旧讲义文字，独立原讲义仍可查阅', () => {
+    for (const original of netChapters) {
+      const review = buildSlideReview(original);
+      const html = review.chapter.sections.flatMap(s => s.blocks).filter(b => b.type === 'html').map(b => b.html).join('');
+      expect(html).not.toContain('以下保留原讲义解释，具体细节尚未全部与原课件逐段对应');
+      expect(original.sections.length).toBeGreaterThan(0);
+    }
+    const chapter = buildSlideReview(netChapters[7]).chapter;
+    const documents = chapter.sections.find(s => s.id === 'sec-ch8-src-documents')!;
+    const dynamic = chapter.sections.find(s => s.id === 'sec-ch8-src-dynamic-docs')!;
+    const html = (section: typeof documents) => section.blocks.filter(b => b.type === 'html').map(b => b.html).join('');
+    expect(html(documents)).not.toContain('Common Gateway Interface');
+    expect(html(dynamic)).toContain('Common Gateway Interface');
+    expect(html(dynamic)).toContain('静态文档');
+    expect(buildSlideReview(netChapters[7]).resolve('sec-ch8-detail-documents-1wu6iek')).toBe('sec-ch8-detail-documents-1q8s1b9');
+  });
+  it('同一知识点的说明与例题保持学习顺序', () => {
+    const ordered = (n: number, headings: string[]) => {
+      const toc = buildSlideReview(netChapters[n-1]).chapter.toc;
+      const indices = headings.map(h => toc.findIndex(e => e.text.replace('★ ', '').includes(h)));
+      for (let i = 0; i < indices.length; i++) {
+        expect(indices[i], headings[i]).toBeGreaterThanOrEqual(0);
+        if (i > 0) expect(indices[i], headings[i]).toBeGreaterThan(indices[i-1]);
+      }
+    };
+    ordered(1, ['第一阶段：远程联机系统','远程联机系统的两种线路连接方式','远程联机系统：三个改进结构','第二阶段：多机互联网络','ARPANET 的特点与贡献','第三阶段：标准化网络','第四阶段：互联与高速网络']);
+    ordered(5, ['物理层扩展','数据链路层扩展','自学习算法','单台四端口交换机','两台交换机互连']);
+    ordered(7, ['为何单独增加一种资源','开环控制与闭环控制','慢开始与拥塞避免','慢开始的逐报文确认','快重传、快恢复','原始拥塞控制曲线','第134页 TCP 拥塞控制流程图']);
+    ordered(8, ['面向事务、请求响应与 TCP 连接','点击链接后的完整访问实例','三种 HTTP 连接方式','HTTP 流水线图示']);
+  });
   it('详细主线不能退化成知识点摘要，且保留课内互动演示', () => {
     for (const original of netChapters) {
       const { chapter } = buildSlideReview(original);
