@@ -4,11 +4,23 @@ name: Preview PR (publish)
 # 这样 fork PR 的代码只在只读的 build 里被执行，发布这一步拿到的是成品目录。
 # 版本号用 PR head SHA：deploy-pages 会把 GITHUB_SHA（这里是 main）当版本，同一提交重复发布会
 # 命中 Pages 去重导致内容不更新，所以改用 pages-deploy.mjs 显式指定版本。
+#
+# 手动补发：Actions → Preview PR (publish) → Run workflow，填构建运行 ID
+# （同分支上 Preview PR (build) 的 run id）。用于同组排队时被新运行取代、没发出去的那次。
 
 on:
   workflow_run:
     workflows: ['Preview PR (build)']
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      run-id:
+        description: Preview PR (build) 的运行 ID
+        required: true
+      pr:
+        description: PR 编号（留空则按 head SHA 反查）
+        required: false
+        default: ''
 
 permissions:
   actions: read
@@ -23,24 +35,51 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
       name: github-pages
       url: https://saltgardenia.github.io/HFUT-CS-Online/
     env:
-      PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
-      PAGES_VERSION: ${{ github.event.workflow_run.head_sha }}
       SITE: https://saltgardenia.github.io/HFUT-CS-Online
     steps:
       - uses: actions/checkout@v7
+
+      - name: 解析构建信息
+        id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_RUN: ${{ inputs['run-id'] }}
+          INPUT_PR: ${{ inputs.pr }}
+          EVENT_RUN: ${{ github.event.workflow_run.id }}
+          EVENT_SHA: ${{ github.event.workflow_run.head_sha }}
+          EVENT_PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: |
+          run="${INPUT_RUN:-$EVENT_RUN}"
+          if [ -z "$run" ]; then
+            echo "缺少构建运行 ID"
+            exit 1
+          fi
+          if [ -n "$INPUT_RUN" ]; then
+            # 手动补发：从构建运行里取 head SHA 当版本号
+            sha=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run}" --jq .head_sha)
+            pr="$INPUT_PR"
+          else
+            sha="$EVENT_SHA"
+            pr="$EVENT_PR"
+          fi
+          [ -n "$sha" ] || { echo "拿不到构建的 head SHA"; exit 1; }
+          echo "run_id=$run" >> "$GITHUB_OUTPUT"
+          echo "PAGES_VERSION=$sha" >> "$GITHUB_ENV"
+          echo "PR_NUMBER=$pr" >> "$GITHUB_ENV"
+          echo "构建运行：$run，版本 $sha，PR ${pr:-（待反查）}"
 
       - uses: actions/download-artifact@v8
         with:
           name: site-dist
           path: ${{ runner.temp }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ steps.meta.outputs.run_id }}
           github-token: ${{ github.token }}
 
       - name: 解包产物
