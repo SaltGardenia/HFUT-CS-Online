@@ -10,6 +10,7 @@ import Sections from '../components/Sections';
 import { netChapters, netPapers, netAllQuestions } from '../content/net';
 import { netHomework } from '../content/net/homework';
 import { buildSlideReview } from '../content/net/slide-review';
+import { buildNetSupplement } from '../content/net/supplement';
 import { netHighlights } from '../content/net/highlights';
 import { readProgress } from '../lib/sync/local';
 import { NET_PRACTICE_STORE_KEY } from '../pages/net/netPracticeState';
@@ -293,7 +294,7 @@ describe('计算机网络试卷题库', () => {
         expect(t.deck, q.id).toBeLessThanOrEqual(8);
         const chapter = netChapters[t.deck - 1];
         const review = buildSlideReview(chapter);
-        const hit = review.resolve(t.sec) ?? chapter.toc.find((e) => e.id === t.sec) ?? chapter.sections.some((s) => s.id === t.sec);
+        const hit = review.resolve(t.sec) ?? buildNetSupplement(chapter).toc.find(e => e.id === t.sec) ?? chapter.toc.find((e) => e.id === t.sec) ?? chapter.sections.some((s) => s.id === t.sec);
         expect(hit, `${q.id} → ch${t.deck}/${t.sec} 不存在`).toBeTruthy();
         expect(t.text.length, q.id).toBeGreaterThan(0);
         expect(ENTITY_RE.test(t.text), `${q.id} 标签文本残留实体`).toBe(false);
@@ -305,7 +306,7 @@ describe('计算机网络试卷题库', () => {
     const expected: Record<string, string[]> = {
       'p1-e2': ['sec-ch8-src-ftp'],
       'p2-e8': ['sec-ch5-src-vlan'],
-      'p2-f13': ['sec-ch5-src-vlan'],
+      'p2-f13': ['sec-ch5-src-vlan','sec-ch5-supp-vlan-modes'],
       'p2-f14': ['sec-ch6-src-services'],
       'p3-e3': ['sec-ch3-src-capacity'],
       'p3-e7': ['sec-ch4-src-window','sec-ch4-src-sw','sec-ch4-src-arq','sec-ch4-src-srp'],
@@ -316,6 +317,24 @@ describe('计算机网络试卷题库', () => {
     const bgp = netAllQuestions.find(q => q.id === 'p3-s19')!.tags[0];
     expect(bgp.text).toContain('拓展');
     expect(buildSlideReview(netChapters[5]).resolve(bgp.sec)).toBeUndefined();
+    expect(buildNetSupplement(netChapters[5]).toc.some(e => e.id === bgp.sec)).toBe(true);
+  });
+
+  it('历年补充题直接定位含具体考点的独立正文', () => {
+    const cases = [
+      ['p1-s3',3,'atm','53 字节'], ['p1-e3',3,'adsl','DMT'],
+      ['p1-e5',8,'smtp','SMTP'], ['p1-e6',6,'ipv6','双协议栈'],
+      ['p1-e8',1,'security','截获'], ['p1-e9',6,'subnet-legacy','10.255.255.254'],
+      ['p2-f9',3,'cabling','Auto-MDI-X'], ['p2-f12',5,'forwarding','Fragment-Free'],
+      ['p2-s10',5,'csma','非坚持 CSMA'], ['p3-e4',6,'planes','数据平面'],
+      ['p3-s19',6,'bgp','AS_PATH'], ['p3-s14',7,'reno','12 KB'],
+    ] as const;
+    for(const [id,no,key,term] of cases){
+      const anchor = 'sec-ch'+no+'-supp-'+key;
+      expect(netAllQuestions.find(q=>q.id===id)?.tags.some(t=>t.sec===anchor),id).toBe(true);
+      const section=buildNetSupplement(netChapters[no-1]).sections.find(s=>s.id===anchor)!;
+      expect(section.blocks.filter(b=>b.type==='html').map(b=>b.html).join(''),id).toContain(term);
+    }
   });
 
   it('知识点覆盖 8 个章（没有落单的章）', () => {
