@@ -113,9 +113,9 @@ describe('2025 计网课件主线', () => {
     }
     expect(count).toBe(55);
     const ch4=buildSlideReview(netChapters[3]).chapter.sections.find(s=>s.id==='sec-ch4-src-crc')!;
-    expect(ch4.blocks.filter(b=>b.type==='html').map(b=>b.html).join('')).toContain('<pre>1100110000');
+    expect(ch4.blocks.filter(b=>b.type==='html').map(b=>b.html).join('')).toContain('<code>  1100110000\n⊕ 1100100000');
     const ch8=buildSlideReview(netChapters[7]).chapter.sections.find(s=>s.id==='sec-ch8-src-message')!;
-    expect(ch8.blocks.filter(b=>b.type==='html').map(b=>b.html).join('')).toContain('<pre>GET /index.html HTTP/1.1');
+    expect(ch8.blocks.filter(b=>b.type==='html').map(b=>b.html).join('')).toContain('<code>GET /index.html HTTP/1.1');
   });
   it('图示验收：接入边界、拥塞控制条件和回退分支', () => {
     const html=(n:number,k:string)=>buildSlideReview(netChapters[n-1]).chapter.sections.find(s=>s.id==='sec-ch'+n+'-src-'+k)!.blocks.filter(b=>b.type==='html').map(b=>b.html).join('');
@@ -193,6 +193,18 @@ describe('2025 计网课件主线', () => {
     }
     expect(count).toBe(25);
     expect(buildSlideReview(netChapters[4]).resolve('sec-ch5-detail-extend-1wewhgl')).toBe('sec-ch5-detail-extend-18dxxsm');
+  });
+  it('CRC 竖式与协议报文保留等宽预格式结构及换行', () => {
+    const review = buildSlideReview(netChapters[3]).chapter;
+    const practice = review.sections.find(s => s.id === 'sec-ch4-src-crc-practice')!;
+    const html = practice.blocks.filter(b => b.type === 'html').map(b => b.html).join('');
+    expect(html).toContain('<pre class="net-preformatted"');
+    expect(html).toContain('<code>  1101000\n⊕ 1011000\n  ───────');
+    expect(html).toContain('  0000001</code></pre>');
+    for (const ch of netChapters) {
+      const body = buildSlideReview(ch).chapter.sections.flatMap(s=>s.blocks).filter(b=>b.type==='html').map(b=>b.html).join('');
+      expect(body).not.toMatch(/<pre>/);
+    }
   });
   it('详细主线不能退化成知识点摘要，且保留课内互动演示', () => {
     for (const original of netChapters) {
