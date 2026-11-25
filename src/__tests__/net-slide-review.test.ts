@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { netChapters } from '../content/net';
 import { netHomework } from '../content/net/homework';
-import { buildSlideReview, sourceExtraNotes } from '../content/net/slide-review';
+import { buildSlideReview, sourceExtraNotes, originalHighlightTargets } from '../content/net/slide-review';
 
 describe('2025 计网课件主线', () => {
   it('八章知识单元顺序独立于旧讲义', () => {
@@ -75,8 +75,24 @@ describe('2025 计网课件主线', () => {
     expect(chapter.toc.some(e=>e.text.includes('停—等协议'))).toBe(false);
     expect(chapter.toc.some(e=>e.text.includes('四种情况分别画时间线'))).toBe(false);
     const sw=chapter.sections.find(s=>s.id==='sec-ch4-src-sw')!;
-    expect(sw.heading).toContain('★');
+    expect(sw.heading).not.toContain('★');
+    expect(chapter.toc.find(e=>e.id===id)?.text).toContain('★');
     expect(sw.blocks.some(b=>b.type==='demo'&&b.name==='net-stop-wait')).toBe(true);
+  });
+  it('荧光笔严格来自原PDF，旧版星号与作业优先级不再传播', () => {
+    const lookup=(n:number)=>buildSlideReview(netChapters[n-1]).chapter;
+    const stars=(n:number)=>lookup(n).toc.filter(e=>e.text.includes('★'));
+    expect(stars(8)).toHaveLength(0);
+    expect(stars(3).some(e=>e.id==='sec-ch3-src-capacity')).toBe(false);
+    expect(stars(4).some(e=>/src-ppp-(frame|transparent|state)$/.test(e.id))).toBe(false);
+    expect(stars(7).some(e=>/src-(udp|tcp|connect)$/.test(e.id))).toBe(false);
+    expect(stars(1).some(e=>e.text.includes('五种拓扑'))).toBe(true);
+    expect(stars(3).some(e=>e.text.includes('字符同步'))).toBe(true);
+    expect(stars(5).some(e=>e.text.includes('双绞线星形'))).toBe(true);
+    for(let n=1;n<=8;n++){
+      const html=lookup(n).sections.flatMap(s=>s.blocks).filter(b=>b.type==='html').map(b=>b.html).join('');
+      expect((html.match(/data-source-highlight="true"/g)??[]).length).toBe(originalHighlightTargets[n].length);
+    }
   });
   it('全部课程作业仍可在主线定位且题目锚点不变', () => {
     for (const [i, original] of netChapters.entries()) {
