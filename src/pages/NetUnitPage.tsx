@@ -273,6 +273,23 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
 
 const askAiStyles = `
 
+/* Calculation and protocol examples must retain their original line breaks, including on mobile. */
+.page[data-deck] pre.net-preformatted {
+  display:block; box-sizing:border-box; max-width:100%; margin:1rem 0;
+  padding:.85rem 1rem; border:1px solid var(--hairline); border-radius:10px;
+  background:var(--panel-solid); color:var(--ink); overflow-x:auto;
+  white-space:pre !important; overflow-wrap:normal; word-break:normal;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:.9rem; line-height:1.65; font-variant-numeric:tabular-nums;
+  letter-spacing:0; tab-size:4;
+}
+.page[data-deck] pre.net-preformatted > code {
+  display:block; width:max-content; min-width:100%; padding:0; margin:0;
+  border:0; background:transparent; color:inherit; font:inherit;
+  white-space:pre !important; overflow-wrap:normal; word-break:normal;
+}
+
+
 .page h2.net-ask-ai-heading, .page h3.net-ask-ai-heading, .page h4.net-ask-ai-heading { display:flex; align-items:center; flex-wrap:wrap; gap:.45rem; }
 .page h3.net-ask-ai-heading::before { flex:none; margin-right:.15rem; }
 .page .net-ask-ai { --ask-accent:var(--deck-accent); margin-inline-start:auto; position:relative; display:inline-flex; align-items:center; flex:none; font-family:inherit; font-size:12px; font-weight:500; line-height:1.4; letter-spacing:0; color:var(--ink-2); white-space:nowrap; border:1px solid var(--hairline); border-radius:9px; background:var(--panel-solid); }
