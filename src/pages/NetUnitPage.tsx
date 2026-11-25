@@ -49,8 +49,8 @@ function providerIcon(provider: AskProvider) {
   img.height = 18;
   img.loading = 'lazy';
   img.referrerPolicy = 'no-referrer';
-  img.hidden = true;
-  img.addEventListener('load', () => { img.hidden = false; });
+  img.style.opacity = '0';
+  img.addEventListener('load', () => { img.style.opacity = '1'; });
   img.addEventListener('error', () => { img.remove(); });
   img.src = new URL('/favicon.ico', provider.home).href;
   icon.appendChild(img);
