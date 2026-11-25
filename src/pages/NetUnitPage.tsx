@@ -1,7 +1,8 @@
 import { Fragment, useEffect, useMemo, useRef } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { NET_BASE } from '../courses/registry';
-import { netChapters } from '../content/net';
+import { netChapters, netPapers } from '../content/net';
+import { buildNetSupplement, isNetSupplementAnchor } from '../content/net/supplement';
 import { netHomework } from '../content/net/homework';
 import { buildSlideReview, sourceExtraNotes } from '../content/net/slide-review';
 import NetHomework from './net/NetHomework';
@@ -319,36 +320,43 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
   const [params] = useSearchParams();
   const requested = params.get('s');
   const review = useMemo(() => buildSlideReview(original), [original]);
-  const legacyAnchor = !!requested && !review.resolve(requested) && original.toc.some((e) => e.id === requested);
-  const extra = params.get('view') === 'extra' || legacyAnchor;
-  const chapter = extra ? original : review.chapter;
-  const section = requested ? (extra ? requested : review.resolve(requested)) : undefined;
+  const supplement = useMemo(() => buildNetSupplement(original), [original]);
+  const supplementAnchor = !!requested && isNetSupplementAnchor(requested) && supplement.toc.some(e => e.id === requested);
+  const legacyAnchor = !!requested && !review.resolve(requested) && original.toc.some(e => e.id === requested);
+  const mode = supplementAnchor || params.get('view') === 'supplement' ? 'supplement'
+    : params.get('view') === 'extra' || legacyAnchor ? 'extra' : 'main';
+  const extra = mode === 'extra';
+  const isSupplement = mode === 'supplement';
+  const chapter = isSupplement ? supplement : extra ? original : review.chapter;
+  const section = requested ? (mode === 'main' ? review.resolve(requested) : requested) : undefined;
   useEffect(() => {
-    if (legacyAnchor && params.get('view') !== 'extra') {
-      navigate(`${NET_BASE}/deck/${original.id}?view=extra&s=${encodeURIComponent(requested!)}`, { replace: true });
+    if (!requested) return;
+    const view = supplementAnchor ? 'supplement' : legacyAnchor ? 'extra' : undefined;
+    if (view && params.get('view') !== view) {
+      navigate(`${NET_BASE}/deck/${original.id}?view=${view}&s=${encodeURIComponent(requested)}`, { replace: true });
     }
-  }, [legacyAnchor, params, navigate, original.id, requested]);
+  }, [legacyAnchor, supplementAnchor, params, navigate, original.id, requested]);
   const pageRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
 
   const jump = (id: string) => {
     scrollToId(id);
     toc.setActive(id);
-    navigate(`${NET_BASE}/deck/${chapter.id}?${extra ? 'view=extra&' : ''}s=${encodeURIComponent(id)}`, { replace: true });
+    navigate(`${NET_BASE}/deck/${chapter.id}?${mode === 'main' ? '' : 'view='+mode+'&'}s=${encodeURIComponent(id)}`, { replace: true });
   };
 
   useEffect(() => {
     toc.report(chapter.toc, jump);
     return () => toc.report([], () => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapter.id, extra]);
+  }, [chapter.id, mode]);
 
   useEffect(() => {
     if (!section) return;
     const t = window.setTimeout(() => scrollToId(section, firstRender.current), 80);
     firstRender.current = false;
     return () => window.clearTimeout(t);
-  }, [section, extra]);
+  }, [section, mode]);
 
   useScrollSpy(pageRef, [chapter.id, extra]);
 
@@ -359,7 +367,7 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
 
   const level2 = chapter.toc.filter((e) => e.level === 2);
   const chapterNo = Number(chapter.id.slice(2));
-  const questions = netHomework[chapterNo] ?? [];
+  const questions = isSupplement ? [] : netHomework[chapterNo] ?? [];
   // 与侧栏目录使用相同的 section id；把 h3 知识点归入所在 h2。
   const questionsForSection = new Map<string, typeof questions>();
   let parent = '';
@@ -383,12 +391,20 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
       </div>
       <nav className="topic-map" aria-label="复习模式">
         <span className="topic-map-label">复习模式</span>
-        <button className="topic-chip" type="button" aria-pressed={!extra} style={{ fontWeight: !extra ? 700 : 400 }} onClick={() => { if (extra) { navigate(`${NET_BASE}/deck/${chapter.id}`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>课件主线（详细讲义）</button>
-        <button className="topic-chip" type="button" aria-pressed={extra} style={{ fontWeight: extra ? 700 : 400 }} onClick={() => { if (!extra) { navigate(`${NET_BASE}/deck/${chapter.id}?view=extra`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>完整原讲义与拓展</button>
+        {([['main','课件主线'],['supplement','历年考点与拓展'],['extra','历史原讲义']] as const).map(([value,label]) => (
+          <button key={value} className="topic-chip" type="button" aria-pressed={mode === value}
+            style={{ fontWeight: mode === value ? 700 : 400 }} onClick={() => {
+              if (mode !== value) {
+                navigate(`${NET_BASE}/deck/${chapter.id}${value === 'main' ? '' : '?view='+value}`, {replace:true});
+                window.scrollTo({top:0,behavior:'auto'});
+              }
+            }}>{label}</button>
+        ))}
       </nav>
       <div className="callout tip">
-        <p className="callout-h">{extra ? '原有讲义与拓展（非课件主线）' : '学习范围与拓展'}</p>
-        <p>{sourceExtraNotes[chapterNo]} {extra ? '以下为原有讲义，含与主线重复的解释、拓展及尚未逐段核实的内容，不代表全部属于课件。' : '主线采用统一整理的定义、原理、例题和图解，不重复拼接旧讲义。原有补充文字、表格及额外图示可在完整原讲义模式查阅。「理解辅助」用于解释课内概念；拓展内容不计作课内知识点。'}</p>
+        <p className="callout-h">{isSupplement ? '历年考点与课外拓展' : extra ? '历史原讲义（仅供对照）' : '学习范围'}</p>
+        <p>{isSupplement ? '本页不重复整理课内定义，仅收录未详细展开的考点和必要的延伸知识。' : extra ? '此处保留历史版本，其中有与主线重复的内容。' : '按课件顺序学习；理解辅助紧随相应知识点。'}</p>
+        <p>{sourceExtraNotes[chapterNo]}</p>
       </div>
       {level2.length > 1 && (
         <nav className="topic-map" aria-label="本章知识点导航">
@@ -403,6 +419,13 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
       {chapter.sections.map((section) => (
         <Fragment key={section.id}>
           <Sections sections={[section]} keepNumberDot />
+          {isSupplement && (() => {
+            const papers = netPapers.filter(p => p.questions.some(q => q.tags.some(t => t.sec === section.id)));
+            return papers.length > 0 && <nav className="net-hw-context" aria-label="相关历年试卷">
+              <span>相关历年试卷</span>
+              {papers.map(p => <Link key={p.id} to={`${NET_BASE}/practice/${p.id}`}>{p.id.replace('paper-', '')} 年试卷</Link>)}
+            </nav>;
+          })()}
           {(questionsForSection.get(section.id) ?? []).length > 0 && (
             <nav className="net-hw-context" aria-label="本节相关课程作业">
               <span>对应课程作业</span>
@@ -415,7 +438,7 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
           )}
         </Fragment>
       ))}
-      <NetHomework chapterNo={chapterNo} questions={questions} />
+      {!isSupplement && <NetHomework chapterNo={chapterNo} questions={questions} />}
       <SectionCapsule />
     </div>
   );
