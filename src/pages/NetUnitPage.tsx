@@ -13,6 +13,7 @@ import Sections from '../components/Sections';
 import SectionCapsule from '../components/SectionCapsule';
 import { scrollToId } from '../lib/scroll';
 import { useScrollSpy } from '../lib/scrollspy';
+import { netAskReference, buildNetAskPrompt, type NetAskMode } from '../lib/netAskPrompt';
 
 
 type AskProvider = { id: string; name: string; home: string; param?: string };
@@ -81,8 +82,8 @@ function providerUrl(provider: AskProvider, prompt: string) {
   return url.toString();
 }
 
-/** 只传课程、章节和知识点名称，不抓取正文，不限制原文长度。 */
-function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[number]) {
+/** 传课程、知识点名称与定位链接，不复制完整正文。 */
+function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[number], mode: NetAskMode) {
   let preferred = askProviders[0];
   try {
     preferred = askProviders.find((provider) => provider.id === localStorage.getItem(ASK_PROVIDER_KEY)) ?? preferred;
@@ -94,12 +95,15 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
     const container = document.getElementById(section.id)?.parentElement;
     if (!container || !root.contains(container)) return [];
     let parentTitle = '';
+    let anchor = section.id;
     return Array.from(container.querySelectorAll<HTMLElement>('h2, h3, h4')).map((heading) => {
       const level = Number(heading.tagName.slice(1));
       const title = (heading.textContent ?? '').trim();
       if (level === 3) parentTitle = title;
+      if (heading.id && (level === 2 || level === 3)) anchor = heading.id;
       return {
         heading,
+        anchor,
         level,
         title,
         sectionTitle: decodeEntities(section.heading),
@@ -120,14 +124,15 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
     controls.forEach((item) => item.refresh());
   }
 
-  for (const { heading, level, title, sectionTitle, parentTitle } of entries) {
+  for (const { heading, anchor, level, title, sectionTitle, parentTitle } of entries) {
     if (!title) continue;
     const scope = [
       chapter.no + ' ' + decodeEntities(chapter.title),
       ...(level > 2 ? [sectionTitle] : []),
       ...(parentTitle ? [parentTitle] : []),
     ].join(' / ');
-    const prompt = '请通俗地讲解计算机网络（' + scope + '）中的「' + title + '」，并举一个具体例子。';
+    const reference = netAskReference(window.location.href, chapter.id, anchor, mode);
+    const prompt = buildNetAskPrompt(scope, title, reference);
 
     const wrap = document.createElement('span');
     wrap.className = 'net-ask-ai';
@@ -169,7 +174,7 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
         return;
       }
       void navigator.clipboard.writeText(prompt).then(() => {
-        status.textContent = '已复制简短问题，可在 AI 中粘贴。';
+        status.textContent = '已复制问题和参考链接，可在 AI 中粘贴。';
       }).catch(() => {
         status.textContent = '请手动复制：' + prompt;
       });
@@ -183,7 +188,7 @@ function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[num
       model.className = 'net-ask-ai-current';
       model.textContent = preferred.name;
       primary.replaceChildren(askAiGlyph('M12 3 13.9 8.1 19 10 13.9 11.9 12 17 10.1 11.9 5 10 10.1 8.1 12 3 M19 13v6 M16 16h6 M5 3v4 M3 5h4'), label, model);
-      primary.title = preferred.param ? '将知识点标题传入 ' + preferred.name : '复制简短问题并打开 ' + preferred.name;
+      primary.title = preferred.param ? '将知识点标题和链接传入 ' + preferred.name : '复制问题和链接并打开 ' + preferred.name;
       primary.setAttribute('aria-label', '向 ' + preferred.name + ' 提问：' + title);
       for (const link of Array.from(menu.querySelectorAll<HTMLAnchorElement>('a[data-provider]'))) {
         const active = link.dataset.provider === preferred.id;
@@ -379,8 +384,8 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
 
   useEffect(() => {
     if (!pageRef.current) return;
-    return installNetAskAI(pageRef.current, chapter);
-  }, [chapter]);
+    return installNetAskAI(pageRef.current, chapter, mode);
+  }, [chapter, mode]);
 
   const level2 = chapter.toc.filter((e) => e.level === 2);
   const chapterNo = Number(chapter.id.slice(2));
