@@ -5,7 +5,7 @@ import { buildSlideReview, sourceExtraNotes } from '../content/net/slide-review'
 
 describe('2025 计网课件主线', () => {
   it('八章知识单元顺序独立于旧讲义', () => {
-    const orders = [["history","definition","function","structure","topology","classify-intro","switch","classify","performance"],["formation","protocol","layer","services","osi","pdu","five","tcpip"],["system","encoding","modulation","pcm","capacity","media","direction","serial","sync","mux","t1e1","stDM","sonet","switch","vc","physical"],["basic","frame","crc","sw","arq","ppp"],["lan","csma","traditional","util","mac","extend","vlan","fast"],["services","ip","address","mac","arp","header","forward","subnet","cidr","icmp","routing","rip","ospf"],["overview","udp","tcp","reliable","header","window","rtt","connect","congestion"],["overview","dns","ftp","www","http","proxy","message","documents","search"]];
+    const orders = [["history","definition","function","structure","topology","classify-intro","switch","classify","performance"],["formation","protocol","layer","services","osi","pdu","five","tcpip"],["system","encoding","modulation","pcm","capacity","media","direction","serial","sync","mux","t1e1","stDM","sonet","switch","vc","physical"],["basic","frame","crc","reliable","sw","arq","window","srp","ppp"],["lan","csma","traditional","util","mac","extend","vlan","fast"],["services","ip","address","mac","arp","header","forward","subnet","cidr","icmp","routing","rip","ospf"],["overview","udp","tcp","reliable","header","window","rtt","connect","congestion"],["overview","dns","ftp","www","http","proxy","message","documents","search"]];
     expect(netChapters).toHaveLength(8);
     for (const [i, original] of netChapters.entries()) {
       const no = i + 1;
@@ -16,6 +16,19 @@ describe('2025 计网课件主线', () => {
       expect(sourceExtraNotes[no]).toBeTruthy();
       expect(chapter.toc.filter(e => e.id.includes('-src-')).map(e => e.id)).toEqual(chapter.sections.map(s => s.id));
     }
+  });
+  it('第4章后半部分按课件分别展示可靠传输、SWP、GBN、滑动窗口、SRP和PPP', () => {
+    const { chapter, resolve } = buildSlideReview(netChapters[3]);
+    const byKey = (key: string) => chapter.sections.find(s => s.id === 'sec-ch4-src-' + key)!;
+    const html = (key: string) => byKey(key).blocks.filter(b => b.type === 'html').map(b => b.html).join('');
+    expect(html('sw')).toContain('完全理想化的数据传输');
+    expect(html('sw')).toContain('四种典型情形');
+    expect(html('arq')).toContain('DATA0～DATA5');
+    expect(html('window')).toContain('接收窗口三阶段');
+    expect(html('srp')).toContain('选择重传窗口的限制');
+    expect(html('ppp')).toContain('本章最后一页的 CRC 练习');
+    expect(resolve('sec-ch4-flow-h2')).toBeDefined();
+    expect(html('sw')).not.toContain('本节属于拓展自学内容');
   });
   it('全部课程作业仍可在主线定位且题目锚点不变', () => {
     for (const [i, original] of netChapters.entries()) {
