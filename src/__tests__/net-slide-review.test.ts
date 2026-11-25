@@ -106,7 +106,7 @@ describe('2025 计网课件主线', () => {
         expect(fig[0]).toContain('<svg');
         expect(fig[0]).toContain('role="img"');
         expect(fig[0]).toContain('<desc>');
-        expect(fig[0]).toContain('<figcaption>');
+        expect(fig[0]).toMatch(/<figcaption(?:\s[^>]*)?>[\s\S]+?<\/figcaption>/);
       }
       count+=figures.length;
       expect(new Set(figures.map(f=>f[1])).size).toBe(figures.length);
