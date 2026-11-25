@@ -5,7 +5,7 @@ import { buildSlideReview, sourceExtraNotes } from '../content/net/slide-review'
 
 describe('2025 计网课件主线', () => {
   it('八章知识单元顺序独立于旧讲义', () => {
-    const orders = [["history","definition","function","structure","topology","classify-intro","switch","classify","performance"],["formation","protocol","layer","services","osi","pdu","five","tcpip"],["system","encoding","modulation","pcm","capacity","media","direction","serial","sync","mux","t1e1","stDM","sonet","switch","vc","physical"],["basic","frame","crc","reliable","sw","arq","window","srp","ppp","ppp-frame","ppp-transparent","ppp-state","crc-practice"],["lan","csma","traditional","util","mac","extend","vlan","fast"],["services","ip","address","mac","arp","header","forward","subnet","cidr","icmp","routing","rip","ospf"],["overview","udp","tcp","reliable","header","window","flow","rtt","connect","congestion"],["overview","dns","ftp","www","http","proxy","message","cookie","documents","dynamic-docs","search"]];
+    const orders = [["history","definition","function","structure","topology","classify-intro","switch","classify","performance"],["building","formation","protocol","layer","services","osi","pdu","five","tcpip"],["system","encoding","modulation","pcm","capacity","media","direction","serial","sync","mux","t1e1","stDM","sonet","switch","vc","physical"],["basic","frame","crc","reliable","sw","arq","window","srp","ppp","ppp-frame","ppp-transparent","ppp-state","crc-practice"],["lan","csma","traditional","util","mac","extend","vlan","fast"],["services","ip","address","mac","arp","header","forward","subnet","cidr","icmp","routing","rip","ospf"],["overview","udp","tcp","reliable","header","window","flow","rtt","connect","congestion"],["overview","dns","ftp","www","http","proxy","message","cookie","documents","dynamic-docs","search"]];
     expect(netChapters).toHaveLength(8);
     for (const [i, original] of netChapters.entries()) {
       const no = i + 1;
@@ -48,6 +48,14 @@ describe('2025 计网课件主线', () => {
         }
       }
     }
+  });
+  it('图像型课件中易漏的重点保留在主线且归属正确', () => {
+    const html=(n:number,k:string)=>buildSlideReview(netChapters[n-1]).chapter.sections.find(s=>s.id==='sec-ch'+n+'-src-'+k)!.blocks.filter(b=>b.type==='html').map(b=>b.html).join('');
+    for(const [n,k,word] of [[1,'classify','第一个路由器'],[1,'performance','838.8608'],[2,'building','多播／组播地址'],[3,'encoding','01001100011'],[3,'pcm','011 100 011 011 001 100'],[3,'pcm','差分脉码调制'],[3,'capacity','码间串扰'],[3,'t1e1','274.176'],[4,'frame','Start Of Header'],[5,'vlan','广播风暴'],[6,'address','221.45.71.255'],[6,'routing','内部网关协议'],[6,'ospf','600年'],[7,'flow','900字节滑动窗口'],[7,'congestion','闭环控制的三项措施'],[7,'congestion','第134页 TCP 拥塞控制流程图'],[8,'search','分类检索的界面示例']] as const){
+      expect(html(n,k), '第'+n+'章 '+k).toContain(word);
+    }
+    const {chapter}=buildSlideReview(netChapters[2]);
+    expect(chapter.sections.find(s=>s.id==='sec-ch3-src-capacity')!.blocks.some(b=>b.type==='demo' && b.name==='net-nyquist')).toBe(true);
   });
   it('全部课程作业仍可在主线定位且题目锚点不变', () => {
     for (const [i, original] of netChapters.entries()) {
