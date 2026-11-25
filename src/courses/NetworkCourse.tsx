@@ -19,7 +19,7 @@ import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
 /** 计网课搜索索引：各章目录 + 试卷入口 + 总目录 */
-export function buildNetIndex(): SearchIndexItem[] {
+function buildNetIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of netChapters) {
     for (const t of buildNetSupplement(ch).toc) {
