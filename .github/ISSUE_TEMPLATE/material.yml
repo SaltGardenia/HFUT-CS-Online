@@ -1,0 +1,54 @@
+name: 资料投稿
+description: 补充课件、试卷、实验材料或参考答案
+title: 'material: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        投稿规则见 [补充资料/README.md](https://github.com/SaltGardenia/HFUT-CS-Online/blob/main/补充资料/README.md)。
+        直接把文件放进 `补充资料/<学期>/<课程>/{课件,试题,附件}/` 再开 PR 也可以，
+        本模板用于先确认归属与来源。
+  - type: input
+    id: course
+    attributes:
+      label: 课程
+      description: 与 data/ 中同名课程完全一致（不确定可写「待确认」）
+      placeholder: 计算机网络
+    validations:
+      required: true
+  - type: dropdown
+    id: semester
+    attributes:
+      label: 学期
+      options: [大一上, 大一下, 大二上, 大二下, 大三上, 大三下, 大四上, 大四下]
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 资料类型
+      options: [课件, 试题, 附件（实验/代码/报告/参考）]
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: 文件清单
+      description: 文件名或压缩包内容；有多个版本请注明年份/教师
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: 来源与授权
+      description: 来自哪门课的哪位老师/哪个群/哪个仓库；是否允许公开分发
+      placeholder: 2025 年秋季学期课件，授课教师同意公开
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: 确认
+      options:
+        - label: 我有权公开分享这些资料，或它们本来就是公开材料
+          required: true

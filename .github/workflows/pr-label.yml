@@ -1,0 +1,58 @@
+name: PR 标签
+
+# 按 PR 标题的 Conventional Commits 前缀打类型标签，供 .github/release.yml 分组。
+# 用 pull_request_target：fork PR 也有写标签的权限；这里只读标题，不检出 PR 代码。
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const TYPES = ['feat', 'fix', 'perf', 'docs', 'style', 'refactor', 'ci', 'build', 'test', 'chore', 'revert'];
+            const COLORS = {
+              feat: '0e8a16', fix: 'd73a4a', perf: 'fbca04', docs: '0075ca', style: 'c2e0c6',
+              refactor: 'cfd3d7', ci: 'e4e669', build: 'bfd4f2', test: 'f9d0c4', chore: 'ededed', revert: '5319e7',
+            };
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+
+            // release-please 自己的发布 PR 不入账
+            if (/^chore\(main\): release /.test(pr.title || '')) return;
+
+            const m = /^([a-z]+)(?:\([^)]*\))?!?:/i.exec(pr.title || '');
+            const type = m && TYPES.includes(m[1].toLowerCase()) ? m[1].toLowerCase() : null;
+            const current = (pr.labels || []).map((l) => l.name).filter((n) => TYPES.includes(n));
+
+            if (type) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: type });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, name: type, color: COLORS[type] });
+              }
+              if (!current.includes(type)) {
+                await github.rest.issues.addLabels({ owner, repo, issue_number: pr.number, labels: [type] });
+              }
+            }
+
+            // 标题类型改了：摘掉旧类型标签
+            for (const old of current) {
+              if (old === type) continue;
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name: old });
+              } catch {
+                // 标签已被删掉时忽略
+              }
+            }

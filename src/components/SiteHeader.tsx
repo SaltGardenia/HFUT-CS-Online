@@ -10,10 +10,10 @@ export default function SiteHeader() {
         HFUT-CS-Online
       </Link>
       <div className="hub-topbar-right">
-        <AccountButton />
         <div className="topbar-ctl nav-pill">
           <ThemeToggle />
         </div>
+        <AccountButton />
       </div>
     </header>
   );

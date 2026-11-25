@@ -1,0 +1,18 @@
+  /* comp 章（共享 12 色板，按导航顺序取色） */
+  --comp1: #a05a2c;  --comp2: #4a5aa8;  --comp3: #8f741c;  --comp4: #7d5ba6;  --comp5: #6b7a2f;  --comp6: #9c4a72;  --comp7: #2e7d5b;
+  --comp1: #e0975f;  --comp2: #8f9ce0;  --comp3: #d4b95a;  --comp4: #b39be0;  --comp5: #b3c26e;  --comp6: #d69ab8;  --comp7: #7cc9a3;
+  /* co 章（共享 12 色板，按导航顺序取色） */
+  --co1: #4a5aa8;  --co2: #a05a2c;  --co3: #2e7d5b;  --co4: #b5485e;  --co5: #22767c;  --co6: #8f741c;  --co7: #7d5ba6;  --co8: #6b7a2f;  --co9: #9c4a72;
+  --co1: #8f9ce0;  --co2: #e0975f;  --co3: #7cc9a3;  --co4: #ec8ea0;  --co5: #6cc4c9;  --co6: #d4b95a;  --co7: #b39be0;  --co8: #b3c26e;  --co9: #d69ab8;
+  /* emb 章（共享 12 色板，按导航顺序取色） */
+  --emb1: #b5485e;  --emb2: #6b7a2f;  --emb3: #7d5ba6;  --emb4: #8f741c;  --emb5: #4a5aa8;  --emb6: #2e7d5b;
+  --emb1: #ec8ea0;  --emb2: #b3c26e;  --emb3: #b39be0;  --emb4: #d4b95a;  --emb5: #8f9ce0;  --emb6: #7cc9a3;
+  /* ml 章（共享 12 色板，按导航顺序取色） */
+  --ml1: #b5485e;  --ml2: #2e7d5b;  --ml3: #7d5ba6;  --ml4: #8f741c;  --ml5: #4a5aa8;
+  --ml1: #ec8ea0;  --ml2: #7cc9a3;  --ml3: #b39be0;  --ml4: #d4b95a;  --ml5: #8f9ce0;
+  /* ste 章（共享 12 色板，按导航顺序取色） */
+  --ste1: #7d5ba6;  --ste2: #2e7d5b;  --ste3: #4a5aa8;  --ste4: #6b7a2f;  --ste5: #31708e;  --ste6: #8f741c;
+  --ste1: #b39be0;  --ste2: #7cc9a3;  --ste3: #8f9ce0;  --ste4: #b3c26e;  --ste5: #74b3d2;  --ste6: #d4b95a;
+  /* comb 章（共享 12 色板，按导航顺序取色） */
+  --comb1: #2e7d5b;  --comb2: #b5485e;  --comb3: #22767c;  --comb4: #a05a2c;
+  --comb1: #7cc9a3;  --comb2: #ec8ea0;  --comb3: #6cc4c9;  --comb4: #e0975f;

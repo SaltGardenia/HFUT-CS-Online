@@ -22,6 +22,25 @@ export type FavoriteMeta = Record<string, FavoriteStamp>;
 /** 最近查看：课程名 → 最近一次查看时间（毫秒） */
 export type RecentMeta = Record<string, number>;
 
+/**
+ * 阅读进度：一页一条，本地键是路由 pathname（如 `/algo/deck/deck3`）。
+ * y 用于同设备精确恢复，p（0~1）用于跨设备换算（屏幕尺寸不同）。
+ */
+export interface ReadingEntry {
+  /** 课程 slug（路由首段，与云端 course 字段一致） */
+  c: string;
+  /** 滚动位置（px） */
+  y: number;
+  /** 页面进度 0~1 */
+  p: number;
+  /** 最近的小节标题 */
+  s?: string;
+  /** 本地更新时间（毫秒） */
+  t: number;
+}
+
+export type ReadingMap = Record<string, ReadingEntry>;
+
 export interface RemoteProgressRow {
   course: string;
   question_id: string;
@@ -38,6 +57,19 @@ export interface RemoteFavoriteRow {
 export interface RemoteRecentRow {
   course: string;
   viewed_at: string;
+}
+
+export interface RemoteReadingRow {
+  course: string;
+  page: string;
+  scroll_y: number;
+  percent: number;
+  section: string | null;
+  updated_at: string;
+}
+
+export interface PushReadingRow extends RemoteReadingRow {
+  device_id: string;
 }
 
 export interface PushProgressRow {
@@ -63,6 +95,7 @@ export interface PushPayload {
   progress: PushProgressRow[];
   favorites: PushFavoriteRow[];
   recent: PushRecentRow[];
+  reading: PushReadingRow[];
 }
 
 export interface SyncUser {

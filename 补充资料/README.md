@@ -27,7 +27,7 @@
 ## 新增资料的步骤
 
 1. 按上面的契约把文件放进对应目录（新建课程时同时建好课程目录）。
-2. 运行 `npm run catalog`，它会重建 `src/content/catalog.ts` 与 `public/attachments/*.json`。
+2. 运行 `npm run catalog:supplement`，它会重建 `src/content/catalog.ts` 与 `public/attachments/*.json`（不需要本地 `data/`；CI 会校验生成物是否最新）。
 3. 连同生成物一起提交。附件页会从本仓库 raw 直链下载，并显示文件的上传者（取自 git 首次提交该作者）。
 
 ## 命名与冲突

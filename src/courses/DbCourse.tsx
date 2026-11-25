@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
+import { useScrollMemory } from '../lib/scrollMemory';
 import { DB_BASE, findCourseByBase } from './registry';
 import { dbChapters, dbPapers } from '../content/db';
 import TopBar, { type CourseTab } from '../components/TopBar';
@@ -14,9 +15,6 @@ import DbPaperPage from '../pages/DbPaperPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
-
-/** 各路由的滚动记忆（POP 导航时恢复） */
-const scrollPositions = new Map<string, number>();
 
 /** 数据库系统课程搜索索引：章节目录 + 试卷 */
 function buildDbIndex(): SearchIndexItem[] {
@@ -102,22 +100,7 @@ export default function DbCourse() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // 滚动记忆：离开时保存；POP 恢复；新导航回顶部（?s= 定位交给页面处理）
-  useEffect(() => {
-    const key = location.key;
-    return () => {
-      scrollPositions.set(key, window.scrollY);
-    };
-  }, [location.key]);
-
-  useEffect(() => {
-    if (navType === 'POP') {
-      const y = scrollPositions.get(location.key) ?? 0;
-      requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'auto' }));
-    } else if (!location.search) {
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
-  }, [location.key, navType, location.search]);
+  useScrollMemory(location, navType);
 
   useEffect(() => setDrawerOpen(false), [location.pathname]);
 

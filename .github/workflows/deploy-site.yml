@@ -1,0 +1,143 @@
+name: Deploy site
+
+# 主站 + 全部分支预览构建成一个 Pages 产物后发布。
+# 主站构建哪个提交由 main-ref 决定：发版传刚发布的 tag，push 传空（取最近一次 Release）。
+# 调用方：deploy-release.yml（Release 发布）与 deploy-preview.yml（每次 push 刷新预览）。
+
+on:
+  workflow_call:
+    inputs:
+      main-ref:
+        description: 主站要构建的 git 引用；留空取最近一次 GitHub Release
+        required: false
+        type: string
+        default: ''
+      publish:
+        description: 是否在本工作流内发布；false 时只上传 site-dist 产物供调用方发布
+        required: false
+        type: boolean
+        default: true
+
+# 权限由调用方的顶层 permissions 决定，这里不重复声明
+
+env:
+  SITE_BASE: /HFUT-CS-Online/
+  PREVIEW_MAX: '8'
+  PREVIEW_TTL_DAYS: '14'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Supabase 连接信息（Publishable Key，可公开）；未配置时站点自动退回纯本地模式
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 选择主站版本
+        id: mainref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_REF: ${{ inputs.main-ref }}
+        run: node .github/scripts/main-ref.mjs
+
+      # 先把预览脚本拷到临时目录：下面要检出的可能是旧 tag，那里的脚本未必支持现在的参数
+      - name: 准备预览脚本
+        run: cp -R .github/scripts "$RUNNER_TEMP/scripts"
+
+      - name: 检出主站版本
+        run: git checkout -f --detach "${{ steps.mainref.outputs.ref }}"
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 类型检查与测试
+        run: |
+          npx tsc -b
+          npx vitest run
+
+      - name: 构建主站
+        run: npm run build
+
+      - name: 计算预览目标
+        id: targets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node "$RUNNER_TEMP/scripts/preview-targets.mjs"
+
+      # build-previews.sh 以 origin/main 的依赖声明作为“已安装”基线；
+      # 主站版本与 origin/main 依赖不同时（发旧 tag），先对齐再构建预览。
+      - name: 对齐预览依赖基线
+        if: steps.targets.outputs.count != '0'
+        run: |
+          if git diff --quiet "${{ steps.mainref.outputs.ref }}" origin/main -- package.json package-lock.json; then
+            echo "依赖声明与 origin/main 一致，沿用当前 node_modules"
+          else
+            git checkout -f --detach origin/main
+            npm ci
+          fi
+
+      - name: 构建分支预览
+        if: steps.targets.outputs.count != '0'
+        env:
+          SITE_BASE: ${{ env.SITE_BASE }}
+        run: bash "$RUNNER_TEMP/scripts/build-previews.sh" "${{ steps.targets.outputs.file }}" dist
+
+      - name: 生成预览索引页
+        env:
+          PREVIEW_TARGETS_FILE: ${{ steps.targets.outputs.file }}
+        run: node "$RUNNER_TEMP/scripts/preview-index.mjs" "$PREVIEW_TARGETS_FILE" "${RUNNER_TEMP}/preview-built.txt" dist
+
+      - name: 打包产物（交给调用方发布）
+        if: ${{ !inputs.publish }}
+        run: tar -C dist -cf "$RUNNER_TEMP/site-dist.tar" .
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !inputs.publish }}
+        with:
+          name: site-dist
+          path: ${{ runner.temp }}/site-dist.tar
+          retention-days: 1
+
+      - uses: actions/upload-pages-artifact@v5
+        if: ${{ inputs.publish }}
+        with:
+          path: dist
+          retention-days: 1
+
+  deploy:
+    if: ${{ inputs.publish }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+      # 部署成功不等于页面可用（历史上有过 SW 缓存导致白屏）：主站与预览索引都拉一次
+      - name: 冒烟检查
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          code=""
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$PAGE_URL" || true)
+            [ "$code" = "200" ] && break
+            echo "第 $i 次：主站返回 $code，5 秒后重试"
+            sleep 5
+          done
+          [ "$code" = "200" ] || { echo "主站返回 $code"; exit 1; }
+          preview=$(curl -s -o /dev/null -w '%{http_code}' "${PAGE_URL}preview/" || true)
+          [ "$preview" = "200" ] || { echo "预览索引返回 $preview"; exit 1; }

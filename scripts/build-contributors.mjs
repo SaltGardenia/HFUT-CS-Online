@@ -19,6 +19,18 @@ const REPOS = [
 const HEADERS = { 'User-Agent': 'hfut-cs-online-build' };
 if (process.env.GITHUB_TOKEN) HEADERS.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
 
+/** 自动化账号不进头像墙：API 的 type 偶尔也会把 App 账号标成 User，按 login 再兜一层 */
+const BOT_LOGINS = new Set([
+  'github-actions',
+  'dependabot',
+  'release-please',
+  'copilot',
+  'renovate',
+  'codecov',
+  'github-pages',
+]);
+const isBot = (c) => c.type === 'Bot' || /\[bot\]$/i.test(c.login) || BOT_LOGINS.has(c.login.toLowerCase());
+
 async function fetchContributors(repo) {
   const url = `https://api.github.com/repos/${repo}/contributors?per_page=100`;
   for (let i = 0; i < 3; i++) {
@@ -33,7 +45,7 @@ async function fetchContributors(repo) {
       if (res.ok) {
         const list = await res.json();
         return Array.isArray(list)
-          ? list.filter((c) => c.login && c.type !== 'Bot').map((c) => ({
+          ? list.filter((c) => c.login && !isBot(c)).map((c) => ({
               login: c.login,
               avatar_url: c.avatar_url,
               html_url: c.html_url,

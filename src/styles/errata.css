@@ -16,23 +16,12 @@
   }
 }
 
-/* 紧凑桌面（1021–1500）右组已满：勘误入口挪到课程名胶囊旁，更宽屏再回到右组 */
+/* 勘误入口固定在右组（紧挨账号入口左侧）：只留铅笔图标，不随宽度换边 */
 .topbar-ctl.errata-slot {
   flex: none;
 }
-.topbar-ctl.errata-slot-left {
-  display: none;
-}
-@media (min-width: 1021px) and (max-width: 1500px) {
-  .topbar-ctl.errata-slot-left {
-    display: inline-flex;
-  }
-  .topbar-ctl.errata-slot-right {
-    display: none;
-  }
-}
 
-/* 顶栏入口：与账号入口同尺寸的文字按钮，编辑态用当前讲次主题色 */
+/* 顶栏入口：与账号入口同尺寸的图标按钮，编辑态用当前讲次主题色 */
 .errata-trigger.active {
   color: var(--deck-accent);
 }
@@ -53,15 +42,6 @@
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-}
-.errata-label {
-  white-space: nowrap;
-}
-/* 1418px 实测：顶栏右组已接近满宽，勘误只留铅笔 + 数字，给搜索让出位置 */
-@media (max-width: 1500px) {
-  .errata-label {
-    display: none;
-  }
 }
 
 /* 编辑态：每个可改单元只有悬停/聚焦时才显出虚线，避免整页花掉 */

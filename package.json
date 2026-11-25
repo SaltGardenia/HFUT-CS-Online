@@ -1,16 +1,21 @@
 {
   "name": "hfut-cs-online",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.2.0",
   "type": "module",
   "description": "《算法设计与分析》复习手册 —— 依据课程 PPT 整理的核心考点、24 个交互式算法动画与 36 道自测题",
-  "license": "CC-BY-NC-SA-4.0",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "predev": "node scripts/build-catalog.mjs",
     "dev": "vite",
     "prebuild": "node scripts/build-catalog.mjs",
     "build": "tsc -b && vite build",
     "catalog": "node scripts/build-catalog.mjs",
+    "catalog:supplement": "node scripts/build-catalog.mjs --supplement-only",
+    "catalog:check": "node scripts/build-catalog.mjs --supplement-only --check",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -19,20 +24,20 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.2",
-    "motion": "^14.12.0",
+    "motion": "^14.14.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.5"
+    "react-router-dom": "^7.18.6"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.9",
+    "@testing-library/user-event": "^14.6.13",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
-    "jsdom": "^31.0.0",
+    "jsdom": "^31.0.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   }
 }

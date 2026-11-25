@@ -1,0 +1,41 @@
+# GitHub 自动生成 Release notes 的分类（release-please 的 changelog-type: github 也走这里）。
+# 标签由 .github/workflows/pr-label.yml 按 PR 标题前缀自动打。
+changelog:
+  exclude:
+    labels:
+      - "autorelease: pending"
+      - "autorelease: tagged"
+      - dependencies
+      - skip-changelog
+  categories:
+    - title: 新功能
+      labels:
+        - feat
+    - title: 修复
+      labels:
+        - fix
+    - title: 性能
+      labels:
+        - perf
+    - title: 文档
+      labels:
+        - docs
+    - title: 样式与文案
+      labels:
+        - style
+    - title: 重构
+      labels:
+        - refactor
+    - title: 持续集成与构建
+      labels:
+        - ci
+        - build
+    - title: 测试
+      labels:
+        - test
+    - title: 杂项
+      labels:
+        - chore
+    - title: 其他改动
+      labels:
+        - '*'

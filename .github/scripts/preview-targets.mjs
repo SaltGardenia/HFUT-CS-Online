@@ -31,19 +31,20 @@ function slugify(branch) {
   return `${clean || 'branch'}-${hash}`;
 }
 
-/* 开着的 PR：fork 的 head 分支不在本仓库 origin 上，暂不预览 */
+/* 开着的 PR：本仓库分支按分支名索引；fork 的 head 分支单独用 refs/pull/<n>/head 取 */
 let prByBranch = new Map();
+let forkPrs = [];
 try {
   const json = execFileSync(
     'gh',
     ['pr', 'list', '--state', 'open', '--limit', '200', '--json', 'number,headRefName,isCrossRepository'],
     { encoding: 'utf8' },
   );
-  prByBranch = new Map(
-    JSON.parse(json)
-      .filter((pr) => !pr.isCrossRepository)
-      .map((pr) => [pr.headRefName, pr.number]),
-  );
+  const prs = JSON.parse(json);
+  prByBranch = new Map(prs.filter((pr) => !pr.isCrossRepository).map((pr) => [pr.headRefName, pr.number]));
+  // fork 的 head 分支不在本仓库 origin 上，用 base 仓库的 refs/pull/<n>/head 取。
+  // 每个外部 PR 要一次 fetch，限制数量，避免一次部署拉几十个远端分支。
+  forkPrs = prs.filter((pr) => pr.isCrossRepository).slice(0, 20);
 } catch (err) {
   console.warn(`[preview-targets] 读取 PR 列表失败，本次只按分支规则生成预览：${err.message}`);
 }
@@ -74,9 +75,52 @@ for (const line of git(
   }
   if (!ahead) continue;
 
-  candidates.push({ branch, date: Number(date), sha, pr, ahead });
+  candidates.push({
+    branch,
+    date: Number(date),
+    sha,
+    pr,
+    ahead,
+    ref: `origin/${branch}`,
+    // 有 PR 的分支统一用 pr-<编号>：PR 评论里回贴的链接才能稳定对上（fork PR 也只有这个 slug）
+    slugBase: pr ? `pr-${pr}` : slugify(branch),
+  });
 }
 
+/* 外部 PR：fetch 到 origin/pr-<n>，构建时再合并到当前 main（GitHub 的 merge ref
+ * 只在 PR 同步时更新，拿不到主站之后的修复，所以这里取 head、由构建脚本现合）。 */
+for (const pr of forkPrs) {
+  const ref = `origin/pr-${pr.number}`;
+  try {
+    execFileSync('git', ['fetch', '--no-tags', '--quiet', 'origin', `+refs/pull/${pr.number}/head:refs/remotes/${ref}`], {
+      stdio: ['ignore', 'ignore', 'ignore'],
+    });
+  } catch (err) {
+    console.warn(`[preview-targets] 取不到 PR #${pr.number} 的 head（fork 可能已删除）：${err.message.split('\n')[0]}`);
+    continue;
+  }
+  try {
+    const sha = git('rev-parse', '--short', ref);
+    const date = Number(git('log', '-1', '--format=%ct', ref));
+    const ahead = Number(git('rev-list', '--count', `${MAIN}..${ref}`));
+    if (!ahead) continue;
+    candidates.push({
+      branch: pr.headRefName ?? `pr-${pr.number}`,
+      date,
+      sha,
+      pr: pr.number,
+      ahead,
+      ref,
+      slugBase: `pr-${pr.number}`,
+      fork: true,
+      merge: true,
+    });
+  } catch (err) {
+    console.warn(`[preview-targets] 解析 PR #${pr.number} 失败：${err.message.split('\n')[0]}`);
+  }
+}
+
+candidates.sort((a, b) => b.date - a.date);
 const picked = candidates.slice(0, max);
 if (candidates.length > picked.length) {
   console.warn(`[preview-targets] ${candidates.length} 个分支符合条件，按最近提交只保留 ${picked.length} 个（PREVIEW_MAX）`);
@@ -84,18 +128,20 @@ if (candidates.length > picked.length) {
 
 const used = new Set();
 const targets = picked.map((c) => {
-  let slug = slugify(c.branch);
-  for (let i = 2; used.has(slug); i++) slug = `${slugify(c.branch)}-${i}`;
+  let slug = c.slugBase;
+  for (let i = 2; used.has(slug); i++) slug = `${c.slugBase}-${i}`;
   used.add(slug);
   return {
     slug,
-    ref: `origin/${c.branch}`,
+    ref: c.ref,
     branch: c.branch,
-    label: c.pr ? `#${c.pr} · ${c.branch}` : c.branch,
+    label: c.pr ? `#${c.pr} · ${c.branch}${c.fork ? '（fork）' : ''}` : c.branch,
     pr: c.pr,
     sha: c.sha,
     date: c.date,
     ahead: c.ahead,
+    ...(c.fork ? { fork: true } : {}),
+    ...(c.merge ? { merge: true } : {}),
   };
 });
 

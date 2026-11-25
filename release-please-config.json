@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "node",
+  "bootstrap-sha": "9b821f420915c9120a6685b002730e69172ad477",
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "changelog-type": "github",
+  "changelog-sections": [
+    { "type": "feat", "section": "新功能", "hidden": false },
+    { "type": "fix", "section": "修复", "hidden": false },
+    { "type": "perf", "section": "性能", "hidden": false },
+    { "type": "revert", "section": "回滚", "hidden": false },
+    { "type": "docs", "section": "文档", "hidden": false },
+    { "type": "style", "section": "样式与文案", "hidden": false },
+    { "type": "refactor", "section": "重构", "hidden": false },
+    { "type": "ci", "section": "持续集成", "hidden": true },
+    { "type": "build", "section": "构建", "hidden": true },
+    { "type": "test", "section": "测试", "hidden": true },
+    { "type": "chore", "section": "杂项", "hidden": true }
+  ],
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "hfut-cs-online",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}

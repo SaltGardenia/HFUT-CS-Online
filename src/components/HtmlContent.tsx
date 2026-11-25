@@ -55,7 +55,8 @@ function highlightCode(code: HTMLElement) {
         inCom = true;
         cur.com.push({ text: p, com: true });
       } else {
-        cur.code.push(t);
+        // 跨行 token 必须按行拆分后再放入对应行，否则整段文本会在每一行重复
+        cur.code.push({ text: p, com: false });
       }
     });
   }
@@ -375,6 +376,13 @@ export default function HtmlContent({ html }: Props) {
     if (!a) return;
     const href = a.getAttribute('href') ?? '';
 
+    // HashRouter 路由链接（#/ds/simulator）交给路由；当成页内锚点会滚到一个不存在的元素，
+    // 表现就是「点了没反应」。
+    if (href.startsWith('#/')) {
+      e.preventDefault();
+      navigate(href.slice(1));
+      return;
+    }
     if (href.startsWith('#')) {
       e.preventDefault();
       scrollToId(href.slice(1));

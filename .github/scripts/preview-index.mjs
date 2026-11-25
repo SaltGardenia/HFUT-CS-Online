@@ -27,6 +27,7 @@ const cards = rows
         <div class="head">
           <span class="branch">${esc(t.branch)}</span>
           ${t.pr ? `<span class="tag">#${t.pr}</span>` : ''}
+          ${t.fork ? `<span class="tag">fork</span>` : ''}
         </div>
         <div class="meta">${esc(t.sha)} · ${day(t.date)} · 领先 main ${t.ahead} 个提交</div>
         <span class="go" aria-hidden="true">→</span>

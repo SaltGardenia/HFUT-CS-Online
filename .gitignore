@@ -34,3 +34,7 @@ _tools/*_out/
 _tools/*_tmp/
 _tools/pptx/
 .kilo/
+_tools/*.log
+
+# TypeScript 增量构建缓存（本地生成，不随仓库分发）
+*.tsbuildinfo

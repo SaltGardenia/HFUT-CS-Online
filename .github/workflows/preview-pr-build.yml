@@ -1,0 +1,25 @@
+name: Preview PR (build)
+
+# 外部 fork 的 PR 不会触发本仓库的 push 工作流，所以单独按 pull_request 事件构建：
+# 这里只有 contents: read，负责跑 PR 代码并上传产物；发布交给 Preview PR (publish)。
+# 同一个 PR 连推取消旧构建；PR 关闭后不再有 synchronize，自然不会重建它的预览。
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: preview-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    # release-please 的发布 PR 只有版本号与 CHANGELOG，预览没有意义
+    if: ${{ !startsWith(github.event.pull_request.head.ref, 'release-please--') }}
+    uses: ./.github/workflows/deploy-site.yml
+    with:
+      publish: false

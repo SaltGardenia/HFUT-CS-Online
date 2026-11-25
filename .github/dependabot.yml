@@ -1,0 +1,37 @@
+version: 2
+
+updates:
+  # 运行依赖：只按 minor/patch 分组，major 单独开 PR 便于评估
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    groups:
+      npm-minor:
+        patterns: ['*']
+        update-types: ['minor', 'patch']
+    commit-message:
+      prefix: chore
+      include: scope
+
+  # 工作流里引用的 action 也纳入升级；统一打 ci 前缀，不污染站点 CHANGELOG
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    groups:
+      actions-minor:
+        patterns: ['*']
+    commit-message:
+      prefix: ci
+      include: scope

@@ -264,6 +264,223 @@ export const courses: readonly CourseEntry[] = [
     ready: true,
     source: '创新实践结课报告 · 课件与试题未收录',
   },
+  {
+    id: 'python-programming',
+    name: 'Python程序设计',
+    semester: '大二上',
+    base: '/py',
+    ready: true,
+    source: '九章课件精讲（第 1～7 章主干 + 第 8～9 章选学）· 试题为上机练习代码，未设在线练习',
+  },
+  {
+    id: 'discrete-mathematics',
+    name: '离散数学',
+    semester: '大二上',
+    base: '/dm',
+    ready: true,
+    source: '六章课件精讲（命题逻辑 / 谓词逻辑 / 集合与计数 / 图论 / 关系 / 特殊关系）· 1 份期末试卷在线练习',
+  },
+  {
+    id: 'computational-methods',
+    name: '计算方法',
+    semester: '大二上',
+    base: '/cm',
+    ready: true,
+    source: '六章课件精讲（插值 / 数值积分 / 常微分方程差分 / 方程求根 / 线性方程组）· 试题未收录',
+  },
+  {
+    id: 'probability-statistics',
+    name: '概率论与数理统计',
+    semester: '大二上',
+    base: '/prob',
+    ready: true,
+    source: '六章课件精讲 · 期末试卷为公式图片版，未设在线练习',
+  },
+  {
+    id: 'assembly-language',
+    name: '汇编语言程序设计',
+    semester: '大二上',
+    base: '/asm',
+    ready: true,
+    source: '七章课件精讲（80x86 指令系统 / 程序设计 / 子程序 / 中断）· 1 份期末真题在线练习',
+  },
+  {
+    id: 'eda-training',
+    name: 'EDA实训',
+    semester: '大二上',
+    base: '/eda',
+    ready: true,
+    source: 'EDA 与 PCB 设计实训课件 · Verilog / FPGA 期末复习题在线练习',
+  },
+  {
+    id: 'research-training',
+    name: '科研训练',
+    semester: '大二上',
+    base: '/res',
+    ready: true,
+    source: '科研训练答辩课件 · 试题未收录',
+  },
+  {
+    id: 'physics-lab',
+    name: '大学物理实验',
+    semester: '大二上',
+    base: '/physlab',
+    ready: true,
+    source: '声速测量 / 静电场实验课件 · 期末试卷为扫描件，未设在线练习',
+  },
+  {
+    id: 'java-technology',
+    name: 'Java技术',
+    semester: '大二上',
+    base: '/java',
+    ready: true,
+    source: '实验指导书 + 五次上机作业源码 · 课件与试题未收录',
+  },
+  {
+    id: 'digital-logic',
+    name: '数字逻辑',
+    semester: '大二上',
+    base: '/dl',
+    ready: true,
+    source: '实验指导与习题答案 · 课件目录为空（PPT 在附件中），试题未收录',
+  },
+  {
+    id: 'robotics',
+    name: '机器人技术',
+    semester: '大二上',
+    base: '/robot',
+    ready: true,
+    source: 'RoboCup 2D 实验与项目资料 · 课件目录为空（PPT 在附件中），无成套试卷',
+  },
+  {
+    id: 'data-structures',
+    name: '数据结构',
+    semester: '大一下',
+    base: '/ds',
+    ready: true,
+    source: '八章课件精讲 · 5 份模拟/期末试卷在线练习',
+  },
+  {
+    id: 'data-structures-course-design',
+    name: '数据结构课程设计',
+    semester: '大一下',
+    base: '/dscd',
+    ready: true,
+    source: '课程设计报告与代码 · 课件与试题未收录',
+  },
+  {
+    id: 'linear-algebra',
+    name: '线性代数',
+    semester: '大一上',
+    base: '/la',
+    ready: true,
+    source: '六章课件精讲 · 4 份习题/期中试卷在线练习',
+  },
+  {
+    id: 'circuits-and-electronics',
+    name: '电路与电子技术基础',
+    semester: '大一下',
+    base: '/ee',
+    ready: true,
+    source: '十五章课件精讲（电路 6 章 + 模电 9 章）· 1 份期末试卷在线练习',
+  },
+  /* ---- 大二下批次（12 门）：base 同时是 html[data-deck] 与 D2XCourse 的 URL 首段 ---- */
+  {
+    id: 'compiler-principles',
+    name: '编译原理',
+    semester: '大二下',
+    base: '/comp',
+    ready: true,
+    source: '七章课件精讲（引论 → 中间代码产生）· 期末试卷扫描件收录于附件',
+  },
+  {
+    id: 'computer-organization',
+    name: '计算机组成原理',
+    semester: '大二下',
+    base: '/co',
+    ready: true,
+    source: '九章课件精讲（概述 / 总线 / 存储 / I/O / 运算 / 指令 / CPU / 控制单元）· 期末试卷在线练习',
+  },
+  {
+    id: 'embedded-systems',
+    name: '嵌入式系统原理',
+    semester: '大二下',
+    base: '/emb',
+    ready: true,
+    source: '六章课件精讲（ARM 体系结构与接口）· 期末试卷扫描件收录于附件',
+  },
+  {
+    id: 'machine-learning',
+    name: '机器学习',
+    semester: '大二下',
+    base: '/ml',
+    ready: true,
+    source: '五讲课件精讲（绪论 / 决策树 / 集成学习 / SVM / OCR 实例）· 试题未收录',
+  },
+  {
+    id: 'software-tools-environment',
+    name: '软件工具与环境',
+    semester: '大二下',
+    base: '/ste',
+    ready: true,
+    source: '六章课件精讲（Web 开发工具链与 CMS 实战）· 试题未收录',
+  },
+  {
+    id: 'combinatorics',
+    name: '组合数学',
+    semester: '大二下',
+    base: '/comb',
+    ready: true,
+    source: '四章十九节课件精讲（计数 / 生成函数 / 递推 / 容斥）· 试题未收录',
+  },
+  {
+    id: 'computer-graphics',
+    name: '计算机图形学',
+    semester: '大二下',
+    base: '/cg',
+    ready: true,
+    source: '八讲课件与实验工程资料（课件归在附件目录）· 未设在线练习',
+  },
+  {
+    id: 'software-modeling-analysis',
+    name: '软件建模与分析',
+    semester: '大二下',
+    base: '/sma',
+    ready: true,
+    source: '软件建模讲义资料 · 课件与试题未收录',
+  },
+  {
+    id: 'digital-media-technology',
+    name: '数字媒体技术',
+    semester: '大二下',
+    base: '/dmt',
+    ready: true,
+    source: '实验手册、调研报告模板与大作业素材 · 课件与试题未收录',
+  },
+  {
+    id: 'network-programming',
+    name: '网络程序设计',
+    semester: '大二下',
+    base: '/np',
+    ready: true,
+    source: '网络程序设计实验与课程设计源码 · 课件与试题未收录',
+  },
+  {
+    id: 'microcomputer-principles',
+    name: '微机原理与接口技术',
+    semester: '大二下',
+    base: '/micro',
+    ready: true,
+    source: '四个实验的程序与实验报告 · 课件与试题未收录',
+  },
+  {
+    id: 'hardware-engineer-training',
+    name: '硬件工程师综合训练',
+    semester: '大二下',
+    base: '/het',
+    ready: true,
+    source: '课程设计题目、注意事项与设计报告 · 课件与试题未收录',
+  },
 ];
 
 /** 首页/占位页用的未上线课程路由前缀 */
@@ -362,6 +579,25 @@ export const DSD_BASE = courses[29].base;
 
 /** 创新实践课路由前缀（同上约定） */
 export const IP_BASE = courses[30].base;
+
+/** 大二上批次路由前缀（同上约定） */
+export const PY_BASE = courses[31].base;
+export const DM_BASE = courses[32].base;
+export const CM_BASE = courses[33].base;
+export const PROB_BASE = courses[34].base;
+export const ASM_BASE = courses[35].base;
+export const EDA_BASE = courses[36].base;
+export const RES_BASE = courses[37].base;
+export const PHYS_LAB_BASE = courses[38].base;
+export const JAVA_BASE = courses[39].base;
+export const DL_BASE = courses[40].base;
+export const ROBOT_BASE = courses[41].base;
+
+/** 大一上/下补全批次路由前缀（独立字面量：不受其它批次课程条目增删影响） */
+export const DS_BASE = '/ds';
+export const DSCD_BASE = '/dscd';
+export const LA_BASE = '/la';
+export const EE_BASE = '/ee';
 
 export function findCourseByName(name: string): CourseEntry | undefined {
   return courses.find((c) => c.name === name);

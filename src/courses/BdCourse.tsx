@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
+import { useScrollMemory } from '../lib/scrollMemory';
 import { bdDecks } from '../content/bd';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
@@ -11,9 +12,6 @@ import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
 import { BD_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
-
-/** 各路由的滚动记忆（POP 导航时恢复） */
-const scrollPositions = new Map<string, number>();
 
 /** 大数据处理技术课搜索索引：讲次目录（试题未收录，无试卷条目；单讲课程不设总目录页） */
 function buildBdIndex(): SearchIndexItem[] {
@@ -72,22 +70,7 @@ export default function BdCourse() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // 滚动记忆：离开时保存；POP 恢复；无 ?s= 的新导航回顶部（定位交给页面处理）
-  useEffect(() => {
-    const key = location.key;
-    return () => {
-      scrollPositions.set(key, window.scrollY);
-    };
-  }, [location.key]);
-
-  useEffect(() => {
-    if (navType === 'POP') {
-      const y = scrollPositions.get(location.key) ?? 0;
-      requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'auto' }));
-    } else if (!location.search) {
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
-  }, [location.key, navType, location.search]);
+  useScrollMemory(location, navType);
 
   // 路由切换时关闭抽屉
   useEffect(() => setDrawerOpen(false), [location.pathname]);

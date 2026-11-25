@@ -1,0 +1,122 @@
+{
+ "comp": {
+  "base_light": "#264f73",
+  "base_light_hard": 15.7,
+  "base_dark": "#6c60dc",
+  "base_dark_hard": 18.9,
+  "att_light": "#8d495d",
+  "att_light_hard": 14.6,
+  "att_dark": "#ddb9b0",
+  "att_dark_hard": 13.4
+ },
+ "co": {
+  "base_light": "#a17936",
+  "base_light_hard": 15.3,
+  "base_dark": "#dbaf76",
+  "base_dark_hard": 14.7,
+  "att_light": "#5d6321",
+  "att_light_hard": 13.7,
+  "att_dark": "#ddd7b0",
+  "att_dark_hard": 12.8
+ },
+ "emb": {
+  "base_light": "#53874f",
+  "base_light_hard": 12.5,
+  "base_dark": "#b8d666",
+  "base_dark_hard": 13.0,
+  "att_light": "#632321",
+  "att_light_hard": 11.5,
+  "att_dark": "#e7cb92",
+  "att_dark_hard": 11.5
+ },
+ "ml": {
+  "base_light": "#56a136",
+  "base_light_hard": 16.3,
+  "base_dark": "#81dc60",
+  "base_dark_hard": 13.9,
+  "att_light": "#a19a36",
+  "att_light_hard": 13.4,
+  "att_dark": "#a1cb72",
+  "att_dark_hard": 12.2
+ },
+ "ste": {
+  "base_light": "#58562d",
+  "base_light_hard": 14.5,
+  "base_dark": "#e0c671",
+  "base_dark_hard": 13.0,
+  "att_light": "#346563",
+  "att_light_hard": 12.7,
+  "att_dark": "#7799c5",
+  "att_dark_hard": 12.7
+ },
+ "comb": {
+  "base_light": "#61487a",
+  "base_light_hard": 15.0,
+  "base_dark": "#d176db",
+  "base_dark_hard": 13.0,
+  "att_light": "#8f36a1",
+  "att_light_hard": 12.5,
+  "att_dark": "#b760dc",
+  "att_dark_hard": 12.1
+ },
+ "cg": {
+  "base_light": "#73266e",
+  "base_light_hard": 13.9,
+  "base_dark": "#dc60bb",
+  "base_dark_hard": 14.1,
+  "att_light": "#632133",
+  "att_light_hard": 12.4,
+  "att_dark": "#db8a76",
+  "att_dark_hard": 12.7
+ },
+ "sma": {
+  "base_light": "#4f876f",
+  "base_light_hard": 13.7,
+  "base_dark": "#60dc96",
+  "base_dark_hard": 14.3,
+  "att_light": "#4d3154",
+  "att_light_hard": 12.4,
+  "att_dark": "#9f82e3",
+  "att_dark_hard": 11.7
+ },
+ "dmt": {
+  "base_light": "#369da1",
+  "base_light_hard": 13.3,
+  "base_dark": "#aae4c1",
+  "base_dark_hard": 13.4,
+  "att_light": "#313b54",
+  "att_light_hard": 12.3,
+  "att_dark": "#8691cb",
+  "att_dark_hard": 11.3
+ },
+ "np": {
+  "base_light": "#3644a1",
+  "base_light_hard": 13.5,
+  "base_dark": "#82c6e3",
+  "base_dark_hard": 13.2,
+  "att_light": "#a1363d",
+  "att_light_hard": 12.2,
+  "att_dark": "#e4aabb",
+  "att_dark_hard": 11.1
+ },
+ "micro": {
+  "base_light": "#7a5048",
+  "base_light_hard": 12.7,
+  "base_dark": "#dc6060",
+  "base_dark_hard": 13.6,
+  "att_light": "#71874f",
+  "att_light_hard": 11.8,
+  "att_dark": "#b2e4aa",
+  "att_dark_hard": 11.1
+ },
+ "het": {
+  "base_light": "#a13656",
+  "base_light_hard": 14.6,
+  "base_dark": "#dc607d",
+  "base_dark_hard": 16.3,
+  "att_light": "#8d4979",
+  "att_light_hard": 13.5,
+  "att_dark": "#d0808e",
+  "att_dark_hard": 12.4
+ }
+}

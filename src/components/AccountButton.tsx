@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { syncManager, useSync } from '../lib/sync';
 import type { SyncStatus } from '../lib/sync';
@@ -174,85 +175,90 @@ export default function AccountButton() {
         </AnimatePresence>
       </div>
 
-      <AnimatePresence>
-        {mode && (
-          <motion.div
-            className="hub-modal-scrim"
-            initial={reduced ? undefined : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduced ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            onClick={() => setMode(null)}
-          >
+      {/* 登录 / 注册弹窗：portal 到 body。顶栏右组在窄屏带 backdrop-filter，
+          会成为 fixed 后代的包含块，弹窗会被压进顶栏里 */}
+      {createPortal(
+        <AnimatePresence>
+          {mode && (
             <motion.div
-              className="hub-modal material"
-              role="dialog"
-              aria-modal="true"
-              aria-label={mode === 'signin' ? '登录' : '注册'}
-              initial={reduced ? undefined : { opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, scale: 0.97, y: 6 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              onClick={(e) => e.stopPropagation()}
+              className="hub-modal-scrim"
+              initial={reduced ? undefined : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reduced ? undefined : { opacity: 0 }}
+              transition={{ duration: 0.16 }}
+              onClick={() => setMode(null)}
             >
-              <div className="hub-modal-head">
-                <h2>{mode === 'signin' ? '登录' : '注册'}</h2>
-                <button className="icon-btn" onClick={() => setMode(null)} aria-label="关闭">
-                  <IconX size={16} />
-                </button>
-              </div>
-
-              <form className="auth-form" onSubmit={submit}>
-                <label className="auth-field">
-                  <span>邮箱</span>
-                  <input
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    inputMode="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                </label>
-                <label className="auth-field">
-                  <span>密码</span>
-                  <input
-                    type="password"
-                    name="password"
-                    autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    minLength={6}
-                    required
-                  />
-                </label>
-
-                {error && <p className="auth-error">{error}</p>}
-                {notice && <p className="auth-notice">{notice}</p>}
-
-                <div className="hub-modal-actions">
-                  <button
-                    type="button"
-                    className="auth-switch"
-                    onClick={() => {
-                      setMode(mode === 'signin' ? 'signup' : 'signin');
-                      setError(null);
-                      setNotice(null);
-                    }}
-                  >
-                    {mode === 'signin' ? '没有账号？注册' : '已有账号？登录'}
-                  </button>
-                  <button type="submit" className="btn" disabled={busy}>
-                    {busy ? '请稍候…' : mode === 'signin' ? '登录' : '创建账号'}
+              <motion.div
+                className="hub-modal material"
+                role="dialog"
+                aria-modal="true"
+                aria-label={mode === 'signin' ? '登录' : '注册'}
+                initial={reduced ? undefined : { opacity: 0, scale: 0.96, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={reduced ? undefined : { opacity: 0, scale: 0.97, y: 6 }}
+                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="hub-modal-head">
+                  <h2>{mode === 'signin' ? '登录' : '注册'}</h2>
+                  <button className="icon-btn" onClick={() => setMode(null)} aria-label="关闭">
+                    <IconX size={16} />
                   </button>
                 </div>
-              </form>
+
+                <form className="auth-form" onSubmit={submit}>
+                  <label className="auth-field">
+                    <span>邮箱</span>
+                    <input
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  </label>
+                  <label className="auth-field">
+                    <span>密码</span>
+                    <input
+                      type="password"
+                      name="password"
+                      autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      minLength={6}
+                      required
+                    />
+                  </label>
+
+                  {error && <p className="auth-error">{error}</p>}
+                  {notice && <p className="auth-notice">{notice}</p>}
+
+                  <div className="hub-modal-actions">
+                    <button
+                      type="button"
+                      className="auth-switch"
+                      onClick={() => {
+                        setMode(mode === 'signin' ? 'signup' : 'signin');
+                        setError(null);
+                        setNotice(null);
+                      }}
+                    >
+                      {mode === 'signin' ? '没有账号？注册' : '已有账号？登录'}
+                    </button>
+                    <button type="submit" className="btn" disabled={busy}>
+                      {busy ? '请稍候…' : mode === 'signin' ? '登录' : '创建账号'}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </>
   );
 }

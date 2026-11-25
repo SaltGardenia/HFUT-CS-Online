@@ -1,0 +1,63 @@
+name: Release Please
+
+# 依据 Conventional Commits 自动维护版本号、CHANGELOG.md 与 Git 标签：
+# 每次 push 到 main 都开/更新一个 release PR，合并它才真正打 tag 并发 GitHub Release。
+# 版本号的唯一来源是 package.json（与 .release-please-manifest.json 保持一致），
+# 发布配置见 release-please-config.json。
+
+on:
+  push:
+    branches: [main]
+  # 改完发布配置或仓库设置后，可在 Actions 页手动跑一次，不必等下一次 push
+  workflow_dispatch:
+  # 兜底：run 偶发失败（如 API 抖动）时，下一次定时运行会把没打上的 tag / 没发的 Release 补上
+  schedule:
+    - cron: '17 1 * * *'
+
+# deploy 作业要把构建产物发布到 Pages，因此顶层权限同时给出 pages / id-token
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+  id-token: write
+
+# 连推 main 时排队处理，避免两次运行同时改同一个 release PR
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      released: ${{ steps.release.outputs.releases_created }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          # 用默认 GITHUB_TOKEN 时，它建出的 Release 不会触发 `release: published` 工作流
+          # （Actions 的防递归规则），所以下面用同一个运行直接部署；
+          # 想要发布 PR 也跑 CI，就配一个 Fine-grained PAT 存成 RELEASE_PLEASE_TOKEN。
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          target-branch: main
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - id: tag
+        if: steps.release.outputs.releases_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "本次发布：${tag}"
+
+  # GITHUB_TOKEN 创建的 Release 不会触发 deploy-release.yml，这里直接构建该 tag 并部署
+  deploy:
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    uses: ./.github/workflows/deploy-site.yml
+    with:
+      main-ref: ${{ needs.release-please.outputs.tag }}

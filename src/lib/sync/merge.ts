@@ -9,8 +9,11 @@ import type {
   FavoriteMeta,
   ProgressMap,
   ProgressMeta,
+  ReadingEntry,
+  ReadingMap,
   RemoteFavoriteRow,
   RemoteProgressRow,
+  RemoteReadingRow,
   RemoteRecentRow,
   RecentMeta,
 } from './types';
@@ -193,3 +196,47 @@ export function mergeRecent(
 
   return { list, meta, push };
 }
+
+export interface ReadingPushDraft {
+  page: string;
+  entry: ReadingEntry;
+}
+
+export interface MergeReadingResult {
+  map: ReadingMap;
+  push: ReadingPushDraft[];
+}
+
+/**
+ * 阅读进度合并：同一页取时间较新的一份（页路径唯一，天然按页并行）。
+ * 本地较新或有本地无云端时回传；云端较新则覆盖本机。
+ */
+export function mergeReading(local: ReadingMap, remote: RemoteReadingRow[]): MergeReadingResult {
+  const remoteBy = new Map(remote.map((r) => [r.page, r]));
+  const map: ReadingMap = {};
+  const push: ReadingPushDraft[] = [];
+  const pages = new Set([...Object.keys(local), ...remoteBy.keys()]);
+
+  for (const page of pages) {
+    const localEntry = local[page];
+    const remoteRow = remoteBy.get(page);
+    const localT = localEntry && Number.isFinite(localEntry.t) ? localEntry.t : -Infinity;
+    const remoteT = remoteRow ? ts(remoteRow.updated_at) : -Infinity;
+
+    if (localEntry && localT >= remoteT) {
+      map[page] = localEntry;
+      if (!remoteRow || localT > remoteT) push.push({ page, entry: localEntry });
+    } else if (remoteRow) {
+      map[page] = {
+        c: remoteRow.course,
+        y: Math.max(0, remoteRow.scroll_y ?? 0),
+        p: Math.min(1, Math.max(0, remoteRow.percent ?? 0)),
+        s: remoteRow.section ?? undefined,
+        t: remoteT,
+      };
+    }
+  }
+
+  return { map, push };
+}
+

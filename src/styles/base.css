@@ -368,9 +368,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background: var(--panel-strong);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  backdrop-filter: blur(28px) saturate(180%);
+  /* 下拉菜单必须有实底：半透明会让下方标题/正文透上来，形成文字重叠 */
+  background: var(--panel-solid);
   border: 1px solid var(--hairline-soft);
   border-radius: var(--r-l);
   box-shadow: var(--shadow-2);
@@ -529,9 +528,10 @@ button {
     border-color: transparent;
   }
   .topbar-left {
-    /* 占满左列，让课程名用剩余空间截断（fit-content 会把它压到只剩 1 字） */
-    width: 100%;
-    max-width: none;
+    /* 贴内容收窄（平板 / 横屏时不会拉成一整条空白胶囊）；
+       手机端右组已收成纯图标，剩余空间足够课程名完整显示 */
+    width: fit-content;
+    max-width: 100%;
   }
   .topbar-title,
   .topbar-ctl.topbar-title {
@@ -849,6 +849,7 @@ button {
   background: var(--panel-2);
   color: var(--ink);
   border: 1px solid transparent;
+  text-decoration: none;
   transition: background 140ms var(--press-ease), color 140ms, transform 100ms var(--press-ease),
     opacity 140ms;
 }
@@ -901,6 +902,128 @@ button {
 @media (prefers-reduced-transparency: reduce) {
   .page {
     background: var(--panel-solid);
+  }
+}
+
+/* 数据结构 · 可视化：左栏顶部是资源按钮与算法目录，右栏整块交给模拟器 */
+.visual-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.rail-actions {
+  margin-bottom: 10px;
+}
+.visual-actions .btn {
+  width: 100%;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+.visual-mobile-head {
+  display: none;
+}
+/* 右栏不加滚动容器：模拟器内容自然铺开，跟随页面滚动 */
+.visual-canvas {
+  min-width: 0;
+}
+
+/* 左侧算法目录：搜索 + 分组 + 条目（悬浮只变色不铺底） */
+.visual-rail {
+  padding-bottom: 18px;
+}
+.rail-search {
+  width: 100%;
+  height: 34px;
+  margin: 2px 0 4px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--hairline-soft);
+  background: var(--panel-2);
+  color: var(--ink);
+  font-size: 0.8438rem;
+}
+.rail-search::placeholder {
+  color: var(--ink-3);
+}
+.rail-search:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--deck-accent) 45%, transparent);
+  outline-offset: 1px;
+}
+.rail-group-h {
+  margin: 14px 8px 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+.rail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.rail-list a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 9px;
+  color: var(--ink-2);
+  font-size: 0.8438rem;
+  line-height: 1.45;
+  text-decoration: none;
+  transition: color 140ms var(--press-ease), transform 120ms var(--press-ease);
+}
+.rail-list a:hover {
+  color: var(--deck-accent);
+  transform: translateX(1px);
+}
+.rail-list a.active {
+  color: var(--deck-accent);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--deck-accent) 10%, transparent);
+}
+.rail-page {
+  flex: none;
+  min-width: 30px;
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--ink-3) 45%, transparent);
+  border-radius: 6px;
+  color: var(--ink-3);
+  font-size: 11px;
+  text-align: center;
+}
+.rail-list a.active .rail-page {
+  border-color: var(--deck-accent);
+  color: var(--deck-accent);
+}
+.rail-empty {
+  margin: 10px 8px;
+  color: var(--ink-3);
+  font-size: 0.8438rem;
+}
+
+/* 窄屏没有左侧栏：资源按钮与下拉选择放在正文顶部 */
+@media (max-width: 1020px) {
+  .visual-mobile-head {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .visual-mobile-head .visual-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+  .visual-picker {
+    width: 100%;
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid var(--hairline-soft);
+    background: var(--panel-2);
+    color: var(--ink);
+    font-size: 0.875rem;
   }
 }
 
@@ -2088,9 +2211,14 @@ pre.code .cl-code:empty + .cl-com {
 }
 .quiz-fill {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin: 4px 0 8px;
 }
+/* 窄屏：输入框可收缩、按钮不压缩，避免「检查 / 显示答案」被挤成竖排 */
+.quiz-fill input { min-width: 0; }
+.quiz-fill .btn { flex: none; white-space: nowrap; }
 .quiz-fill input {
   flex: 1;
   max-width: 320px;
@@ -2256,6 +2384,73 @@ pre.code .cl-code:empty + .cl-com {
 @media print {
   .section-capsule {
     display: none !important;
+  }
+}
+
+/* --------------------------------------------- 阅读进度指示标（上次读到） */
+.reading-mark {
+  position: fixed;
+  right: 18px;
+  bottom: 74px; /* 让开右下角的「回到顶部」胶囊 */
+  z-index: 56;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px 0 11px;
+  border-radius: 999px;
+  background: var(--panel-strong);
+  border: 1px solid var(--hairline-soft);
+  box-shadow: var(--shadow-1);
+  color: var(--ink-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  animation: reading-mark-in 200ms var(--press-ease);
+  transition: transform 140ms var(--press-ease), box-shadow 140ms var(--press-ease);
+}
+.reading-mark svg {
+  flex: none;
+  color: var(--deck-accent);
+}
+.reading-mark:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+.reading-mark:active {
+  transform: scale(0.96);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .reading-mark {
+    background: var(--panel-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reading-mark {
+    animation: none;
+    transition: none;
+  }
+}
+@media (max-width: 640px) {
+  .reading-mark {
+    right: 10px;
+    bottom: 62px;
+  }
+}
+@media print {
+  .reading-mark {
+    display: none !important;
+  }
+}
+@keyframes reading-mark-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
 }
 
@@ -2927,6 +3122,18 @@ pre.code .cl-code:empty + .cl-com {
 .ptag[data-deck='math'],
 .pq-group-h[data-deck='math'],
 .site-nav li[data-deck='math'] { --row-accent: var(--math); }
+/* 大二上批次：整课一个主题色，练习标签 / 分组头 / 抽屉导航徽章统一回落到课程色 */
+.ptag[data-deck='py'], .pq-group-h[data-deck='py'], .site-nav li[data-deck='py'] { --row-accent: var(--py); }
+.ptag[data-deck='dm'], .pq-group-h[data-deck='dm'], .site-nav li[data-deck='dm'] { --row-accent: var(--dm); }
+.ptag[data-deck='cm'], .pq-group-h[data-deck='cm'], .site-nav li[data-deck='cm'] { --row-accent: var(--cm); }
+.ptag[data-deck='prob'], .pq-group-h[data-deck='prob'], .site-nav li[data-deck='prob'] { --row-accent: var(--prob); }
+.ptag[data-deck='asm'], .pq-group-h[data-deck='asm'], .site-nav li[data-deck='asm'] { --row-accent: var(--asm); }
+.ptag[data-deck='eda'], .pq-group-h[data-deck='eda'], .site-nav li[data-deck='eda'] { --row-accent: var(--eda); }
+.ptag[data-deck='res'], .pq-group-h[data-deck='res'], .site-nav li[data-deck='res'] { --row-accent: var(--res); }
+.ptag[data-deck='physlab'], .pq-group-h[data-deck='physlab'], .site-nav li[data-deck='physlab'] { --row-accent: var(--physlab); }
+.ptag[data-deck='java'], .pq-group-h[data-deck='java'], .site-nav li[data-deck='java'] { --row-accent: var(--java); }
+.ptag[data-deck='dl'], .pq-group-h[data-deck='dl'], .site-nav li[data-deck='dl'] { --row-accent: var(--dl); }
+.ptag[data-deck='robot'], .pq-group-h[data-deck='robot'], .site-nav li[data-deck='robot'] { --row-accent: var(--robot); }
 
 /* --------------------------------------------- 右侧进度轨（仅 ≥1200px） */
 .pq-track {
@@ -3377,6 +3584,19 @@ pre.code .cl-code:empty + .cl-com {
   .att-dl {
     margin-left: auto;
   }
+  /* 目录行：仓名独占第一行，文件数/来源折到第二行，320px 下不再只剩一个字 */
+  .att-dir-btn {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+  .att-dir-btn .att-row-name {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .att-dir-btn .att-row-path {
+    flex: 1 1 100%;
+    padding-left: 20px;
+  }
 }
 /* --------------------- 练习列表：每卷卡内独立进度条（替代整课总进度条） --------------------- */
 .ext-card-progress {
@@ -3644,3 +3864,92 @@ pre.code .cl-code:empty + .cl-com {
 .net-focus-source { margin: .9rem 0 0; font-size: .77rem; line-height: 1.6; color: var(--ink-3); overflow-wrap: anywhere; }
 .net-focus-none { margin: .5rem 0 0; }
 @media(max-width:600px){ .net-focus { padding: 1rem; } }
+
+/* ============================================================================
+   手机竖屏（≤640px）专项
+   目标：常见手机宽度（320 / 360 / 375 / 390 / 430）下顶栏不再把课程名挤成细条，
+   展开搜索时不再与其它控件互相遮挡；悬浮件之间保持安全间距。
+   ========================================================================== */
+@media (max-width: 640px) {
+  .topbar {
+    padding: 12px 14px;
+    column-gap: 8px;
+  }
+  /* 返回资料库收进抽屉（抽屉首项即「课程资料库 · 首页」），顶栏只留抽屉 + 课程名 */
+  .topbar-left > .topbar-ctl.topbar-home {
+    display: none;
+  }
+  .topbar-left,
+  .topbar-right {
+    padding: 3px;
+    gap: 2px;
+  }
+  .topbar-left > .topbar-ctl.nav-pill,
+  .topbar-right > .topbar-ctl.nav-pill {
+    padding: 0;
+  }
+  .topbar-title,
+  .topbar-ctl.topbar-title {
+    font-size: 0.9375rem;
+    padding: 0 6px;
+  }
+
+  /* 搜索聚焦后独占整行：其余顶栏控件暂时让位，收起即恢复，
+     避免展开的输入框把左侧胶囊压到 10px、控件互相叠压 */
+  .topbar:has(.search-box.expanded) .topbar-left {
+    display: none;
+  }
+  .topbar:has(.search-box.expanded) .topbar-right {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .topbar:has(.search-box.expanded) .topbar-right > *:not(:first-child) {
+    display: none;
+  }
+  .topbar:has(.search-box.expanded) .topbar-right > .topbar-ctl:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .topbar:has(.search-box.expanded) .search-box {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .topbar:has(.search-box.expanded) .search-input {
+    width: 100%;
+    min-width: 0;
+  }
+  /* 下拉结果与整行搜索框同宽，贴住左右边距，不再向左溢出视口；
+     小屏改用实底：半透明毛玻璃会让正文标题透出来，干扰结果阅读 */
+  .topbar:has(.search-box.expanded) .search-drop {
+    left: 0;
+    right: 0;
+    width: auto;
+    background: var(--panel-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* 跨节提示条：小屏收进视口，超长省略 */
+  .sec-flash {
+    right: 14px;
+    max-width: calc(100vw - 28px);
+  }
+
+  /* 勘误胶囊出现时，阅读指示标再上移一档，避免两颗药丸贴在一起 */
+  body:has(.errata-dock) .reading-mark {
+    bottom: 72px;
+  }
+
+  /* 练习页：给右下角「回到顶部」让出最后一屏，末端内容不被压住 */
+  .practice-page {
+    padding-bottom: 76px;
+  }
+
+  /* 弹窗按钮行：小屏允许换行，按钮内文字不折成两行（勘误弹窗的三个按钮） */
+  .hub-modal-actions {
+    flex-wrap: wrap;
+  }
+  .hub-modal-actions .btn {
+    white-space: nowrap;
+  }
+}

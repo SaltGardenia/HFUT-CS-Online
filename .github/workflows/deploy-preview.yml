@@ -1,0 +1,41 @@
+name: Deploy previews (push)
+
+# 每次 push 只刷新分支预览；主站仍停在最近一次 Release 的 tag。
+# 主站与预览同属一个 Pages 产物，所以这里仍要重建主站，只是主站版本取最近一次 Release。
+# 部署 ref 就是被 push 的分支；github-pages 环境按分支名逐段匹配（* / */* / */*/*），
+# 所以 fix/x、dependabot/x/y 这类名字都能落到策略里（见 CONTRIBUTING「部署」）。
+
+on:
+  push:
+    # 只跟分支：tag 的部署由 Release 事件负责
+    branches: ['**']
+    # 纯文档 / 工具 / 资料整理不改变站点产物，不值得重建主站与最多 8 个预览
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '_tools/**'
+      - 'supabase/**'
+      - 'LICENSE*'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+      - '.github/dependabot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: read
+
+# 与 deploy-release.yml 共用 pages 组
+concurrency:
+  group: pages
+  # 不取消正在跑的发布：一次运行会产出完整站点，取消只会让提交挂一个假的红叉；
+  # 同一个组里最多一个运行 + 一个排队，连续 push 时排队的那个会被更新的替换。
+  cancel-in-progress: false
+
+jobs:
+  site:
+    # 删除分支也触发 push：重建一次才能把它的预览从索引里摘掉
+    if: github.event_name != 'push' || !startsWith(github.ref_name, 'release-please--')
+    uses: ./.github/workflows/deploy-site.yml

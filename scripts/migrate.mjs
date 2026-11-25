@@ -74,13 +74,14 @@ function cutBlock(html, startIdx, tag) {
 }
 
 const stripTags = (s) => s.replace(/<[^>]+>/g, '');
+/** 实体解码：&amp; 必须最后解，否则 "&amp;lt;" 会被二次解成 "<" */
 const decodeBasic = (s) =>
   s
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
     .trim();
 
 /* ------------------------------------------------------------- 主解析流程 */

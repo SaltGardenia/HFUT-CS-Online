@@ -9,6 +9,7 @@ import {
   FAVORITE_META_KEY,
   FAVORITES_KEY,
   PROGRESS_STORES,
+  READING_KEY,
   RECENT_KEY,
   RECENT_META_KEY,
   progressMetaKey,
@@ -20,6 +21,8 @@ import type {
   ProgressMeta,
   ProgressStamp,
   ProgressValue,
+  ReadingEntry,
+  ReadingMap,
   RecentMeta,
 } from './types';
 
@@ -91,11 +94,13 @@ function sameJSON(a: unknown, b: unknown): boolean {
 /* ------------------------------------------------------------------ 进度 */
 
 export interface DirtyEvent {
-  kind: 'progress' | 'favorite' | 'recent';
+  kind: 'progress' | 'favorite' | 'recent' | 'reading';
   /** progress：发生变化的进度存储键 */
   key?: string;
   /** progress：发生变化的题目 id */
   qids?: string[];
+  /** reading：发生变化的页面路径 */
+  page?: string;
 }
 
 let dirtyListener: ((e: DirtyEvent) => void) | null = null;
@@ -266,6 +271,49 @@ export function recordRecent(name: string) {
   emitDirty({ kind: 'recent' });
 }
 
+/* ------------------------------------------------------------ 阅读进度 */
+
+/** 只保留最近 200 页：长期使用也不会把 localStorage 撑大 */
+const READING_MAX = 200;
+
+export function readReading(): ReadingMap {
+  return readRecord<ReadingEntry>(READING_KEY);
+}
+
+function sameReading(a: ReadingEntry, b: ReadingEntry): boolean {
+  return (
+    Math.abs(a.y - b.y) < 12 &&
+    Math.abs(a.p - b.p) < 0.002 &&
+    (a.s ?? '') === (b.s ?? '')
+  );
+}
+
+/** 写一页的阅读进度；位置没变时不落盘、也不产生同步脏数据 */
+export function writeReading(page: string, entry: ReadingEntry): boolean {
+  const all = readReading();
+  const prev = all[page];
+  if (prev && sameReading(prev, entry)) return false;
+  all[page] = entry;
+
+  const pages = Object.keys(all);
+  if (pages.length > READING_MAX) {
+    pages
+      .sort((a, b) => (all[b]?.t ?? 0) - (all[a]?.t ?? 0))
+      .slice(READING_MAX)
+      .forEach((p) => delete all[p]);
+  }
+
+  writeRaw(READING_KEY, JSON.stringify(all));
+  emitDirty({ kind: 'reading', page });
+  return true;
+}
+
+/** 云端合并结果落盘（不产生脏标记，避免回声） */
+export function applyReading(map: ReadingMap) {
+  if (sameJSON(readReading(), map)) return;
+  writeRaw(READING_KEY, JSON.stringify(map));
+}
+
 /* ---------------------------------------------------------------- 设备 */
 
 /**
@@ -294,6 +342,7 @@ export function clearUserData() {
   }
   writeRaw(FAVORITES_KEY, '[]');
   writeRaw(RECENT_KEY, '[]');
+  writeRaw(READING_KEY, '{}');
   try {
     localStorage.removeItem(FAVORITE_META_KEY);
     localStorage.removeItem(RECENT_META_KEY);

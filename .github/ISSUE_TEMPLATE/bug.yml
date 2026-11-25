@@ -1,0 +1,54 @@
+name: 站点 bug
+description: 页面打不开、样式错乱、交互异常、数据不同步等
+title: 'bug: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先看一眼 [贡献指南](https://github.com/SaltGardenia/HFUT-CS-Online/blob/main/CONTRIBUTING.md)。
+        内容写错请用「内容问题」，补资料请用「资料投稿」。
+  - type: input
+    id: url
+    attributes:
+      label: 页面链接
+      description: 出问题的页面地址（带 hash 的完整 URL）
+      placeholder: https://saltgardenia.github.io/HFUT-CS-Online/#/algo/practice
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 现象
+      description: 看到了什么、期望是什么
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从哪个页面、点了什么、发生了什么
+      placeholder: |
+        1. 打开 /os/practice
+        2. 选择第 3 章
+        3. 点击「下一题」后回到第 1 题
+  - type: input
+    id: env
+    attributes:
+      label: 环境
+      description: 浏览器与版本、系统；手机端请注明机型
+      placeholder: Chrome 141 / Windows 11
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: 截图
+      description: 直接拖入图片；控制台报错也贴在这里
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 是否影响其他课程
+      options:
+        - 只有这一页
+        - 同一门课的多个页面
+        - 多个课程 / 全站
+    validations:
+      required: true

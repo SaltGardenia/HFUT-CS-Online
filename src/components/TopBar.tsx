@@ -171,8 +171,13 @@ export default function TopBar({
   return (
     <header className="topbar">
       <div className="topbar-left">
-        {/* 独立返回胶囊：左箭头回站点首页 */}
-        <Link to="/" className="topbar-ctl nav-pill" aria-label="返回课程资料库首页" title="返回课程资料库首页">
+        {/* 独立返回胶囊：左箭头回站点首页（手机上收进抽屉，把顶栏宽度让给课程名） */}
+        <Link
+          to="/"
+          className="topbar-ctl nav-pill topbar-home"
+          aria-label="返回课程资料库首页"
+          title="返回课程资料库首页"
+        >
           <span className="icon-btn">
             <IconArrowLeft size={18} />
           </span>
@@ -190,10 +195,6 @@ export default function TopBar({
         <Link to={courseBase} className="topbar-ctl nav-pill topbar-title" title={courseTip}>
           {courseName}
         </Link>
-        {/* 紧凑桌面（1021–1500）：右组放不下，勘误挪到课程名旁边 */}
-        <div className="topbar-ctl nav-pill errata-slot errata-slot-left">
-          <ErrataButton />
-        </div>
       </div>
       <SiteTabs tabs={tabs} />
       <div className="topbar-right">
@@ -206,7 +207,7 @@ export default function TopBar({
         <div className="topbar-ctl nav-pill">
           <ThemeToggle />
         </div>
-        <div className="topbar-ctl nav-pill errata-slot errata-slot-right">
+        <div className="topbar-ctl nav-pill errata-slot">
           <ErrataButton />
         </div>
         <AccountButton />

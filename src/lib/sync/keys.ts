@@ -23,6 +23,17 @@ export const PROGRESS_STORES: readonly ProgressStore[] = [
   { key: 'se-practice-progress-v1', course: 'se' },
   { key: 'st-practice-progress-v1', course: 'st' },
   { key: 'phys-practice-progress-v1', course: 'phys' },
+  { key: 'dm-practice-progress-v1', course: 'dm' },
+  { key: 'asm-practice-progress-v1', course: 'asm' },
+  { key: 'eda-practice-progress-v1', course: 'eda' },
+  { key: 'py-practice-progress-v1', course: 'py' },
+  { key: 'cm-practice-progress-v1', course: 'cm' },
+  { key: 'prob-practice-progress-v1', course: 'prob' },
+  { key: 'res-practice-progress-v1', course: 'res' },
+  { key: 'physlab-practice-progress-v1', course: 'physlab' },
+  { key: 'la-practice-progress-v1', course: 'la' },
+  { key: 'ds-practice-progress-v1', course: 'ds' },
+  { key: 'ee-practice-progress-v1', course: 'ee' },
 ];
 
 const byKey = new Map(PROGRESS_STORES.map((s) => [s.key, s]));
@@ -33,6 +44,7 @@ export function progressStoreOf(key: string): ProgressStore | undefined {
 
 export const FAVORITES_KEY = 'hb-favorite-courses';
 export const RECENT_KEY = 'hb-recent-courses';
+export const READING_KEY = 'hb-reading-v1';
 export const DEVICE_KEY = 'hb-device-id';
 
 /** 进度时间戳（与数据分开存，不改动页面已有的数据格式） */

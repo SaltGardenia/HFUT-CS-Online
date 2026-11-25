@@ -160,6 +160,13 @@ export const IconChevronDown = (p: P) => (
   </svg>
 );
 
+/** 书签（阅读进度指示） */
+export const IconBookmark = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M6.6 4h10.8a.6.6 0 0 1 .6.6V20l-6-3.8L6 20V4.6a.6.6 0 0 1 .6-.6Z" />
+  </svg>
+);
+
 /** GitHub 标识（填充风格，链接到仓库 Issue 区用） */
 export const IconGitHub = (p: P) => (
   <svg {...base(p)} fill="currentColor" stroke="none">

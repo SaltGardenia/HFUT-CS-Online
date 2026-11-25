@@ -10,7 +10,14 @@ import { createSupabaseBackend, type SyncBackend } from './backend';
 import { syncEnabled } from './config';
 import { PROGRESS_STORES, courseNameBySlug, courseSlugByName, progressStoreOf } from './keys';
 import * as local from './local';
-import { mergeFavorites, mergeProgress, mergeRecent, type FavoritePushDraft, type ProgressPushDraft } from './merge';
+import {
+  mergeFavorites,
+  mergeProgress,
+  mergeReading,
+  mergeRecent,
+  type FavoritePushDraft,
+  type ProgressPushDraft,
+} from './merge';
 import type {
   FavoriteMeta,
   ProgressMeta,
@@ -34,6 +41,7 @@ interface SentProgress {
 interface PreparedPush {
   payload: PushPayload;
   sentProgress: SentProgress[];
+  sentReading: { page: string; t: number }[];
   favoritesSeq: number;
   recentSeq: number;
 }
@@ -63,6 +71,7 @@ class SyncManager {
   private recentSeq = 0;
 
   private dirtyProgress = new Map<string, Set<string>>();
+  private dirtyReading = new Set<string>();
   private favoritesDirty = false;
   private recentDirty = false;
 
@@ -84,6 +93,8 @@ class SyncManager {
       if (!this.state.user) return;
       if (e.kind === 'progress' && e.key && e.qids?.length) {
         for (const qid of e.qids) this.markProgress(e.key, qid);
+      } else if (e.kind === 'reading' && e.page) {
+        this.dirtyReading.add(e.page);
       } else if (e.kind === 'favorite') {
         this.favoritesDirty = true;
         this.favoritesSeq += 1;
@@ -215,6 +226,7 @@ class SyncManager {
     if (owner && owner !== user.id) {
       local.clearUserData();
       this.dirtyProgress.clear();
+      this.dirtyReading.clear();
       this.favoritesDirty = false;
       this.recentDirty = false;
     }
@@ -249,6 +261,7 @@ class SyncManager {
     this.sessionGen += 1;
     this.attachUserId = null;
     this.dirtyProgress.clear();
+    this.dirtyReading.clear();
     this.favoritesDirty = false;
     this.recentDirty = false;
     this.retryIndex = 0;
@@ -330,6 +343,17 @@ class SyncManager {
         this.recentSeq += 1;
       }
     }
+
+    // 阅读进度：按页面逐条取新，本地较新的回传
+    {
+      const localReading = local.readReading();
+      const remoteReading = remote.reading ?? [];
+      if (Object.keys(localReading).length > 0 || remoteReading.length > 0) {
+        const merged = mergeReading(localReading, remoteReading);
+        local.applyReading(merged.map);
+        for (const draft of merged.push) this.dirtyReading.add(draft.page);
+      }
+    }
   }
 
   private schedulePush(delay = PUSH_DEBOUNCE_MS) {
@@ -342,8 +366,9 @@ class SyncManager {
   }
 
   private preparePush(): PreparedPush | null {
-    const payload: PushPayload = { progress: [], favorites: [], recent: [] };
+    const payload: PushPayload = { progress: [], favorites: [], recent: [], reading: [] };
     const sentProgress: SentProgress[] = [];
+    const sentReading: { page: string; t: number }[] = [];
     const deviceId = local.getDeviceId();
     const progressMetaCache = new Map<string, ProgressMeta>();
 
@@ -390,16 +415,40 @@ class SyncManager {
       }
     }
 
+    if (this.dirtyReading.size > 0) {
+      const reading = local.readReading();
+      for (const page of this.dirtyReading) {
+        const entry = reading[page];
+        if (!entry || !Number.isFinite(entry.t)) {
+          // 已被裁剪 / 清除，或数据损坏：没有可上传的内容
+          this.dirtyReading.delete(page);
+          continue;
+        }
+        payload.reading.push({
+          course: entry.c || page.split('/')[1] || 'hub',
+          page,
+          scroll_y: Number.isFinite(entry.y) ? Math.max(0, Math.round(entry.y)) : 0,
+          percent: Number.isFinite(entry.p) ? Math.min(1, Math.max(0, entry.p)) : 0,
+          section: entry.s ?? null,
+          updated_at: new Date(entry.t).toISOString(),
+          device_id: deviceId,
+        });
+        sentReading.push({ page, t: entry.t });
+      }
+    }
+
     if (
       payload.progress.length === 0 &&
       payload.favorites.length === 0 &&
-      payload.recent.length === 0
+      payload.recent.length === 0 &&
+      payload.reading.length === 0
     ) {
       return null;
     }
     return {
       payload,
       sentProgress,
+      sentReading,
       favoritesSeq: this.favoritesSeq,
       recentSeq: this.recentSeq,
     };
@@ -452,6 +501,15 @@ class SyncManager {
     }
     if (prepared.favoritesSeq === this.favoritesSeq) this.favoritesDirty = false;
     if (prepared.recentSeq === this.recentSeq) this.recentDirty = false;
+
+    if (prepared.sentReading.length > 0) {
+      const reading = local.readReading();
+      for (const sent of prepared.sentReading) {
+        const current = reading[sent.page];
+        // 发送期间又有新位置：保留脏标记等下一轮
+        if (!current || current.t === sent.t) this.dirtyReading.delete(sent.page);
+      }
+    }
   }
 }
 

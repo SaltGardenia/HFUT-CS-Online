@@ -5,6 +5,7 @@ import { ThemeProvider } from './lib/theme';
 import { TocProvider } from './lib/toc';
 import { syncManager } from './lib/sync';
 import App from './App';
+import ReadingMark from './components/ReadingMark';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/hub.css';
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
       <TocProvider>
         <HashRouter>
           <App />
+          <ReadingMark />
         </HashRouter>
       </TocProvider>
     </ThemeProvider>
@@ -32,6 +34,23 @@ createRoot(document.getElementById('root')!).render(
 // 离线缓存：生产环境注册 Service Worker（站点为纯静态产物，可完整离线）
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {});
+    // 本页加载时已由旧 SW 接管的情况下，新 SW 一接管就刷新一次：否则这次打开仍是旧构建。
+    // 同一标签页只自动刷新一次，避免万一接管反复时刷成死循环。
+    const reloadKey = 'hb-sw-reloaded';
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) return;
+      try {
+        if (sessionStorage.getItem(reloadKey)) return;
+        sessionStorage.setItem(reloadKey, '1');
+      } catch {
+        return; // 隐私模式：不自动刷新，交给用户
+      }
+      window.location.reload();
+    });
+    void navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js?b=${__BUILD_ID__}`, { updateViaCache: 'none' })
+      .then((reg) => reg.update().catch(() => {}))
+      .catch(() => {});
   });
 }

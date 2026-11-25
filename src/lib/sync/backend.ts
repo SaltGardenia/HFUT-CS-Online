@@ -3,6 +3,7 @@ import type {
   PushPayload,
   RemoteFavoriteRow,
   RemoteProgressRow,
+  RemoteReadingRow,
   RemoteRecentRow,
   SyncUser,
 } from './types';
@@ -12,6 +13,7 @@ export interface PullResult {
   progress: RemoteProgressRow[];
   favorites: RemoteFavoriteRow[];
   recent: RemoteRecentRow[];
+  reading: RemoteReadingRow[];
 }
 
 export interface SyncBackend {
@@ -32,7 +34,20 @@ function ensure(error: { message: string } | null): void {
   if (error) throw new Error(error.message);
 }
 
+/** 云端还没执行新版 schema（缺 user_reading 表 / sync_push_reading 函数） */
+function isMissingReading(err: { code?: string }): boolean {
+  return (
+    err.code === 'PGRST202' ||
+    err.code === 'PGRST205' ||
+    err.code === '42883' ||
+    err.code === '42P01'
+  );
+}
+
 export function createSupabaseBackend(): SyncBackend {
+  /** 探测结果：新表/新函数是否可用。不可用时阅读进度只留本机，其余同步照常 */
+  let readingAvailable: boolean | null = null;
+
   return {
     async getSession() {
       const supabase = await getSupabase();
@@ -80,18 +95,25 @@ export function createSupabaseBackend(): SyncBackend {
 
     async pull() {
       const supabase = await getSupabase();
-      const [progress, favorites, recent] = await Promise.all([
+      const [progress, favorites, recent, reading] = await Promise.all([
         supabase.from('user_progress').select('course,question_id,result,updated_at'),
         supabase.from('user_favorites').select('course,favorited,updated_at'),
         supabase.from('user_recent').select('course,viewed_at'),
+        readingAvailable === false
+          ? null
+          : supabase
+              .from('user_reading')
+              .select('course,page,scroll_y,percent,section,updated_at'),
       ]);
       ensure(progress.error);
       ensure(favorites.error);
       ensure(recent.error);
+      if (reading) readingAvailable = !reading.error;
       return {
         progress: (progress.data ?? []) as RemoteProgressRow[],
         favorites: (favorites.data ?? []) as RemoteFavoriteRow[],
         recent: (recent.data ?? []) as RemoteRecentRow[],
+        reading: (reading?.data ?? []) as RemoteReadingRow[],
       };
     },
 
@@ -103,6 +125,21 @@ export function createSupabaseBackend(): SyncBackend {
         p_recent: payload.recent,
       });
       ensure(error);
+
+      // 阅读进度单独走一个 RPC：老库没有这个函数时静默跳过，不拖垮其它数据
+      if (payload.reading.length === 0 || readingAvailable === false) return;
+      const { error: readingError } = await supabase.rpc('sync_push_reading', {
+        p_reading: payload.reading,
+      });
+      if (!readingError) {
+        readingAvailable = true;
+        return;
+      }
+      if (isMissingReading(readingError)) {
+        readingAvailable = false;
+        return;
+      }
+      ensure(readingError);
     },
   };
 }

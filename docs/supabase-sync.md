@@ -131,7 +131,7 @@
 2. 新建两个 **Repository variable**（不是 Secret，Publishable Key 可公开）：
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-3. 推送到 `main` 后 `.github/workflows/deploy.yml` 会把它们注入构建；
+3. 下一次发布（合并发布 PR 触发 `deploy-release.yml`）或手动跑 `Deploy previews (push)` 时会把它们注入构建；
 4. 部署完成后打开线上站点，顶栏出现「登录」即接入成功；
 5. 未配置变量时构建不会失败，账号入口自动隐藏。
 

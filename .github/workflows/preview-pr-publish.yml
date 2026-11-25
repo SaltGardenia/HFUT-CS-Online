@@ -1,0 +1,92 @@
+name: Preview PR (publish)
+
+# 由 Preview PR (build) 触发，在默认分支上下文里发布它构建好的产物。
+# 这样 fork PR 的代码只在只读的 build 里被执行，发布这一步拿到的是成品目录。
+# 版本号用 PR head SHA：deploy-pages 会把 GITHUB_SHA（这里是 main）当版本，同一提交重复发布会
+# 命中 Pages 去重导致内容不更新，所以改用 pages-deploy.mjs 显式指定版本。
+
+on:
+  workflow_run:
+    workflows: ['Preview PR (build)']
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: https://saltgardenia.github.io/HFUT-CS-Online/
+    env:
+      PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+      PAGES_VERSION: ${{ github.event.workflow_run.head_sha }}
+      SITE: https://saltgardenia.github.io/HFUT-CS-Online
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: site-dist
+          path: ${{ runner.temp }}
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: 解包产物
+        run: |
+          mkdir -p dist
+          tar -xf "$RUNNER_TEMP/site-dist.tar" -C dist
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+          retention-days: 1
+
+      - name: 发布（显式版本号，避免 Pages 按 SHA 去重）
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/pages-deploy.mjs
+
+      # 在 PR 里留一条会随提交更新的预览评论；PR 已关闭时不评论
+      - name: 回贴预览链接
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr="$PR_NUMBER"
+          # 个别 PR（例如来自 fork 的运行）事件里没有 pull_requests，用 head SHA 反查
+          if [ -z "$pr" ]; then
+            pr=$(gh pr list --state open --json number,headRefOid \
+              --jq ".[] | select(.headRefOid == \"$PAGES_VERSION\") | .number" | head -1)
+          fi
+          [ -n "$pr" ] || { echo "无法确定 PR 编号，跳过评论"; exit 0; }
+          state=$(gh pr view "$pr" --json state -q .state 2>/dev/null || true)
+          [ "$state" = "OPEN" ] || { echo "PR #$pr 不是 OPEN（$state），跳过评论"; exit 0; }
+          cat > "$RUNNER_TEMP/comment.md" <<EOF
+          <!-- hfut-preview -->
+          预览已更新：$SITE/preview/pr-$pr/
+
+          - 每次向本 PR 提交都会自动重建
+          - 主站仍按 Release 发布，这里只是本 PR 的渲染结果
+          - PR 关闭后不再构建；下一次任意构建会把它从预览索引里摘掉
+          EOF
+          id=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${pr}/comments?per_page=100" \
+            --jq '.[] | select(.body | contains("<!-- hfut-preview -->")) | .id' | head -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${id}" \
+              -F body=@"$RUNNER_TEMP/comment.md" >/dev/null
+            echo "已更新 PR #$pr 的预览评论（$id）"
+          else
+            gh pr comment "$pr" --body-file "$RUNNER_TEMP/comment.md"
+            echo "已发布 PR #$pr 的预览评论"
+          fi

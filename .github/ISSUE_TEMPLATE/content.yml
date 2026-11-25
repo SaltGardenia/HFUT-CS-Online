@@ -1,0 +1,48 @@
+name: 内容问题
+description: 讲义写错、题目答案有误、公式或表述不准确
+title: 'content: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        小改动其实不用开 issue：站点顶栏的铅笔按钮可以直接原地改正文并一键提 PR。
+        这里适合需要讨论的较大改动，或者手边没有课件依据、想请维护者核对的情况。
+  - type: input
+    id: course
+    attributes:
+      label: 课程与位置
+      description: 课程名 + 讲次/章节 + 小节标题
+      placeholder: 计算机网络 · 第 3 章 数据链路层 · 3.2 差错检测
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: 页面链接
+      placeholder: https://saltgardenia.github.io/HFUT-CS-Online/#/net/ch3
+  - type: textarea
+    id: current
+    attributes:
+      label: 现在写的
+      description: 原文摘录，方便定位
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 应该是什么
+      description: 正确说法，以及依据（课件第几页 / 教材 / 规范）
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 依据
+      description: 课件页、教材章节或链接；没有也可以先写「待核对」
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: 影响范围
+      options:
+        - label: 相关题目/自测题也需要一起改
+        - label: 其他课程有同样表述

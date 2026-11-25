@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import CourseHubPage from './pages/CourseHubPage';
 import CourseStubPage from './pages/CourseStubPage';
-import { ALGO_BASE, OS_BASE, NET_BASE, PAT_BASE, AI_BASE, SA_BASE, PHYS_BASE, CA_BASE, MATH_BASE, PD_BASE, NCD_BASE, NAP_BASE, HD_BASE, MC_BASE, NLU_BASE, OSCD_BASE, CPD_BASE, NTR_BASE, CV_BASE, SPM_BASE, BD_BASE, CAP_BASE, AIE_BASE, SEC_BASE, DB_BASE, SE_BASE, ST_BASE, DP_BASE, SWT_BASE, DSD_BASE, IP_BASE } from './courses/registry';
+import { ALGO_BASE, OS_BASE, NET_BASE, PAT_BASE, AI_BASE, SA_BASE, PHYS_BASE, CA_BASE, MATH_BASE, PD_BASE, NCD_BASE, NAP_BASE, HD_BASE, MC_BASE, NLU_BASE, OSCD_BASE, CPD_BASE, NTR_BASE, CV_BASE, SPM_BASE, BD_BASE, CAP_BASE, AIE_BASE, SEC_BASE, DB_BASE, SE_BASE, ST_BASE, DP_BASE, SWT_BASE, DSD_BASE, IP_BASE, PY_BASE, DM_BASE, CM_BASE, PROB_BASE, ASM_BASE, EDA_BASE, RES_BASE, PHYS_LAB_BASE, JAVA_BASE, DL_BASE, ROBOT_BASE, DS_BASE, DSCD_BASE, LA_BASE, EE_BASE } from './courses/registry';
 import { ErrataProvider } from './lib/errata/context';
 
 /** 课程按需加载：首屏只载首页，进入课程时再拉取课程包 */
@@ -37,6 +37,23 @@ const DpCourse = lazy(() => import('./courses/DpCourse'));
 const SwtCourse = lazy(() => import('./courses/SwtCourse'));
 const DsdCourse = lazy(() => import('./courses/DsdCourse'));
 const IpCourse = lazy(() => import('./courses/IpCourse'));
+const PyCourse = lazy(() => import('./courses/PyCourse'));
+const DmCourse = lazy(() => import('./courses/DmCourse'));
+const CmCourse = lazy(() => import('./courses/CmCourse'));
+const ProbCourse = lazy(() => import('./courses/ProbCourse'));
+const AsmCourse = lazy(() => import('./courses/AsmCourse'));
+const EdaCourse = lazy(() => import('./courses/EdaCourse'));
+const ResCourse = lazy(() => import('./courses/ResCourse'));
+const PhyslabCourse = lazy(() => import('./courses/PhyslabCourse'));
+const JavaCourse = lazy(() => import('./courses/JavaCourse'));
+const DlCourse = lazy(() => import('./courses/DlCourse'));
+const RobotCourse = lazy(() => import('./courses/RobotCourse'));
+const DsCourse = lazy(() => import('./courses/DsCourse'));
+const DscdCourse = lazy(() => import('./courses/DscdCourse'));
+const LaCourse = lazy(() => import('./courses/LaCourse'));
+const EeCourse = lazy(() => import('./courses/EeCourse'));
+/** 大二下 12 门课共用入口：再按课程前缀加载各自的数据包 */
+const D2XCourse = lazy(() => import('./courses/D2XCourse'));
 
 /** 旧版单课程链接 → /algo/*（历史收藏与外链不失效） */
 function LegacyDeckRedirect() {
@@ -88,6 +105,23 @@ export default function App() {
         <Route path={`${SWT_BASE}/*`} element={<SwtCourse />} />
         <Route path={`${DSD_BASE}/*`} element={<DsdCourse />} />
         <Route path={`${IP_BASE}/*`} element={<IpCourse />} />
+        <Route path={`${PY_BASE}/*`} element={<PyCourse />} />
+        <Route path={`${DM_BASE}/*`} element={<DmCourse />} />
+        <Route path={`${CM_BASE}/*`} element={<CmCourse />} />
+        <Route path={`${PROB_BASE}/*`} element={<ProbCourse />} />
+        <Route path={`${ASM_BASE}/*`} element={<AsmCourse />} />
+        <Route path={`${EDA_BASE}/*`} element={<EdaCourse />} />
+        <Route path={`${RES_BASE}/*`} element={<ResCourse />} />
+        <Route path={`${PHYS_LAB_BASE}/*`} element={<PhyslabCourse />} />
+        <Route path={`${JAVA_BASE}/*`} element={<JavaCourse />} />
+        <Route path={`${DL_BASE}/*`} element={<DlCourse />} />
+        <Route path={`${ROBOT_BASE}/*`} element={<RobotCourse />} />
+        <Route path={`${DS_BASE}/*`} element={<DsCourse />} />
+        <Route path={`${DSCD_BASE}/*`} element={<DscdCourse />} />
+        <Route path={`${LA_BASE}/*`} element={<LaCourse />} />
+        <Route path={`${EE_BASE}/*`} element={<EeCourse />} />
+        {/* 大二下 12 门课：按 URL 首段分发到同一套课程外壳（数据各自按需加载） */}
+        <Route path="/:courseKey/*" element={<D2XCourse />} />
         <Route path="/course/:name/*" element={<CourseStubPage />} />
         <Route path="/deck/:deckId" element={<LegacyDeckRedirect />} />
         <Route path="/practice" element={<Navigate to={`${ALGO_BASE}/practice`} replace />} />

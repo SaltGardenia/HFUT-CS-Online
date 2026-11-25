@@ -246,5 +246,189 @@
  "ip/dark": {
   "dups": [],
   "adj": []
+ },
+ "py/light": {
+  "dups": [],
+  "adj": []
+ },
+ "py/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "dm/light": {
+  "dups": [],
+  "adj": []
+ },
+ "dm/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "cm/light": {
+  "dups": [],
+  "adj": []
+ },
+ "cm/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "prob/light": {
+  "dups": [],
+  "adj": []
+ },
+ "prob/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "asm/light": {
+  "dups": [],
+  "adj": []
+ },
+ "asm/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "eda/light": {
+  "dups": [],
+  "adj": []
+ },
+ "eda/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "res/light": {
+  "dups": [],
+  "adj": []
+ },
+ "res/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "physlab/light": {
+  "dups": [],
+  "adj": []
+ },
+ "physlab/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "java/light": {
+  "dups": [],
+  "adj": []
+ },
+ "java/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "dl/light": {
+  "dups": [],
+  "adj": []
+ },
+ "dl/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "robot/light": {
+  "dups": [],
+  "adj": []
+ },
+ "robot/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "comp/light": {
+  "dups": [],
+  "adj": []
+ },
+ "comp/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "co/light": {
+  "dups": [],
+  "adj": []
+ },
+ "co/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "emb/light": {
+  "dups": [],
+  "adj": []
+ },
+ "emb/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "ml/light": {
+  "dups": [],
+  "adj": []
+ },
+ "ml/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "ste/light": {
+  "dups": [],
+  "adj": []
+ },
+ "ste/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "comb/light": {
+  "dups": [],
+  "adj": []
+ },
+ "comb/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "cg/light": {
+  "dups": [],
+  "adj": []
+ },
+ "cg/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "sma/light": {
+  "dups": [],
+  "adj": []
+ },
+ "sma/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "dmt/light": {
+  "dups": [],
+  "adj": []
+ },
+ "dmt/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "np/light": {
+  "dups": [],
+  "adj": []
+ },
+ "np/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "micro/light": {
+  "dups": [],
+  "adj": []
+ },
+ "micro/dark": {
+  "dups": [],
+  "adj": []
+ },
+ "het/light": {
+  "dups": [],
+  "adj": []
+ },
+ "het/dark": {
+  "dups": [],
+  "adj": []
  }
 }

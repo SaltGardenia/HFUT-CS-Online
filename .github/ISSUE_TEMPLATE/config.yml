@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 站内勘误（推荐）
+    url: https://saltgardenia.github.io/HFUT-CS-Online/
+    about: 顶栏铅笔按钮可直接改正文并一键提出 PR，不需要 GitHub 账号以外的准备
+  - name: 贡献指南
+    url: https://github.com/SaltGardenia/HFUT-CS-Online/blob/main/CONTRIBUTING.md
+    about: 本地运行、内容契约、提交与 PR 规范
+  - name: 分支预览
+    url: https://saltgardenia.github.io/HFUT-CS-Online/preview/
+    about: 查看尚未发布的改动渲染效果

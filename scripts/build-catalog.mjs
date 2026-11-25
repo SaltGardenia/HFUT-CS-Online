@@ -209,6 +209,11 @@ function buildCourseTree(dir, provKey, rootKey) {
     if (prov) {
       node.r = prov.repo;
       node.sp = prov.src;
+    } else if (rootKey === '补充资料') {
+      // 补充资料带 sp（仓库内路径）与 git 历史无关：新加的文件即使还没提交也要能被
+      // --supplement-only 认出来并替换，否则重新生成时会留下重复节点。
+      node.r = 'self';
+      node.sp = selfPath;
     } else if (GIT_UPLOADERS.has(selfPath)) {
       node.r = 'self';
       node.sp = selfPath;
@@ -351,6 +356,247 @@ function listCourses(sem) {
   return [...names].sort((a, b) => a.localeCompare(b, 'zh-Hans-CN'));
 }
 
+/** catalog.ts 的完整源码（全量扫描与 --supplement-only 共用）。 */
+function catalogSource(lines, totalFiles) {
+  return `/* 【自动生成】由 scripts/build-catalog.mjs 扫描 data/ 与 补充资料/ 生成，请勿手改。
+ * 共 ${lines.length} 门课程 / ${totalFiles} 份文件；增删资料后 npm run catalog 刷新。 */
+
+export interface CatalogCourse {
+  /** 学期文件夹名：大一上…大四下 */
+  semester: string;
+  /** 课程目录名（与整理文件夹一致） */
+  name: string;
+  /** 课件 / 试题 / 附件 文件数 */
+  courseware: number;
+  exams: number;
+  misc: number;
+  total: number;
+}
+
+export const catalog: CatalogCourse[] = [
+${lines.join('\n')}
+];
+`;
+}
+
+/* ── --supplement-only：不依赖 data/ 的增量模式 ────────────────────────────
+ * data/ 只在维护者本机存在（~8.4GB，不入库），外部贡献者与 CI 都只有入库的 补充资料/。
+ * 全量扫描在缺少 data/ 时会被“课程数变少”的守卫拦下，所以这里改为：
+ *   ① 以已提交的 catalog.ts 与 public/attachments/*.json 为底（去掉其中的补充资料节点）；
+ *   ② 重新扫描 补充资料/ 并合并；
+ *   ③ 只重写受影响的课程条目与附件清单。
+ * 维护者本机即使有 data/ 也走同一路径，产物与全量扫描一致。
+ *   node scripts/build-catalog.mjs --supplement-only
+ *   node scripts/build-catalog.mjs --supplement-only --check   # 只校验生成物是否最新 */
+const SUPPLEMENT_PREFIX = '补充资料/';
+const CATALOG_LINE =
+  /^\s*\{\s*semester:\s*("(?:[^"\\]|\\.)*"),\s*name:\s*("(?:[^"\\]|\\.)*"),\s*courseware:\s*(\d+),\s*exams:\s*(\d+),\s*misc:\s*(\d+),\s*total:\s*(\d+)\s*\},?\s*$/;
+const courseKey = (semester, name) => `${semester}\u0000${name}`;
+const isSupplementNode = (n) =>
+  n.r === 'self' && typeof n.sp === 'string' && n.sp.startsWith(SUPPLEMENT_PREFIX);
+
+function readCommittedCatalog() {
+  if (!existsSync(OUT)) return [];
+  const courses = [];
+  for (const line of readFileSync(OUT, 'utf8').split(/\r?\n/)) {
+    const m = line.match(CATALOG_LINE);
+    if (!m) continue;
+    courses.push({
+      semester: JSON.parse(m[1]),
+      name: JSON.parse(m[2]),
+      courseware: Number(m[3]),
+      exams: Number(m[4]),
+      misc: Number(m[5]),
+    });
+  }
+  return courses;
+}
+
+function loadCommittedManifest(semester, course) {
+  const file = join(ATTACH_DIR, `${semester}__${course}.json`);
+  if (!existsSync(file)) return null;
+  try {
+    const manifest = JSON.parse(readFileSync(file, 'utf8'));
+    return Array.isArray(manifest?.cats) ? manifest : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 去掉只属于补充资料的节点：目录整枝是补充资料就整枝丢掉，混合目录保留并递归清理。 */
+function pruneSupplementNodes(nodes) {
+  const kept = [];
+  for (const node of nodes) {
+    if (isSupplementNode(node)) continue;
+    if (node.c) {
+      node.c = pruneSupplementNodes(node.c);
+      if (node.c.length === 0) continue;
+    }
+    kept.push(node);
+  }
+  return kept;
+}
+
+function countLeaves(nodes) {
+  let n = 0;
+  const walk = (x) => (x.c ? x.c.forEach(walk) : (n += 1));
+  nodes.forEach(walk);
+  return n;
+}
+
+/** 递归收集节点上的上传者（u），用于在没有 git 历史（浅克隆）时沿用已提交的信息。 */
+function collectUploaders(nodes, map) {
+  for (const node of nodes) {
+    if (node.c) collectUploaders(node.c, map);
+    else if (node.sp && node.u) map.set(node.sp, node.u);
+  }
+}
+
+function applyUploaders(nodes, map) {
+  for (const node of nodes) {
+    if (node.c) applyUploaders(node.c, map);
+    else if (!node.u && node.sp && map.has(node.sp)) node.u = map.get(node.sp);
+  }
+}
+
+/** 扫描 补充资料/<学期>/<课程>，返回 Map<课程键, { semester, name, trees }>。 */
+function scanSupplement() {
+  const found = new Map();
+  if (!existsSync(SUPPLEMENT)) return found;
+  for (const sem of SEMESTER_ORDER) {
+    const semDir = join(SUPPLEMENT, sem);
+    if (!existsSync(semDir)) continue;
+    for (const name of readdirSync(semDir)) {
+      const dir = join(semDir, name);
+      if (!statSync(dir).isDirectory()) continue;
+      found.set(courseKey(sem, name), {
+        semester: sem,
+        name,
+        trees: buildCourseTree(dir, `${sem}/${name}`, '补充资料'),
+      });
+    }
+  }
+  return found;
+}
+
+/** 比较两份附件清单时忽略上传者（u 依赖 git 历史，浅克隆/新文件下会不同）。 */
+function canonicalManifest(json) {
+  const strip = (nodes) =>
+    nodes.map(({ u, ...rest }) => ({ ...rest, ...(rest.c ? { c: strip(rest.c) } : {}) }));
+  return JSON.stringify({
+    ...json,
+    cats: json.cats.map((cat) => ({ ...cat, tree: strip(cat.tree ?? []) })),
+  });
+}
+
+function runSupplementOnly(check) {
+  const entries = new Map();
+  for (const c of readCommittedCatalog()) {
+    const manifest = loadCommittedManifest(c.semester, c.name);
+    entries.set(courseKey(c.semester, c.name), {
+      semester: c.semester,
+      name: c.name,
+      counts: { 课件: c.courseware, 试题: c.exams, 附件: c.misc },
+      trees: manifest
+        ? Object.fromEntries(CATS.map((k) => [k, pruneSupplementNodes(manifest.cats.find((x) => x.name === k)?.tree ?? [])]))
+        : null,
+      dirty: false,
+    });
+  }
+
+  const uploaderFallback = new Map();
+  for (const e of entries.values()) {
+    if (e.trees) CATS.forEach((k) => collectUploaders(e.trees[k], uploaderFallback));
+  }
+
+  for (const [key, extra] of scanSupplement()) {
+    let e = entries.get(key);
+    if (!e) {
+      e = {
+        semester: extra.semester,
+        name: extra.name,
+        counts: { 课件: 0, 试题: 0, 附件: 0 },
+        trees: { 课件: [], 试题: [], 附件: [] },
+        dirty: true,
+      };
+      entries.set(key, e);
+    } else if (!e.trees) {
+      console.warn(`[build-catalog] ${extra.semester}/${extra.name} 缺少已提交的附件清单，跳过该课程的补充资料合并`);
+      continue;
+    } else {
+      e.dirty = true;
+    }
+    for (const k of CATS) {
+      mergeTree(e.trees[k], extra.trees[k]);
+      restampTree(e.trees[k]);
+      applyUploaders(e.trees[k], uploaderFallback);
+      e.trees[k].sort(sortNodes);
+    }
+    e.counts = { 课件: countLeaves(e.trees.课件), 试题: countLeaves(e.trees.试题), 附件: countLeaves(e.trees.附件) };
+  }
+
+  const ordered = [...entries.values()].sort(
+    (a, b) =>
+      SEMESTER_ORDER.indexOf(a.semester) - SEMESTER_ORDER.indexOf(b.semester) ||
+      a.name.localeCompare(b.name, 'zh-Hans-CN'),
+  );
+
+  const lines = [];
+  let totalFiles = 0;
+  for (const e of ordered) {
+    const total = e.counts.课件 + e.counts.试题 + e.counts.附件;
+    totalFiles += total;
+    lines.push(
+      `  { semester: ${pad(e.semester)}, name: ${pad(e.name)}, courseware: ${e.counts.课件}, exams: ${e.counts.试题}, misc: ${e.counts.附件}, total: ${total} },`,
+    );
+  }
+  const nextCatalog = catalogSource(lines, totalFiles);
+
+  const changed = [];
+  const same = (a, b) => a.replaceAll('\r\n', '\n') === b.replaceAll('\r\n', '\n');
+  if (!existsSync(OUT) || !same(nextCatalog, readFileSync(OUT, 'utf8'))) changed.push(relative(REPO_ROOT, OUT).replaceAll('\\', '/'));
+
+  const pending = [];
+  for (const e of ordered) {
+    if (!e.dirty || !e.trees) continue;
+    const manifest = {
+      semester: e.semester,
+      course: e.name,
+      cats: CATS.map((name) => ({ name, tree: e.trees[name] })),
+      total: e.counts.课件 + e.counts.试题 + e.counts.附件,
+    };
+    const file = join(ATTACH_DIR, `${e.semester}__${e.name}.json`);
+    const nextJson = JSON.stringify(manifest);
+    const oldRaw = existsSync(file) ? readFileSync(file, 'utf8').trim() : '';
+    const sameJson = oldRaw && canonicalManifest(JSON.parse(oldRaw)) === canonicalManifest(manifest);
+    if (sameJson) continue;
+    pending.push({ file, nextJson });
+    changed.push(relative(REPO_ROOT, file).replaceAll('\\', '/'));
+  }
+
+  if (check) {
+    if (changed.length === 0) {
+      console.log('[build-catalog] 补充资料相关生成物均为最新');
+      return;
+    }
+    console.error(`[build-catalog] 生成物不是最新，请运行 npm run catalog:supplement：\n  ${changed.join('\n  ')}`);
+    process.exit(1);
+  }
+
+  if (changed.length === 0) {
+    console.log('[build-catalog] 补充资料相关生成物均为最新，无需写入');
+    return;
+  }
+  writeFileSync(OUT, nextCatalog, 'utf8');
+  for (const { file, nextJson } of pending) writeFileSync(file, nextJson, 'utf8');
+  console.log(`[build-catalog] 合并补充资料：${lines.length} 门课程 / ${totalFiles} 份文件，更新 ${changed.length} 个文件`);
+}
+
+if (process.argv.includes('--supplement-only')) {
+  runSupplementOnly(process.argv.includes('--check'));
+  process.exit(0);
+}
+
 if (!existsSync(MATERIALS) && !existsSync(SUPPLEMENT)) {
   syncExistingManifestUploaders();
   console.warn('[build-catalog] 未找到资料目录（data/ 与 补充资料/），跳过（保留现有 catalog.ts）');
@@ -424,25 +670,7 @@ for (const sem of semesters) {
   }
 }
 
-const ts = `/* 【自动生成】由 scripts/build-catalog.mjs 扫描 data/ 与 补充资料/ 生成，请勿手改。
- * 共 ${lines.length} 门课程 / ${totalFiles} 份文件；增删资料后 npm run catalog 刷新。 */
-
-export interface CatalogCourse {
-  /** 学期文件夹名：大一上…大四下 */
-  semester: string;
-  /** 课程目录名（与整理文件夹一致） */
-  name: string;
-  /** 课件 / 试题 / 附件 文件数 */
-  courseware: number;
-  exams: number;
-  misc: number;
-  total: number;
-}
-
-export const catalog: CatalogCourse[] = [
-${lines.join('\n')}
-];
-`;
+const ts = catalogSource(lines, totalFiles);
 
 /* 防误伤：data/ 里只要有零星课件（如 PR 误提交了某门课的几个 PDF），扫描结果就会只剩这一门课，
  * 直接覆盖会把已入库的完整目录缩成 1 门，附件清单也跟着只剩 1 份（CI 上就是这么把线上刷坏的）。

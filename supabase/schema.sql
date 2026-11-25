@@ -7,6 +7,7 @@
 --   user_progress   每题作答（course + question_id 唯一；result 为 null 表示清空墓碑）
 --   user_favorites  课程收藏（按课程一行，favorited=false 为取消收藏墓碑）
 --   user_recent     最近查看（按课程一行，取最大 viewed_at）
+--   user_reading    阅读进度（按页面一行，记录滚动位置与百分比）
 --
 -- 安全
 --   * 所有表启用 RLS，只允许 auth.uid() = user_id 的读写；
@@ -163,6 +164,44 @@ create policy "recent delete own"
   on public.user_recent for delete to authenticated
   using (auth.uid() = user_id);
 
+-- ---------------------------------------------------------------- reading
+create table if not exists public.user_reading (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  course text not null,
+  page text not null,
+  scroll_y integer not null default 0,
+  percent real not null default 0,
+  section text,
+  updated_at timestamptz not null default now(),
+  device_id text,
+  primary key (user_id, course, page)
+);
+
+create index if not exists user_reading_user_idx on public.user_reading (user_id);
+
+alter table public.user_reading enable row level security;
+
+drop policy if exists "reading select own" on public.user_reading;
+create policy "reading select own"
+  on public.user_reading for select to authenticated
+  using (auth.uid() = user_id);
+
+drop policy if exists "reading insert own" on public.user_reading;
+create policy "reading insert own"
+  on public.user_reading for insert to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "reading update own" on public.user_reading;
+create policy "reading update own"
+  on public.user_reading for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "reading delete own" on public.user_reading;
+create policy "reading delete own"
+  on public.user_reading for delete to authenticated
+  using (auth.uid() = user_id);
+
 -- --------------------------------------------------------------- 批量同步
 -- 一次请求上传全部脏数据。冲突规则：updated_at 更新者胜；同一毫秒时保留云端。
 -- 函数以调用者身份执行（security invoker），越权写会被 RLS 拒绝。
@@ -237,21 +276,74 @@ begin
 end;
 $$;
 
+-- --------------------------------------------------- 阅读进度批量上传
+-- 单独一个函数：老库没执行这段时前端会静默跳过，其它数据同步不受影响。
+create or replace function public.sync_push_reading(
+  p_reading jsonb default '[]'::jsonb
+)
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    raise exception 'not authenticated';
+  end if;
+
+  insert into public.user_reading (user_id, course, page, scroll_y, percent, section, updated_at, device_id)
+  select
+    v_uid,
+    x.course,
+    x.page,
+    coalesce(x.scroll_y, 0),
+    coalesce(x.percent, 0),
+    x.section,
+    coalesce(x.updated_at, now()),
+    x.device_id
+  from jsonb_to_recordset(coalesce(p_reading, '[]'::jsonb)) as x(
+    course text,
+    page text,
+    scroll_y integer,
+    percent real,
+    section text,
+    updated_at timestamptz,
+    device_id text
+  )
+  where x.course is not null and x.page is not null
+  on conflict (user_id, course, page) do update
+    set scroll_y = excluded.scroll_y,
+        percent = excluded.percent,
+        section = excluded.section,
+        updated_at = excluded.updated_at,
+        device_id = excluded.device_id
+    where excluded.updated_at > user_reading.updated_at;
+end;
+$$;
+
 -- ----------------------------------------------------------------- grants
 -- 只授予登录用户；匿名访客不接触任何用户表。
 grant select, insert, update, delete on public.user_progress to authenticated;
 grant select, insert, update, delete on public.user_favorites to authenticated;
 grant select, insert, update, delete on public.user_recent to authenticated;
+grant select, insert, update, delete on public.user_reading to authenticated;
 grant select, insert, update on public.profiles to authenticated;
 
 revoke all on public.user_progress from anon;
 revoke all on public.user_favorites from anon;
 revoke all on public.user_recent from anon;
+revoke all on public.user_reading from anon;
 revoke all on public.profiles from anon;
 
 revoke all on function public.sync_push(jsonb, jsonb, jsonb) from public;
 revoke all on function public.sync_push(jsonb, jsonb, jsonb) from anon;
 grant execute on function public.sync_push(jsonb, jsonb, jsonb) to authenticated;
+
+revoke all on function public.sync_push_reading(jsonb) from public;
+revoke all on function public.sync_push_reading(jsonb) from anon;
+grant execute on function public.sync_push_reading(jsonb) to authenticated;
 
 -- 可选：实时订阅（跨设备即时刷新，当前前端按「回到前台拉取」处理，无需开启）
 -- alter publication supabase_realtime add table public.user_progress;

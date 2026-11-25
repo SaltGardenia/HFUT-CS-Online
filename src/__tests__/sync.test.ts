@@ -1,20 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PROGRESS_STORES } from '../lib/sync/keys';
+import { PROGRESS_STORES, READING_KEY } from '../lib/sync/keys';
 import {
   applyProgress,
+  applyReading,
   ensureProgressStamps,
   readProgress,
   readProgressMeta,
+  readReading,
+  setDirtyListener,
   subscribeStore,
   writeProgress,
+  writeReading,
 } from '../lib/sync/local';
-import { mergeFavorites, mergeProgress, mergeRecent } from '../lib/sync/merge';
-import type { RemoteProgressRow } from '../lib/sync/types';
+import { mergeFavorites, mergeProgress, mergeReading, mergeRecent } from '../lib/sync/merge';
+import type { RemoteProgressRow, RemoteReadingRow } from '../lib/sync/types';
 
 const iso = (ms: number) => new Date(ms).toISOString();
 
 function progressRow(qid: string, result: string | null, at: number): RemoteProgressRow {
   return { course: 'algo', question_id: qid, result, updated_at: iso(at) };
+}
+
+function readingRow(page: string, at: number, over: Partial<RemoteReadingRow> = {}): RemoteReadingRow {
+  return {
+    course: 'algo',
+    page,
+    scroll_y: 100,
+    percent: 0.1,
+    section: null,
+    updated_at: iso(at),
+    ...over,
+  };
 }
 
 describe('mergeProgress：逐题独立合并', () => {
@@ -104,6 +120,50 @@ describe('mergeFavorites / mergeRecent：集合合并', () => {
   });
 });
 
+describe('mergeReading：按页取新', () => {
+  it('逐页独立合并：云端较新覆盖，本机较新 / 独有回传', () => {
+    const merged = mergeReading(
+      {
+        '/algo/deck/deck3': { c: 'algo', y: 1200, p: 0.12, s: '分治法', t: 5000 },
+        '/algo/deck/deck5': { c: 'algo', y: 300, p: 0.03, t: 1000 },
+      },
+      [
+        readingRow('/algo/deck/deck3', 2000, { scroll_y: 40, percent: 0.01 }),
+        readingRow('/algo/deck/deck4', 9000, { scroll_y: 2500, percent: 0.5, section: '动态规划' }),
+      ],
+    );
+
+    expect(merged.map['/algo/deck/deck3']).toMatchObject({ y: 1200, p: 0.12, s: '分治法', t: 5000 });
+    expect(merged.map['/algo/deck/deck4']).toMatchObject({
+      c: 'algo',
+      y: 2500,
+      p: 0.5,
+      s: '动态规划',
+      t: 9000,
+    });
+    expect(merged.map['/algo/deck/deck5']).toMatchObject({ y: 300, t: 1000 });
+    expect(merged.push.map((p) => p.page).sort()).toEqual(['/algo/deck/deck3', '/algo/deck/deck5']);
+  });
+
+  it('新设备只有云端进度：直接回填，无需上传', () => {
+    const merged = mergeReading({}, [readingRow('/comp/deck/deck2', 7000, { course: 'comp' })]);
+    expect(merged.map['/comp/deck/deck2']).toMatchObject({ c: 'comp', y: 100, p: 0.1, t: 7000 });
+    expect(merged.push).toEqual([]);
+  });
+
+  it('云端位置越界时收敛到合法范围', () => {
+    const merged = mergeReading(
+      {},
+      [
+        readingRow('/x/deck/a', 1000, { scroll_y: -20, percent: 1.7 }),
+        readingRow('/x/deck/b', 1000, { scroll_y: 50, percent: -0.3 }),
+      ],
+    );
+    expect(merged.map['/x/deck/a']).toMatchObject({ y: 0, p: 1 });
+    expect(merged.map['/x/deck/b']).toMatchObject({ y: 50, p: 0 });
+  });
+});
+
 describe('本地存储层：时间戳、墓碑、订阅', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -147,6 +207,31 @@ describe('本地存储层：时间戳、墓碑、订阅', () => {
     expect(readProgress('practice-progress-v1')).toEqual({ q9: 'revealed' });
     expect(listener).toHaveBeenCalled();
     unsub();
+  });
+
+  it('阅读进度：位置变化才落盘并广播，重复位置不产生脏数据', () => {
+    const listener = vi.fn();
+    const unsub = subscribeStore(READING_KEY, listener);
+    expect(writeReading('/algo/deck/deck3', { c: 'algo', y: 1000, p: 0.2, t: 1 })).toBe(true);
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    // 10px / 0.2% 内的抖动视为没动
+    expect(writeReading('/algo/deck/deck3', { c: 'algo', y: 1006, p: 0.2005, t: 2 })).toBe(false);
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(readReading()['/algo/deck/deck3'].y).toBe(1000);
+
+    expect(writeReading('/algo/deck/deck3', { c: 'algo', y: 1600, p: 0.32, t: 3 })).toBe(true);
+    expect(readReading()['/algo/deck/deck3'].y).toBe(1600);
+    unsub();
+  });
+
+  it('applyReading 落盘云端结果但不产生脏事件（避免回声上传）', () => {
+    const dirty = vi.fn();
+    setDirtyListener(dirty);
+    applyReading({ '/os/chapter/ch2': { c: 'os', y: 800, p: 0.4, s: '进程调度', t: 5000 } });
+    expect(readReading()['/os/chapter/ch2']).toMatchObject({ c: 'os', y: 800, p: 0.4 });
+    expect(dirty).not.toHaveBeenCalled();
+    setDirtyListener(null);
   });
 });
 
