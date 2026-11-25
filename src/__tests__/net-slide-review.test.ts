@@ -11,6 +11,8 @@ describe('2025 计网课件主线', () => {
       const no = i + 1;
       const { chapter } = buildSlideReview(original);
       expect(chapter.sections.map(s => s.id)).toEqual(orders[i].map(k => `sec-ch${no}-src-${k}`));
+      expect(chapter.sections.map(s => s.heading.match(/^\d+\.(?!\d)/)?.[0])).toEqual(orders[i].map((_, j) => `${j+1}.`));
+      expect(chapter.sections.some(s => /^\d+\.\d+/.test(s.heading))).toBe(false);
       expect(sourceExtraNotes[no]).toBeTruthy();
       expect(chapter.toc.filter(e => e.id.includes('-src-')).map(e => e.id)).toEqual(chapter.sections.map(s => s.id));
     }
