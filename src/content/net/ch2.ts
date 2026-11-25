@@ -21,10 +21,10 @@ const ch: NetChapter = {
     { id: 'sec-ch2-arch-h3', text: '计算机网络体系结构模型', level: 3 },
     { id: 'sec-ch2-protocol', text: '3. 网络协议', level: 2 },
     { id: 'sec-ch2-protocol-h1', text: '★ 协议「三要素」', level: 3 },
-    { id: 'sec-ch2-protocol-h2', text: '协议数据单元 PDU', level: 3 },
     { id: 'sec-ch2-osi', text: '4. OSI 参考模型', level: 2 },
     { id: 'sec-ch2-osi-h1', text: '三种模型的比较', level: 3 },
     { id: 'sec-ch2-osi-h2', text: '★ 主机 1 向主机 2 发送数据', level: 3 },
+    { id: 'sec-ch2-protocol-h2', text: '协议数据单元 PDU', level: 3 },
     { id: 'sec-ch2-osi-h3', text: '★ OSI/RM 各层简介', level: 3 },
     { id: 'sec-ch2-tcpip', text: '5. Internet 模型', level: 2 },
     { id: 'sec-ch2-tcpip-h1', text: '★ Internet 模型简介', level: 3 },
@@ -191,19 +191,9 @@ const ch: NetChapter = {
             时序通过控制具有特定语义的报文的交换，从而实现计算机间的通信。<strong>语法是语义的载体，时序又是对语义的有序组织</strong>。
             正是基于这样的关系，计算机在通信时才得以保持高度默契。
           </p>
-          <h3 id="sec-ch2-protocol-h2">协议数据单元 PDU</h3>
           <p><strong>协议可以有两种表达形式：</strong><strong>文字描述</strong>便于人阅读和理解；
             <strong>程序代码</strong>便于计算机执行。无论采用哪一种形式，都应能对信息交换的格式、含义和过程作出精确说明。</p>
           
-          <p>
-            计算机网络体系结构中，对等层之间交换的信息报文统称为<strong>协议数据单元</strong>（Protocol Data Unit，PDU）。
-            PDU 由协议控制信息（<strong>协议头</strong>）和数据（<strong>SDU</strong>）组成。协议头中一般含有完成传输数据所需的控制信息，
-            如：地址、序号、长度、分段标志、差错控制信息等。各层的 PDU 有不同的专属名称。
-          </p>
-          <p>
-            两个端系统之间的数据通信过程本质上就是 PDU 的不断<strong>封装</strong>和<strong>解封</strong>过程：
-            在源系统，数据在自上而下逐层递交的过程就是 PDU 不断封装的过程；在目的系统，当数据到达后自下而上递交的过程就是 PDU 不断拆封的过程。
-          </p>
           `,
         },
       ],
@@ -255,6 +245,19 @@ const ch: NetChapter = {
             <p>结合分层传输图辨别各层作用、传输层的端到端通信，以及 TCP/IP 各层的功能对应。</p>
           </div>
 
+          <h4 id="sec-ch2-protocol-h2">协议数据单元 PDU</h4>
+          <p>
+            计算机网络体系结构中，对等层实体之间按照本层协议交换的信息单元统称为<strong>协议数据单元</strong>（Protocol Data Unit，PDU）。
+            在简单的逐层封装模型中，本层在上层交付的<strong>服务数据单元</strong>（Service Data Unit，SDU）上加入本层的<strong>协议控制信息</strong>（Protocol Control Information，PCI），形成 PDU。
+            PCI 通常位于首部，某些协议也使用尾部，例如数据链路层帧的 FCS。
+            控制信息可包括地址、序号、长度、分段标志、差错控制信息等。各层的 PDU 有不同的名称。
+          </p>
+          <p class="formula">PDU = PCI + SDU（简单封装模型）</p>
+          <p>
+            两个端系统之间的数据通信过程本质上就是 PDU 的不断<strong>封装</strong>和<strong>解封</strong>过程：
+            在源系统，数据在自上而下逐层递交的过程中不断封装；在目的系统，数据自下而上逐层递交的过程中不断解封。
+            在不发生分段、合并等情况下，上层的 PDU 作为下层的 SDU。
+          </p>
           <p>主机 1 的应用进程 AP1 向主机 2 的应用进程 AP2 发送数据的完整过程（自上而下逐层封装，再自下而上逐层拆封）：</p>
           <ol>
             <li>应用进程数据先传送到应用层，加上应用层首部，成为<strong>应用层 PDU</strong>；</li>
