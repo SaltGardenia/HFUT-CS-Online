@@ -23,6 +23,9 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  // 代码/插图覆盖层直接挂在 body 上，cleanup 不会带走
+  document.querySelectorAll('.code-lightbox, .fig-lightbox').forEach((el) => el.remove());
+  document.body.style.overflow = '';
   vi.unstubAllGlobals();
 });
 
@@ -56,5 +59,35 @@ describe('HtmlContent 里的链接', () => {
 
     await userEvent.click(screen.getByText('跳到 A'));
     expect(screen.getByTestId('path').textContent).toBe('/ds');
+  });
+});
+
+describe('HtmlContent 长代码折叠与完整代码覆盖层', () => {
+  // 课程内容里没有 .code-pair 包裹时，折叠态落在 .code-wrap 自身（覆盖层克隆的根节点）
+  const codeLines = Array.from({ length: 12 }, (_, i) => `int v${i} = ${i};`).join('\n');
+  const html = `<p>示例</p><pre class="code"><code>${codeLines}</code></pre>`;
+
+  it('点击「查看完整代码」后覆盖层里的代码不再折叠', async () => {
+    render(
+      <MemoryRouter initialEntries={['/pd']}>
+        <HtmlContent html={html} />
+      </MemoryRouter>,
+    );
+
+    const trigger = screen.getByText(/查看完整代码/);
+    // 页内仍是折叠态：长代码默认收起
+    expect(trigger.closest('.code-wrap')?.classList.contains('clamped')).toBe(true);
+
+    await userEvent.click(trigger);
+
+    const wrap = document.querySelector('.code-lightbox-panel .code-wrap');
+    expect(wrap).not.toBeNull();
+    expect(wrap?.classList.contains('clamped')).toBe(false);
+    const pre = wrap?.querySelector('pre.code') as HTMLElement;
+    expect(pre.style.maxHeight).toBe('');
+
+    // close 按钮能正常收掉覆盖层
+    await userEvent.click(document.querySelector('.fig-lightbox-close') as HTMLElement);
+    expect(document.querySelector('.code-lightbox')).toBeNull();
   });
 });

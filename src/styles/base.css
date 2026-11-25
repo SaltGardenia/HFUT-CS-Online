@@ -1385,7 +1385,11 @@ pre.code::-webkit-scrollbar-track {
 .code-lightbox-panel .code-wrap {
   margin: 0;
 }
-.code-lightbox-panel pre.code {
+/* 覆盖层里的代码块必须完整展开：.code-wrap.clamped pre.code 的特异性更高，
+   这里用同等级以上的选择器压住它，避免残留折叠态把代码继续截断 */
+.code-lightbox-panel pre.code,
+.code-lightbox-panel .code-wrap pre.code,
+.code-lightbox-panel .code-wrap.clamped pre.code {
   max-height: none;
   overflow-x: auto;
   -webkit-mask-image: none;

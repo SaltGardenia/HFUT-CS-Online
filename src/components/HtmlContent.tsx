@@ -253,6 +253,9 @@ function openCodeLightbox(scope: HTMLElement) {
   // 克隆目标区域的代码块（伪代码 + C++ 纵向排列），去掉折叠态与页内按钮
   const source = scope.cloneNode(true) as HTMLElement;
   source.querySelectorAll('.copy-btn, .code-expand, .code-tabs').forEach((el) => el.remove());
+  // 没有 .code-pair 包裹时 scope 就是折叠的 .code-wrap 本身，而 querySelectorAll 不含自身 ——
+  // 漏掉这一步，克隆体仍带 .clamped，覆盖层里的代码依旧被截成 200px。
+  source.classList.remove('clamped');
   source.querySelectorAll('.clamped').forEach((el) => el.classList.remove('clamped'));
   source.querySelectorAll('pre.code').forEach((el) => {
     (el as HTMLElement).style.maxHeight = '';
