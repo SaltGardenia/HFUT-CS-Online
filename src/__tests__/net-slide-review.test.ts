@@ -25,8 +25,20 @@ describe('2025 计网课件主线', () => {
       }
     }
   });
-  it('已识别的额外讲义锚点不冒充课件正文', () => {
+  it('独立的额外讲义锚点不冒充课件正文', () => {
     expect(buildSlideReview(netChapters[3]).resolve('sec-ch4-p2p-h1')).toBeUndefined();
     expect(buildSlideReview(netChapters[7]).resolve('sec-ch8-http-h5')).toBeUndefined();
+  });
+  it('详细主线不能退化成知识点摘要，且保留课内互动演示', () => {
+    for (const original of netChapters) {
+      const { chapter } = buildSlideReview(original);
+      const html = (c: typeof original) => c.sections.flatMap(s=>s.blocks).filter(b=>b.type==='html').map(b=>b.html).join('');
+      // Only visible text counts: SVG markup cannot artificially inflate coverage.
+      const size = (c: typeof original) => html(c).replace(/<svg\b[\s\S]*?<\/svg>/gi,'').replace(/<[^>]*>/g,'').replace(/\s/g,'').length;
+      expect(size(chapter), original.title).toBeGreaterThan(4000);
+      expect(size(chapter), original.title).toBeGreaterThanOrEqual(size(original)*0.60);
+      const demos=chapter.sections.flatMap(s=>s.blocks).filter(b=>b.type==='demo');
+      expect(demos.length,original.title).toBeGreaterThan(0);
+    }
   });
 });

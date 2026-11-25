@@ -384,12 +384,12 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
       </div>
       <nav className="topic-map" aria-label="复习模式">
         <span className="topic-map-label">复习模式</span>
-        <button className="topic-chip" type="button" aria-pressed={!extra} style={{ fontWeight: !extra ? 700 : 400 }} onClick={() => { if (extra) { navigate(`${NET_BASE}/deck/${chapter.id}`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>课件主线（按顺序）</button>
-        <button className="topic-chip" type="button" aria-pressed={extra} style={{ fontWeight: extra ? 700 : 400 }} onClick={() => { if (!extra) { navigate(`${NET_BASE}/deck/${chapter.id}?view=extra`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>原有讲义与拓展</button>
+        <button className="topic-chip" type="button" aria-pressed={!extra} style={{ fontWeight: !extra ? 700 : 400 }} onClick={() => { if (extra) { navigate(`${NET_BASE}/deck/${chapter.id}`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>课件主线（详细讲义）</button>
+        <button className="topic-chip" type="button" aria-pressed={extra} style={{ fontWeight: extra ? 700 : 400 }} onClick={() => { if (!extra) { navigate(`${NET_BASE}/deck/${chapter.id}?view=extra`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>完整原讲义与拓展</button>
       </nav>
       <div className="callout tip">
         <p className="callout-h">{extra ? '原有讲义与拓展（非课件主线）' : '拓展与待核内容说明'}</p>
-        <p>{sourceExtraNotes[chapterNo]} {extra ? '以下为原有讲义，含与主线重复的解释、拓展及尚未逐段核实的内容，不代表全部属于课件。' : '「理解辅助」用于解释课内概念；「拓展」及「待核」不当作课件原有知识点。'}</p>
+        <p>{sourceExtraNotes[chapterNo]} {extra ? '以下为原有讲义，含与主线重复的解释、拓展及尚未逐段核实的内容，不代表全部属于课件。' : '详细正文保留相关原有图解、例题和交互演示。「理解辅助」用于解释课内概念；「拓展」及「待核」不当作课件原有知识点。'}</p>
       </div>
       <details>
         <summary>荧光笔重点索引（辅助索引，不按正文顺序）</summary>

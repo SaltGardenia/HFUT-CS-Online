@@ -59,7 +59,7 @@ export function buildNetHomeSections(reading: ReadingMap = {}): Section[] {
     id: 'sec-net-map', heading: '八章内容地图', blocks: [{
       type: 'html', html: `
       <div class="callout tip"><p class="callout-h">复习顺序</p>
-      <p>默认进入按课件顺序整理的主线，另可切换查看原有讲义与拓展；先读主线，再做每章末的作业。卡片中的百分比表示上次保存的阅读位置，并非知识掌握程度。
+      <p>默认进入按课件顺序整理的详细讲义，另可切换查看完整原讲义与拓展；先读主线，再做每章末的作业。卡片中的百分比表示上次保存的阅读位置，并非知识掌握程度。
       答案区分别注明<strong>教师答案（整理）</strong>与<strong>补充参考解答</strong>，
       便于区分已给结论和推导解释；2025 课件未布置的题不虚构为教师作业。</p></div>
       <h3 id="sec-net-map-h1">章节内容与作业</h3>

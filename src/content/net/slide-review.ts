@@ -2,7 +2,7 @@
  * 原有讲义不删除，独立显示为补充；图像页、动画与未提取文字不冒充已完成逐页转录。
  * 旧 URL 锚点通过别名映射到新的主题，作业 ID 与原始题库不变。
  */
-import type { DeckData, Section, TocEntry } from './types';
+import type { Block, DeckData, Section, TocEntry } from './types';
 
 interface SourceTopic {
   key: string;
@@ -269,7 +269,7 @@ const topics: Record<number, SourceTopic[]> = {
       "aliases": [
         "mux-h3"
       ],
-      "html": "<p>同步 TDM 等速 n 路输入时，复用链路速率至少为各路速率之和，空闲输入也占时隙。异步时分 STDM 动态按需分配时隙；n 路输入可使用少于 n 个时隙的帧，链路容量可低于输入速率总和。每个时隙要携带地址，分用器才知道应交给哪路，因此有额外寻址开销；突发流量过大时需缓存。</p><p>WDM（波分复用）是光的频分复用：不同波长光信号经光复用器合并到一根光纤，再由光分用器分离。DWDM（密集波分复用）使用更密集的波长间隔，在同一光纤中承载更多信道。</p>"
+      "html": "<p>同步 TDM 等速 n 路输入时，复用链路速率至少为各路速率之和，空闲输入也占时隙。异步时分 STDM 动态按需分配时隙；n 路输入可使用少于 n 个时隙的帧，链路容量可低于输入速率总和。每个时隙要携带地址，分用器才知道应交给哪路，因此有额外寻址开销；突发流量过大时需缓存。</p><p>WDM（波分复用）是光的频分复用：不同波长光信号经光复用器合并到一根光纤，再由光分用器分离。DWDM（密集波分复用）使用更密集的波长间隔，在同一光纤中承载更多信道。</p><h3>统计时分复用的容量与开销</h3><p>设有n条输入线路，采用固定时隙的同步时分复用时，每一帧至少安排n个时隙；在等速输入的条件下，复用线路容量至少为输入速率的n倍。统计时分复用一帧可以只安排m个时隙（m&lt;n），复用器为实际有数据的线路分配时间片，并在时隙中增加地址，使分用器识别数据去向。容量规划依据统计负荷而非全部输入同时满载，负荷过大时必须缓存并等待可用时隙，因此可能引入排队时延。</p>"
     },
     {
       "key": "sonet",
@@ -367,7 +367,7 @@ const topics: Record<number, SourceTopic[]> = {
         "lan-basic",
         "broadcast-h1"
       ],
-      "html": "<p>局域网通常由一个单位拥有，地理范围与站点数量有限。优点：广播便捷、扩展演变容易、可提高可靠性、可用性、生存性。星型、总线、环型是典型拓扑。共享信道同时发送会互扰，静态划分信道（频分、时分、波分、码分）或动态接入（随机、受控如轮询）解决争用。</p><p>以太网两个标准 DIX Ethernet V2 与 IEEE 802.3，硬件可互操作。LAN 体系结构只包含物理层、数据链路层；链路层划分 LLC（逻辑链路控制）与 MAC（媒体接入控制），不同局域网对 LLC 子层透明。</p><table class=\"tbl\"><thead><tr><th>IEEE 802</th><th>含义</th></tr></thead><tbody><tr><td>802.1</td><td>体系结构与网络互联</td></tr><tr><td>802.2</td><td>LLC</td></tr><tr><td>802.3</td><td>CSMA/CD 以太网</td></tr><tr><td>802.4</td><td>令牌总线</td></tr><tr><td>802.5</td><td>令牌环网</td></tr><tr><td>802.6</td><td>城域网（旧标准）</td></tr><tr><td>802.11</td><td>无线局域网</td></tr></tbody></table>\n<p>网络适配器（网卡）实现串并转换、帧收发、缓存、差错检测、地址过滤等；工作涉及物理层与数据链路层。收到正确帧通知主机并交付协议栈，错误帧丢弃。<strong>理解辅助：</strong>许多收发操作由网卡硬件完成，但不意味着完全不使用 CPU。</p>"
+      "html": "<p>局域网通常由一个单位拥有，地理范围与站点数量有限。优点：广播便捷、扩展演变容易、可提高可靠性、可用性、生存性。星型、总线、环型是典型拓扑。共享信道同时发送会互扰，静态划分信道（频分、时分、波分、码分）或动态接入（随机、受控如轮询）解决争用。</p><p>以太网两个标准 DIX Ethernet V2 与 IEEE 802.3，硬件可互操作。LAN 体系结构只包含物理层、数据链路层；链路层划分 LLC（逻辑链路控制）与 MAC（媒体接入控制），不同局域网对 LLC 子层透明。</p><table class=\"tbl\"><thead><tr><th>IEEE 802</th><th>含义</th></tr></thead><tbody><tr><td>802.1</td><td>体系结构与网络互联</td></tr><tr><td>802.2</td><td>LLC</td></tr><tr><td>802.3</td><td>CSMA/CD 以太网</td></tr><tr><td>802.4</td><td>令牌总线</td></tr><tr><td>802.5</td><td>令牌环网</td></tr><tr><td>802.6</td><td>城域网（旧标准）</td></tr><tr><td>802.11</td><td>无线局域网</td></tr></tbody></table>\n<p>网络适配器（网卡）实现串并转换、帧收发、缓存、差错检测、地址过滤等；工作涉及物理层与数据链路层。收到正确帧通知主机并交付协议栈，错误帧丢弃。<strong>理解辅助：</strong>许多收发操作由网卡硬件完成，但不意味着完全不使用 CPU。</p><h3>局域网的五个技术特征</h3><p>局域网覆盖办公室、机关、工厂、学校等内部范围，课程采用0.1～25 km的示例范围，并没有严格的距离分界。其典型传输速率为100～1000 Mbit/s，误码率约10<sup>−8</sup>～10<sup>−11</sup>，时延通常为毫秒至数十毫秒级；传输速率还可达到吉比特和万兆级，并可以使用双绞线、同轴电缆、光纤及无线介质。上述数值用于理解局域网的相对特点，不是所有局域网的硬性指标。</p><p>需要掌握的是地域范围小、误码率低、传输时延小、传输速率高和支持多种传输介质五项特点，以及归属单一单位、站点数有限的组织特点。</p>"
     },
     {
       "key": "csma",
@@ -428,7 +428,7 @@ const topics: Record<number, SourceTopic[]> = {
         "evolve",
         "lan-gigabit"
       ],
-      "html": "<p>100BASE-T 快速以太网保留原 MAC 帧格式，支持全双工/半双工，典型介质标准：100BASE-TX 两对五类双绞线100 m，100BASE-T4 四对三类/五类线100 m，100BASE-FX 两根光纤2000 m。</p><p>吉比特以太网1 Gbit/s，使用 IEEE 802.3 MAC 帧格式，向后兼容10BASE-T/100BASE-T；半双工采用 CSMA/CD，全双工不用。1000BASE-SX 多模光纤、LX 单模/多模、CX 屏蔽铜缆、T 四对双绞线。</p><p>半双工为保持64 B最短 MAC 帧与100 m网段，使用<strong>载波延伸</strong>（扩展争用时隙至512字节时间）及<strong>分组突发</strong>（多个短帧连续传输降低延伸开销）；全双工不用。10GE 仅全双工，以太网扩展到城域/广域，实现端到端统一帧格式，具有成熟、互操作、成本和管理方面优势。</p>"
+      "html": "<p>100BASE-T 快速以太网保留原 MAC 帧格式，支持全双工/半双工，典型介质标准：100BASE-TX 两对五类双绞线100 m，100BASE-T4 四对三类/五类线100 m，100BASE-FX 两根光纤2000 m。</p><p>吉比特以太网1 Gbit/s，使用 IEEE 802.3 MAC 帧格式，向后兼容10BASE-T/100BASE-T；半双工采用 CSMA/CD，全双工不用。1000BASE-SX 多模光纤、LX 单模/多模、CX 屏蔽铜缆、T 四对双绞线。</p><p>半双工为保持64 B最短 MAC 帧与100 m网段，使用<strong>载波延伸</strong>（扩展争用时隙至512字节时间）及<strong>分组突发</strong>（多个短帧连续传输降低延伸开销）；全双工不用。10GE 仅全双工，以太网扩展到城域/广域，实现端到端统一帧格式，具有成熟、互操作、成本和管理方面优势。</p><h3>以太网从10 Mbit/s到100 Gbit/s的演进</h3><p>高速以太网继续沿用统一的MAC帧格式。40GE与100GE可以在不同种类的传输媒体上工作：单模光纤的长距离标准如40GBASE-LR4、100GBASE-LR4（10 km），以及更远距离的ER类标准（约40 km）。以太网从局域网扩大到城域网、广域网，体现其可扩展性、灵活性、易安装性和稳健性。统一帧格式还可以简化操作和管理。</p>"
     }
   ],
   "6": [
@@ -486,7 +486,7 @@ const topics: Record<number, SourceTopic[]> = {
       "aliases": [
         "ip-h6"
       ],
-      "html": "<ol><li>提取目的 IP 地址 D，确定目的网络 N。</li><li>N 与本路由器直接相连，直接交付。</li><li>否则查特定主机路由，若有则按指定下一跳。</li><li>查目的网络 N 的路由。</li><li>查默认路由。</li><li>均无则报告转发错误。</li></ol><p>特定主机路由和默认路由是两种特殊路由。转发表记录目的网络与下一跳而非完整端到端路径；下一跳的 IP 交网络接口软件，ARP 转换成 MAC 地址用于帧首部。CIDR 场景的实际匹配规则见后面的最长前缀匹配。</p>"
+      "html": "<ol><li>提取目的 IP 地址 D，确定目的网络 N。</li><li>N 与本路由器直接相连，直接交付。</li><li>否则查特定主机路由，若有则按指定下一跳。</li><li>查目的网络 N 的路由。</li><li>查默认路由。</li><li>均无则报告转发错误。</li></ol><p>特定主机路由和默认路由是两种特殊路由。转发表记录目的网络与下一跳而非完整端到端路径；下一跳的 IP 交网络接口软件，ARP 转换成 MAC 地址用于帧首部。CIDR 场景的实际匹配规则见后面的最长前缀匹配。</p><h3>分类编址与无分类编址下的转发区别</h3><p>分类编址依据地址类别确定网络号；划分子网后，应把目的IP与相应掩码按位与，再比较网络地址。无分类编址下同一目的地址可能匹配多项，必须按前缀长度决定最具体的路由。路由选择负责形成路由信息，转发则按已有转发表确定出接口和下一跳；两者不可混淆。</p>"
     },
     {
       "key": "subnet",
@@ -529,7 +529,7 @@ const topics: Record<number, SourceTopic[]> = {
         "routing-h3",
         "protocol-h1"
       ],
-      "html": "<p>RIP 是距离向量路由选择协议，距离按跳数，直连网络距离1，最大可达15，16表示不可达。三个特点：只和邻居交换、交换自己的全部路由表、每隔约30秒交换，拓扑变化时也可及时通告。路由表主要是目的网络、距离、下一跳。</p><ol><li>收到邻居 X 的路由表，把各条距离加1、下一跳改为 X。</li><li>目的网络原来没有则添加。</li><li>已有且下一跳同为 X，无论新距离大或小都更新。</li><li>已有且下一跳不同，若新距离更小则更新，否则保留。</li></ol><p>收敛是各结点获得正确路由信息的过程。RIP 好消息传播快、坏消息传播慢，可能发生计数到无穷；最大跳数限制网络规模。RIP 使用 UDP 传送路由信息。</p>"
+      "html": "<p>RIP 是距离向量路由选择协议，距离按跳数，直连网络距离1，最大可达15，16表示不可达。三个特点：只和邻居交换、交换自己的全部路由表、每隔约30秒交换，拓扑变化时也可及时通告。路由表主要是目的网络、距离、下一跳。</p><ol><li>收到邻居 X 的路由表，把各条距离加1、下一跳改为 X。</li><li>目的网络原来没有则添加。</li><li>已有且下一跳同为 X，无论新距离大或小都更新。</li><li>已有且下一跳不同，若新距离更小则更新，否则保留。</li></ol><p>收敛是各结点获得正确路由信息的过程。RIP 好消息传播快、坏消息传播慢，可能发生计数到无穷；最大跳数限制网络规模。RIP 使用 UDP 传送路由信息。</p><h3>距离向量更新的逐项分析</h3><p>设Y从邻居X收到到网络N的距离d，则经X到N的候选距离为d+1。如果Y原来没有N的表项，则建立(N,d+1,X)；若原来已经经X到达N，即便新的距离变大，也必须接受X提供的最新信息；若原来经其他邻居Z到达N，原距离为b，只有d+1&lt;b时才改用X。这三种情形的差别是判断下一跳是否相同，不能机械地只接受距离变小的路由。</p>"
     },
     {
       "key": "ospf",
@@ -600,7 +600,7 @@ const topics: Record<number, SourceTopic[]> = {
       "aliases": [
         "impl-h2"
       ],
-      "html": "<p>互联网路由及排队变化使 RTT 样本方差较大。第一次样本取作 RTTS，之后用指数加权平均：RTTS=(1−α)×旧RTTS+α×新RTT，课内 α=1/8；α越大对新样本越敏感。偏差 RTTVAR 用平滑平均估计，RTO 取 RTTS+4×RTTVAR。</p><p>Karn 算法：重传后的 ACK 无法确定对应第一次还是重传的数据，因此不使用重传报文段的 RTT 样本；每次超时重传将 RTO 增大一倍，恢复正常后再根据新的有效测量更新。</p>"
+      "html": "<p>互联网路由及排队变化使 RTT 样本方差较大。第一次样本取作 RTTS，之后用指数加权平均：RTTS=(1−α)×旧RTTS+α×新RTT，课内 α=1/8；α越大对新样本越敏感。偏差 RTTVAR 用平滑平均估计，RTO 取 RTTS+4×RTTVAR。</p><p>Karn 算法：重传后的 ACK 无法确定对应第一次还是重传的数据，因此不使用重传报文段的 RTT 样本；每次超时重传将 RTO 增大一倍，恢复正常后再根据新的有效测量更新。</p><h3>为什么不能直接使用最近一次测得的RTT</h3><p>同一TCP连接的IP数据报可能经历不同路由及不同程度的排队，RTT会显著波动。若超时过短，正常到达的确认尚未返回便引起不必要的重传；超时过长又使实际丢失的数据迟迟无法恢复。因此使用RTTS平滑估计和RTT偏差共同确定RTO。第一次测得样本时初始化RTTS，以后逐次按权重更新；重传引入样本歧义时采用Karn算法，不以重传报文段测出的时间直接更新估计。</p>"
     },
     {
       "key": "connect",
@@ -719,50 +719,167 @@ export const sourceExtraNotes: Record<number, string> = {
   "8": "电子邮件只在开篇应用与协议例子中出现，没有独立邮件协议章节；HTTP/3、QUIC、HTTPS 等属于补充讲义。"
 };
 
+
+/** 按知识点保留原讲义的段落、表格、SVG、课件原图及交互演示。
+ * 独立的课外主题仍留在完整原讲义模式；混合主题按可辨识的段落边界拆分。
+ * 不能确认来源的旧解释标为待核，而不是直接删除或当作课内原文。
+ */
+const detailedRoutes: Record<number, Record<string, string>> = {
+  1: { 'definition-functions':'function', 'work':'structure','work-h1':'structure','work-h2':'structure','work-h3':'switch','classify-h2':'topology','classify':'classify','internet':'structure','trend':'@extra' },
+  2: { 'idea':'layer','arch':'layer','arch-h2':'services','protocol-h2':'pdu','osi-env':'pdu','osi-market':'pdu','osi-h1':'five','osi-h2':'five','osi-h3':'osi' },
+  3: { 'basic-h3':'capacity','mode':'direction','process':'encoding','digital':'sonet','mux-h3':'stDM','access':'@extra' },
+  4: { 'error-h1':'crc','error-h2':'@extra','error-h3':'@extra','error-h5':'@extra','p2p-h1':'@extra','p2p-h3':'@extra','p2p':'ppp' },
+  5: { 'broadcast':'traditional','broadcast-h1':'lan','broadcast-h2':'csma','broadcast-h3':'traditional','broadcast-h4':'mac','broadcast-h5':'extend','lan-current-h1':'util','lan-current':'util','lan-gigabit':'fast','evolve':'fast' },
+  6: { 'ip-h6':'cidr','arp-h0':'mac','arp-h1':'arp','arp-h2':'arp','routing-h1':'routing','routing-h2':'routing','routing-h3':'rip','routing-h4':'ospf','protocol':'routing','protocol-h1':'rip','protocol-h2':'@extra','switch':'@extra' },
+  7: { 'overview-h4':'tcp','udp-h3':'@extra','tcp-h6':'@extra','tcp-h5':'@extra','impl-h3':'@extra','flow-h2':'@extra','tcp-header':'header','tcp-connection':'connect' },
+  8: { 'overview-h3':'@extra','overview-h4':'@extra','dns-h4':'@extra','dns-h5':'@extra','ftp-h3':'@extra','http-h5':'@extra','email':'@extra','http':'www' },
+};
+const detailLabel = '<p class="quiz-note"><strong>详细讲解与例题</strong></p>';
+const extraLabel = (message: string) => '<p class="quiz-note"><strong>拓展：</strong>' + message + '</p>';
+const pendingLabel = '<p class="quiz-note"><strong>待核：</strong>以下保留原讲义解释，具体细节尚未全部与原课件逐段对应。</p>';
+type Detail = { anchor: string; block: Block };
+function oldDetails(original: DeckData): Detail[] {
+  const result: Detail[] = [];
+  for (const section of original.sections) {
+    let anchor = section.id;
+    for (const block of section.blocks) {
+      if (block.type !== 'html') { result.push({ anchor, block }); continue; }
+      const html = block.html;
+      const boundaries = [...html.matchAll(/<h3 id="(sec-ch[^"]+)">/g)];
+      let at = 0;
+      for (const match of boundaries) {
+        const pos = match.index!;
+        if (pos > at && html.slice(at,pos).trim()) result.push({anchor,block:{type:'html',html:html.slice(at,pos)}});
+        anchor = match[1];
+        at = pos;
+      }
+      if (html.slice(at).trim()) result.push({anchor,block:{type:'html',html:html.slice(at)}});
+    }
+  }
+  return result;
+}
+
+/** Find a complete paragraph boundary before a strong label. */
+function paragraphAt(html: string, phrase: string): number {
+  const i = html.indexOf(phrase);
+  return i < 0 ? -1 : html.lastIndexOf('<p',i);
+}
+function detailedPieces(no: number, item: Detail, key: string): {key:string;block:Block}[] {
+  const b=item.block;
+  if(b.type !== 'html') {
+    // Existing interactive content is preserved, with non-course features explicitly labeled.
+    if(b.type === 'demo' && ['net-nat','net-email'].includes(b.name)) return [{key:'@extra',block:b}];
+    const demoRoutes: Record<string,string> = {'net-vlan':'vlan','net-longest-prefix':'cidr','net-prefix-match-2025':'cidr'};
+    const target=b.type==='demo' ? demoRoutes[b.name] ?? key : key;
+    const out:{key:string;block:Block}[]=[];
+    if (b.type==='demo' && ['net-nyquist','net-multiplex','net-http','net-tcp-flow'].includes(b.name)) {
+      out.push({key:target,block:{type:'html',html:extraLabel('演示包含与当前课件主线相关的内容，也可能涉及奈奎斯特、码分复用、TLS/QUIC 或零窗口等延伸机制。')}})
+    }
+    out.push({key:target,block:b});return out;
+  }
+  let html=b.html;
+  const id=item.anchor.replace(/^sec-ch\d+-/,'');
+  const pieces:{key:string;block:Block}[]=[];
+  const push=(k:string,h:string)=>{if(h.trim())pieces.push({key:k,block:{type:'html',html:h}})};
+  if(no===3 && id==='mux-h2'){
+    const s=paragraphAt(html,'<strong>统计时分复用</strong>');
+    const t=html.indexOf('<div class="callout tip">');
+    if(s>=0 && t>s && html.slice(t).includes('T1 / E1 帧长与周期')){
+      push('mux',html.slice(0,s).replace('时分复用 TDM 与统计时分复用 STDM','同步时分复用 TDM'));
+      push('t1e1',html.slice(t));push('stDM',html.slice(s,t));return pieces;
+    }
+  }
+  if(no===3 && id==='mux-h3'){
+    const p=paragraphAt(html,'<strong>波分复用</strong>');
+    if(p>0){push('stDM',html.slice(0,p).replace('码分复用 CDM 与波分复用 WDM','拓展：码分复用 CDM')+extraLabel('码分复用详细原理不属于本章课件的复用主线。'));push('stDM',html.slice(p));return pieces;}
+  }
+  if(no===5 && id==='broadcast-h2'){
+    const p=paragraphAt(html,'<strong>CSMA/CA</strong>');
+    if(p>=0){push(key,html.slice(0,p).replace('CSMA/CD 与 CSMA/CA','CSMA/CD 详细原理'));push(key,extraLabel('CSMA/CA、隐藏结点和暴露结点为无线网络拓展。')+html.slice(p));return pieces;}
+  }
+  if(no===6 && id==='protocol-h1'){
+    const p=paragraphAt(html,'<strong>开放式最短路径优先 OSPF</strong>');
+    if(p>0){push('rip',html.slice(0,p).replace('RIP 与 OSPF','RIP 协议详细讲解'));push('ospf',html.slice(p));return pieces;}
+  }
+  if(no===8 && id==='http-h2'){
+    const p=paragraphAt(html,'<strong>代理服务器（proxy server）</strong>');
+    if(p>0){push('http',html.slice(0,p));push('proxy',html.slice(p));return pieces;}
+  }
+  if(no===1 && id==='work-h1')html=extraLabel('C/S、P2P的详细比较为理解网络边缘工作方式的扩展。')+html;
+  if(no===3 && id==='basic-h3')html=pendingLabel+html;
+  if(no===4 && id==='error-h1')html=pendingLabel+html;
+  if(no===6 && id==='arp-h2')html=pendingLabel+html;
+  if(no===8 && id==='http-h2')html=extraLabel('涉及HTTPS、TLS与QUIC的现代网页访问细节为扩展，经典HTTP过程仍属于主线。')+html;
+  push(key,html);return pieces;
+}
+
 export interface SlideReview {
   chapter: DeckData;
   resolve: (anchor: string) => string | undefined;
 }
 
-/** 课件主线独立于旧讲义；对外旧锚点保持可跳转，按最长别名前缀匹配。 */
+/** 课件顺序作为目录骨架，保留对应的详细原讲义内容与图解。 */
 export function buildSlideReview(original: DeckData): SlideReview {
-  const no = Number(original.id.slice(2));
-  const source = topics[no] ?? [];
-  const prefix = `sec-ch${no}-`;
-  const sections: Section[] = source.map(({ key, heading, html }) => ({
-    id: `${prefix}src-${key}`,
-    heading,
-    blocks: [{ type: 'html', html }],
+  const no=Number(original.id.slice(2));
+  const source=topics[no] ?? [];
+  const prefix='sec-ch'+no+'-';
+  const sections:Section[]=source.map(({key,heading,html})=>({
+    id:prefix+'src-'+key,heading,blocks:[{type:'html',html}],
   }));
-  const aliases = source.flatMap((topic) => topic.aliases.map((alias) => ({
-    alias: prefix + alias,
-    id: prefix + 'src-' + topic.key,
-  }))).sort((a, b) => b.alias.length - a.alias.length);
-  const homework = original.toc.filter((entry) => entry.id === prefix + 'homework' || entry.id.startsWith(prefix + 'hw-'));
-  const toc: TocEntry[] = [
-    ...sections.map((section) => ({ id: section.id, text: section.heading, level: 2 as const })),
-    ...homework,
-  ];
-  const extraAnchors: Record<number, string[]> = {
-    1: ['trend'],
-    3: ['access'],
-    4: ['error-h2', 'error-h3', 'p2p-h1', 'p2p-h3'],
-    7: ['impl-h3', 'flow-h2'],
-    8: ['http-h5', 'email'],
+  const byKey=new Map(source.map((topic,i)=>[topic.key,sections[i]]));
+  const aliases=source.flatMap(topic=>topic.aliases.map(alias=>({alias,key:topic.key}))).sort((a,b)=>b.alias.length-a.alias.length);
+  const exact=detailedRoutes[no]??{};
+  const oldKey=(anchor:string)=>{
+    const a=anchor.startsWith(prefix)?anchor.slice(prefix.length):anchor;
+    const route=Object.entries(exact).sort((a,b)=>b[0].length-a[0].length).find(([name])=>a===name||a.startsWith(name+'-'));
+    const alias=aliases.find(x=>a===x.alias||a.startsWith(x.alias+'-'));
+    // A precise explicit mapping wins, but a more specific existing alias overrides a broad parent.
+    if(route&&(!alias||route[0].length>=alias.alias.length))return route[1];
+    return alias?.key;
   };
-  const direct = new Set(toc.map((entry) => entry.id));
-  const resolve = (anchor: string) => {
-    if (direct.has(anchor)) return anchor;
-    if ((extraAnchors[no] ?? []).some((a) => anchor === prefix + a || anchor.startsWith(prefix + a + '-'))) return undefined;
-    return aliases.find(({ alias }) => anchor === alias || anchor.startsWith(alias + '-'))?.id;
+  const inserted=new Set<string>();
+  const legacyTargets=new Map<string,string>();
+  for(const item of oldDetails(original)){
+    const key=oldKey(item.anchor)??'@extra';
+    if(key==='@extra')continue;
+    for(const piece of detailedPieces(no,item,key)){
+      if(piece.key==='@extra')continue;
+      const section=byKey.get(piece.key);
+      if(!section)continue;
+      if(!inserted.has(piece.key)){
+        section.blocks.push({type:'html',html:detailLabel});
+        inserted.add(piece.key);
+      }
+      section.blocks.push(piece.block);
+      if(!legacyTargets.has(item.anchor))legacyTargets.set(item.anchor,section.id);
+    }
+  }
+  // Preserve exact h3 anchors for existing homework, highlights, practice and in-text links.
+  const originalEntries=new Map(original.toc.map(entry=>[entry.id,entry]));
+  const homework=original.toc.filter(entry=>entry.id===prefix+'homework'||entry.id.startsWith(prefix+'hw-'));
+  const toc:TocEntry[]=[];
+  const seen=new Set<string>();
+  for(const section of sections){
+    toc.push({id:section.id,text:section.heading,level:2});seen.add(section.id);
+    for(const block of section.blocks){
+      if(block.type!=='html')continue;
+      for(const m of block.html.matchAll(/<h3 id="(sec-ch[^"]+)">([\s\S]*?)<\/h3>/g)){
+        if(seen.has(m[1]))continue;
+        seen.add(m[1]);
+        const old=originalEntries.get(m[1]);
+        toc.push({id:m[1],text:old?.text??m[2].replace(/<[^>]+>/g,''),level:3});
+      }
+    }
+  }
+  toc.push(...homework);
+  const direct=new Set(toc.map(entry=>entry.id));
+  const resolve=(anchor:string)=>{
+    if(direct.has(anchor))return anchor;
+    const target=oldKey(anchor);
+    if(target==='@extra')return undefined;
+    return legacyTargets.get(anchor)??(target?byKey.get(target)?.id:undefined);
   };
-  return {
-    chapter: {
-      ...original,
-      lede: `<p>按<strong>${sourceNames[no]}</strong>的实际主题顺序复习。原有讲义（含与主线重合的详细解释、额外拓展和待核内容）可切换查看，不混入课件主线。课件主线基于可读取的 PDF 文字整理；图像、手写标注和无法提取的公式须结合原图。</p>`,
-      toc,
-      sections,
-    },
-    resolve,
-  };
+  return {chapter:{...original,
+    lede:'<p>按<strong>'+sourceNames[no]+'</strong>顺序组织完整复习讲义：保留相应的详细定义、公式推导、图示、例题和交互演示；另补入旧讲义缺失的课内知识。独立的课外专题可切换到完整原讲义查阅，混合段落明确标注拓展或待核。</p>',
+    toc,sections},resolve};
 }
