@@ -12,16 +12,18 @@ export function SimulatorCanvas({ algorithmId, embedded = false }: { algorithmId
   useEffect(() => {
     const el = host.current;
     if (!el) return;
-    document.documentElement.dataset.deck = 'ds';
+    // data-deck 决定 --deck-accent（课程主题色）。课程页里由 CourseShell 持有，
+    // 这里不改也不删，否则卸载/切换演示时会把整门课的主题色清掉、回落成全局红色。
+    if (!embedded) document.documentElement.dataset.deck = 'ds';
     const root = el.shadowRoot ?? el.attachShadow({ mode: 'open' });
     root.innerHTML = `<style>${styles}</style>${template}`;
     const stop = mountSimulator(root, algorithmId);
     return () => {
       stop();
-      delete document.documentElement.dataset.deck;
+      if (!embedded) delete document.documentElement.dataset.deck;
       root.replaceChildren();
     };
-  }, [algorithmId]);
+  }, [algorithmId, embedded]);
 
   return (
     <div

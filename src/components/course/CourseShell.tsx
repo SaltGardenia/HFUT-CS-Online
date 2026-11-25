@@ -72,12 +72,13 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
   }, [onPractice, onAtt]);
 
   // 课程主题色：html[data-deck]
+  // 每次路由变化都重新声明：子页面卸载时可能清掉它（如模拟器），否则主题会回落成全局红色。
   useEffect(() => {
     document.documentElement.dataset.deck = config.deckKey;
     return () => {
       delete document.documentElement.dataset.deck;
     };
-  }, [config.deckKey]);
+  }, [config.deckKey, location.pathname]);
 
   // 当前章 → html[data-ch]：tokens.css 按课内序数映射每章专属色
   const chIdx = currentChapter ? config.chapters.findIndex((c) => c.id === currentChapter) + 1 : 0;

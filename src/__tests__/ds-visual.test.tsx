@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import DsCourse from '../courses/DsCourse';
+import { SimulatorCanvas } from '../components/DataStructureSimulator';
 import { SIMULATOR_CATALOG } from '../components/data-structure/catalog';
 import { ErrataProvider } from '../lib/errata/context';
 import { TocProvider } from '../lib/toc';
@@ -87,5 +88,22 @@ describe('数据结构 · 可视化页', () => {
     const view = show('/ds/visual');
     const rail = view.container.querySelector('.visual-rail');
     expect(rail!.querySelector('.rail-list a.active')?.textContent).toContain(SIMULATOR_CATALOG[0].title);
+  });
+});
+
+describe('SimulatorCanvas 与课程主题色', () => {
+  it('嵌入模式不设置也不清理 html[data-deck]（由 CourseShell 持有）', () => {
+    document.documentElement.dataset.deck = 'ds';
+    const view = render(<SimulatorCanvas embedded />);
+    view.unmount();
+    expect(document.documentElement.dataset.deck).toBe('ds');
+  });
+
+  it('整页模式自己设置并在卸载时清理', () => {
+    delete document.documentElement.dataset.deck;
+    const view = render(<SimulatorCanvas />);
+    expect(document.documentElement.dataset.deck).toBe('ds');
+    view.unmount();
+    expect(document.documentElement.dataset.deck).toBeUndefined();
   });
 });
