@@ -44,13 +44,17 @@ describe('计网章末作业复用标准题卡及保存进度', () => {
   });
 
   it('缺教师答案时显示来源提示与单一参考解析，不伪造教师内容', () => {
-    const view = show(6);
+    const index = netHomework[6].findIndex((q) => q.no === 11);
+    expect(index).toBeGreaterThanOrEqual(0);
+    const question = netHomework[6][index];
+    expect(question.teacher).toBeNull();
+    const view = show(6, index);
     fireEvent.click(screen.getByRole('button', { name: '查看参考答案与解析' }));
     expect(screen.getByText('参考答案与解析')).toBeTruthy();
     expect(screen.getByText(/原作业文件未附教师答案/)).toBeTruthy();
     expect(view.container.querySelector('.pq-rubric')).toBeNull();
     expect(screen.queryByText('原文件答案（文字转录）')).toBeNull();
-    expect(loadHomeworkResults()[homeworkId(6, netHomework[6][0].no)]).toBe('revealed');
+    expect(loadHomeworkResults()[homeworkId(6, question.no)]).toBe('revealed');
   });
 
   it('刷新后恢复已掌握、自评、答案和进度，需复习也能持久化', () => {
