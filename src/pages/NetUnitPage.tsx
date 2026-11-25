@@ -387,8 +387,8 @@ function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[num
         <button className="topic-chip" type="button" aria-pressed={extra} style={{ fontWeight: extra ? 700 : 400 }} onClick={() => { if (!extra) { navigate(`${NET_BASE}/deck/${chapter.id}?view=extra`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>完整原讲义与拓展</button>
       </nav>
       <div className="callout tip">
-        <p className="callout-h">{extra ? '原有讲义与拓展（非课件主线）' : '拓展与待核内容说明'}</p>
-        <p>{sourceExtraNotes[chapterNo]} {extra ? '以下为原有讲义，含与主线重复的解释、拓展及尚未逐段核实的内容，不代表全部属于课件。' : '详细正文保留相关原有图解、例题和交互演示。「理解辅助」用于解释课内概念；「拓展」及「待核」不当作课件原有知识点。'}</p>
+        <p className="callout-h">{extra ? '原有讲义与拓展（非课件主线）' : '学习范围与拓展'}</p>
+        <p>{sourceExtraNotes[chapterNo]} {extra ? '以下为原有讲义，含与主线重复的解释、拓展及尚未逐段核实的内容，不代表全部属于课件。' : '主线采用统一整理的定义、原理、例题和图解，不重复拼接旧讲义。原有补充文字、表格及额外图示可在完整原讲义模式查阅。「理解辅助」用于解释课内概念；拓展内容不计作课内知识点。'}</p>
       </div>
       {level2.length > 1 && (
         <nav className="topic-map" aria-label="本章知识点导航">
