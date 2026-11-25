@@ -116,6 +116,22 @@ describe('2025 计网课件主线', () => {
     const ch8=buildSlideReview(netChapters[7]).chapter.sections.find(s=>s.id==='sec-ch8-src-message')!;
     expect(ch8.blocks.filter(b=>b.type==='html').map(b=>b.html).join('')).toContain('<pre>GET /index.html HTTP/1.1');
   });
+  it('图示验收：接入边界、拥塞控制条件和回退分支', () => {
+    const html=(n:number,k:string)=>buildSlideReview(netChapters[n-1]).chapter.sections.find(s=>s.id==='sec-ch'+n+'-src-'+k)!.blocks.filter(b=>b.type==='html').map(b=>b.html).join('');
+    expect(html(1,'classify')).toContain('不是必经的三级路径');
+    expect(html(5,'csma')).toContain('达到16次碰撞？');
+    expect(html(7,'congestion')).toContain('原例在 cwnd=24 时发生超时');
+    expect(html(7,'congestion')).not.toContain('cwnd=22 时拥塞');
+    expect(html(7,'congestion')).toContain('适用于慢开始和拥塞避免两个阶段');
+    for(const original of netChapters) {
+      const content=buildSlideReview(original).chapter.sections.flatMap(s=>s.blocks).filter(b=>b.type==='html').map(b=>b.html).join('');
+      for(const match of content.matchAll(/<figure class="fig net-review-diagram"[\s\S]*?<\/figure>/g)){
+        expect(match[0]).toContain('class="net-diagram-scroll" tabindex="0"');
+        expect(match[0]).toContain('class="fig-cap"');
+        expect(match[0]).not.toMatch(/\b(?:NaN|Infinity)\b/);
+      }
+    }
+  });
   it('全部课程作业仍可在主线定位且题目锚点不变', () => {
     for (const [i, original] of netChapters.entries()) {
       const no = i + 1;

@@ -173,6 +173,21 @@ function enhance(root: HTMLElement) {
     a.appendChild(meta);
   }
 
+  // 已有 figure 包装的计网图：独立按钮避免滑动时误触放大。
+  for (const plate of Array.from(root.querySelectorAll<HTMLElement>('figure.net-review-diagram'))) {
+    if (plate.dataset.figEnhanced) continue;
+    const svg = plate.querySelector<SVGElement>('svg');
+    if (!svg) continue;
+    plate.dataset.figEnhanced = '1';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'net-diagram-expand';
+    btn.textContent = '放大查看';
+    btn.setAttribute('aria-label', '放大查看：' + (svg.getAttribute('aria-label') ?? '示意图'));
+    btn.addEventListener('click', () => openLightbox(plate, svg));
+    plate.appendChild(btn);
+  }
+
   // 插图图版：内容里的 <svg class="fig"> 包一层 <figure>，挂上点击放大（lightbox）
   for (const svg of Array.from(root.querySelectorAll<SVGElement>('svg.fig'))) {
     if (svg.dataset.figEnhanced) continue;
@@ -317,6 +332,10 @@ function openLightbox(fig: HTMLElement, svg: SVGElement) {
   panel.className = 'fig-lightbox-panel';
   const clone = svg.cloneNode(true) as SVGElement;
   clone.removeAttribute('style');
+  if (fig.classList.contains('net-review-diagram')) {
+    const width = Number(svg.getAttribute('viewBox')?.split(/\s+/)[2]);
+    if (Number.isFinite(width) && width > 0) clone.style.minWidth = width + 'px';
+  }
   clone.setAttribute('width', '100%');
   clone.setAttribute('height', 'auto');
   panel.appendChild(clone);
