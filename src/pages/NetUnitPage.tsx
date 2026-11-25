@@ -14,145 +14,205 @@ import { scrollToId } from '../lib/scroll';
 import { useScrollSpy } from '../lib/scrollspy';
 
 
-const GPT_HOME = 'https://chatgpt.com/';
-const GPT_URL_LIMIT = 7500;
+type AskProvider = { id: string; name: string; home: string; param?: string };
 
-/** 保留段落、列表、表格和公式的可读文本；不把交互控件或 HTML 标签传给 GPT。 */
-function contextText(node: Node): string {
-  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
-  if (node instanceof Element) {
-    const tag = node.tagName.toLowerCase();
-    if (node.matches('button, script, style, textarea, input, .code-expand, .copy-btn, .net-ask-gpt')) return '';
-    if (tag === 'img') return node.getAttribute('alt') ? ' [图：' + node.getAttribute('alt') + '] ' : '';
-    if (tag === 'br') return '\n';
-    const content = Array.from(node.childNodes).map(contextText).join('');
-    if (tag === 'sup') return '^(' + content + ')';
-    if (tag === 'sub') return '_(' + content + ')';
-    if (tag === 'td' || tag === 'th') return content + ' | ';
-    if (tag === 'li') return '\n- ' + content;
-    if (/^(p|div|section|h[1-6]|ul|ol|tr|table|pre|figure|figcaption|text)$/.test(tag)) return '\n' + content + '\n';
-    return content;
+const askProviders: AskProvider[] = [
+  { id: 'chatgpt', name: 'ChatGPT', home: 'https://chatgpt.com/', param: 'q' },
+  { id: 'kimi', name: 'Kimi', home: 'https://www.kimi.com/', param: 'prefill_prompt' },
+  { id: 'deepseek', name: 'DeepSeek', home: 'https://chat.deepseek.com/' },
+  { id: 'qwen', name: '通义千问', home: 'https://www.qianwen.com/' },
+  { id: 'doubao', name: '豆包', home: 'https://www.doubao.com/chat/' },
+  { id: 'yuanbao', name: '腾讯元宝', home: 'https://yuanbao.tencent.com/' },
+  { id: 'claude', name: 'Claude', home: 'https://claude.ai/new', param: 'q' },
+  { id: 'gemini', name: 'Gemini', home: 'https://gemini.google.com/app' },
+  { id: 'grok', name: 'Grok', home: 'https://grok.com/', param: 'q' },
+  { id: 'perplexity', name: 'Perplexity', home: 'https://www.perplexity.ai/search', param: 'q' },
+];
+const ASK_PROVIDER_KEY = 'hfut-net-ask-ai-provider';
+
+function providerUrl(provider: AskProvider, prompt: string) {
+  const url = new URL(provider.home);
+  if (provider.param) url.searchParams.set(provider.param, prompt);
+  return url.toString();
+}
+
+/** 只传课程、章节和知识点名称，不抓取正文，不限制原文长度。 */
+function installNetAskAI(root: HTMLDivElement, chapter: (typeof netChapters)[number]) {
+  let preferred = askProviders[0];
+  try {
+    preferred = askProviders.find((provider) => provider.id === localStorage.getItem(ASK_PROVIDER_KEY)) ?? preferred;
+  } catch {
+    // 禁用本地存储时仍可正常提问。
   }
-  return Array.from(node.childNodes).map(contextText).join('');
-}
 
-function cleanContext(text: string): string {
-  return text.replace(/[^\S\n]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-}
-
-/** HTML 正文中的 h3/h4 与 React 渲染的 h2 共用同一套入口。 */
-function installNetAskGPT(root: HTMLDivElement, chapter: (typeof netChapters)[number]) {
   const entries = chapter.sections.flatMap((section) => {
     const container = document.getElementById(section.id)?.parentElement;
     if (!container || !root.contains(container)) return [];
-    return Array.from(container.querySelectorAll<HTMLElement>('h2, h3, h4')).map((heading) => ({
-      heading,
-      container,
-      level: Number(heading.tagName.slice(1)),
-      title: (heading.textContent ?? '').trim(),
-      sectionTitle: decodeEntities(section.heading),
-    }));
-  });
-  let dialog: HTMLDialogElement | undefined;
-
-  function showCopyDialog(prompt: string) {
-    dialog?.remove();
-    const panel = document.createElement('dialog');
-    dialog = panel;
-    panel.className = 'net-ask-gpt-dialog';
-    panel.setAttribute('aria-label', '完整知识点上下文');
-    const title = document.createElement('h3');
-    title.textContent = '复制完整上下文';
-    const hint = document.createElement('p');
-    hint.textContent = '这段知识点较长，为避免链接截断，请复制完整内容后打开 ChatGPT 并粘贴。';
-    const field = document.createElement('textarea');
-    field.value = prompt;
-    field.readOnly = true;
-    field.setAttribute('aria-label', '待复制的完整上下文');
-    const actions = document.createElement('div');
-    actions.className = 'net-ask-gpt-actions';
-    const copy = document.createElement('button');
-    copy.type = 'button';
-    copy.textContent = '复制完整内容';
-    copy.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(prompt);
-        copy.textContent = '已复制';
-      } catch {
-        field.focus();
-        field.select();
-        copy.textContent = '请按 Ctrl/Cmd+C 复制';
-      }
+    let parentTitle = '';
+    return Array.from(container.querySelectorAll<HTMLElement>('h2, h3, h4')).map((heading) => {
+      const level = Number(heading.tagName.slice(1));
+      const title = (heading.textContent ?? '').trim();
+      if (level === 3) parentTitle = title;
+      return {
+        heading,
+        level,
+        title,
+        sectionTitle: decodeEntities(section.heading),
+        parentTitle: level === 4 ? parentTitle : '',
+      };
     });
-    const open = document.createElement('a');
-    open.href = GPT_HOME;
-    open.target = '_blank';
-    open.rel = 'noopener noreferrer';
-    open.textContent = '打开 ChatGPT ↗';
-    const close = document.createElement('button');
-    close.type = 'button';
-    close.textContent = '关闭';
-    close.addEventListener('click', () => panel.close());
-    panel.addEventListener('close', () => panel.remove(), { once: true });
-    actions.append(copy, open, close);
-    panel.append(title, hint, field, actions);
-    document.body.appendChild(panel);
-    panel.showModal();
+  });
+
+  const controls: { heading: HTMLElement; wrap: HTMLElement; refresh: () => void; close: () => void }[] = [];
+
+  function remember(provider: AskProvider) {
+    preferred = provider;
+    try {
+      localStorage.setItem(ASK_PROVIDER_KEY, provider.id);
+    } catch {
+      // 不阻断提问。
+    }
+    controls.forEach((item) => item.refresh());
   }
 
-  const buttons = entries.map((entry, index) => {
-    const { heading, container, level, title, sectionTitle } = entry;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'net-ask-gpt';
-    btn.textContent = '问问 GPT ↗';
-    btn.title = '将当前知识点及上下文带入新的 ChatGPT 对话';
-    btn.setAttribute('aria-label', '问问 GPT：' + title);
-    btn.addEventListener('click', () => {
-      const range = document.createRange();
-      range.setStartAfter(heading);
-      const next = entries.slice(index + 1).find((item) => item.container === container && item.level <= level);
-      if (next) range.setEndBefore(next.heading);
-      else range.setEnd(container, container.childNodes.length);
-      const body = cleanContext(contextText(range.cloneContents()));
-      const prompt = [
-        '我正在复习合肥工业大学《计算机网络》课程，请结合以下网站讲义上下文，帮助我理解当前知识点。',
-        '章节：' + chapter.no + ' ' + decodeEntities(chapter.title),
-        ...(level > 2 ? ['所属小节：' + sectionTitle] : []),
-        '当前知识点：' + title,
-        ...(entries[index - 1] ? ['前一知识点：' + entries[index - 1].title] : []),
-        ...(entries[index + 1] ? ['后一知识点：' + entries[index + 1].title] : []),
-        '【知识点原文】\n' + body,
-        '【我的问题】\n请用通俗但严谨的语言解释该知识点，结合具体例子说明原理、易混概念和考试重点。如讲义与通行标准存在出入，请明确区分。不要把讲义中未出现的内容当成原文。',
-      ].join('\n\n');
-      const url = GPT_HOME + '?q=' + encodeURIComponent(prompt);
-      if (url.length <= GPT_URL_LIMIT) window.open(url, '_blank', 'noopener,noreferrer');
-      else showCopyDialog(prompt);
-    });
-    heading.classList.add('net-ask-gpt-heading');
-    heading.appendChild(btn);
-    return { heading, btn };
-  });
+  for (const { heading, level, title, sectionTitle, parentTitle } of entries) {
+    if (!title) continue;
+    const scope = [
+      chapter.no + ' ' + decodeEntities(chapter.title),
+      ...(level > 2 ? [sectionTitle] : []),
+      ...(parentTitle ? [parentTitle] : []),
+    ].join(' / ');
+    const prompt = '请通俗地讲解计算机网络（' + scope + '）中的「' + title + '」，并举一个具体例子。';
 
-  return () => {
-    for (const { heading, btn } of buttons) {
-      btn.remove();
-      heading.classList.remove('net-ask-gpt-heading');
+    const wrap = document.createElement('span');
+    wrap.className = 'net-ask-ai';
+    const primary = document.createElement('a');
+    primary.className = 'net-ask-ai-primary';
+    primary.target = '_blank';
+    primary.rel = 'noopener noreferrer';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'net-ask-ai-toggle';
+    toggle.textContent = '▾';
+    toggle.setAttribute('aria-label', '选择 AI 平台');
+    toggle.setAttribute('aria-expanded', 'false');
+    const menu = document.createElement('span');
+    menu.className = 'net-ask-ai-menu';
+    menu.hidden = true;
+
+    const status = document.createElement('span');
+    status.className = 'net-ask-ai-status';
+    status.setAttribute('role', 'status');
+    status.hidden = true;
+    const close = () => {
+      menu.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    function copyQuestion() {
+      status.hidden = false;
+      status.textContent = '正在复制问题…';
+      if (!navigator.clipboard?.writeText) {
+        status.textContent = '请手动复制：' + prompt;
+        return;
+      }
+      void navigator.clipboard.writeText(prompt).then(() => {
+        status.textContent = '已复制简短问题，可在 AI 中粘贴。';
+      }).catch(() => {
+        status.textContent = '请手动复制：' + prompt;
+      });
     }
-    dialog?.remove();
+
+    const refresh = () => {
+      primary.href = providerUrl(preferred, prompt);
+      primary.textContent = '问问 AI · ' + preferred.name + ' ↗';
+      primary.title = preferred.param ? '将知识点标题传入 ' + preferred.name : '复制简短问题并打开 ' + preferred.name;
+      primary.setAttribute('aria-label', '向 ' + preferred.name + ' 提问：' + title);
+      for (const link of Array.from(menu.querySelectorAll<HTMLAnchorElement>('a[data-provider]'))) {
+        const active = link.dataset.provider === preferred.id;
+        link.classList.toggle('is-selected', active);
+      }
+    };
+
+    primary.addEventListener('click', () => {
+      if (!preferred.param) copyQuestion();
+    });
+
+    toggle.addEventListener('click', () => {
+      const willOpen = menu.hidden;
+      controls.forEach((item) => item.close());
+      menu.hidden = !willOpen;
+      toggle.setAttribute('aria-expanded', String(willOpen));
+    });
+
+    for (const provider of askProviders) {
+      const link = document.createElement('a');
+      link.dataset.provider = provider.id;
+      link.href = providerUrl(provider, prompt);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      const name = document.createElement('span');
+      name.textContent = provider.name;
+      const mode = document.createElement('small');
+      mode.textContent = provider.param ? '传入问题' : '复制并打开';
+      link.append(name, mode);
+      link.addEventListener('click', () => {
+        remember(provider);
+        if (!provider.param) copyQuestion();
+        close();
+      });
+      menu.appendChild(link);
+    }
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.textContent = '仅复制问题';
+    copy.addEventListener('click', () => {
+      copyQuestion();
+      close();
+    });
+    menu.appendChild(copy);
+    wrap.append(primary, toggle, menu, status);
+    heading.classList.add('net-ask-ai-heading');
+    heading.appendChild(wrap);
+    controls.push({ heading, wrap, refresh, close });
+    refresh();
+  }
+
+  const onOutside = (event: PointerEvent) => {
+    if (event.target instanceof Element && !event.target.closest('.net-ask-ai')) {
+      controls.forEach((item) => item.close());
+    }
+  };
+  const onKey = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') controls.forEach((item) => item.close());
+  };
+  document.addEventListener('pointerdown', onOutside);
+  document.addEventListener('keydown', onKey);
+  return () => {
+    document.removeEventListener('pointerdown', onOutside);
+    document.removeEventListener('keydown', onKey);
+    for (const { heading, wrap } of controls) {
+      wrap.remove();
+      heading.classList.remove('net-ask-ai-heading');
+    }
   };
 }
 
-const askGptStyles = `
-.net-ask-gpt-heading { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
-.net-ask-gpt { margin-inline-start: auto; flex-shrink: 0; font-family: inherit; font-size: .75rem; font-weight: 500; line-height: 1.5; color: var(--deck-accent, currentColor); background: transparent; border: 1px solid currentColor; border-radius: 999px; padding: .2rem .65rem; cursor: pointer; white-space: nowrap; }
-.net-ask-gpt:hover, .net-ask-gpt:focus-visible { text-decoration: underline; }
-.net-ask-gpt-dialog { width: min(40rem, calc(100% - 2rem)); max-height: 85vh; box-sizing: border-box; padding: 1.25rem; border: 1px solid currentColor; border-radius: 12px; color: inherit; background: Canvas; }
-.net-ask-gpt-dialog::backdrop { background: rgba(0,0,0,.48); }
-.net-ask-gpt-dialog textarea { width: 100%; min-height: 12rem; max-height: 45vh; box-sizing: border-box; resize: vertical; font: inherit; color: CanvasText; background: Canvas; }
-.net-ask-gpt-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: .75rem; }
-.net-ask-gpt-actions button, .net-ask-gpt-actions a { font: inherit; color: inherit; padding: .35rem .7rem; border: 1px solid currentColor; border-radius: 6px; background: transparent; cursor: pointer; }
-@media print { .net-ask-gpt, .net-ask-gpt-dialog { display: none !important; } }
+const askAiStyles = `
+.net-ask-ai-heading { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.net-ask-ai { margin-inline-start: auto; position: relative; display: inline-flex; align-items: center; flex-shrink: 0; font-family: inherit; font-size: .75rem; font-weight: 500; line-height: 1.5; color: var(--deck-accent, currentColor); white-space: nowrap; }
+.net-ask-ai-primary, .net-ask-ai-toggle { font: inherit; color: inherit; background: transparent; border: 1px solid currentColor; padding: .2rem .6rem; cursor: pointer; text-decoration: none; }
+.net-ask-ai-primary { border-radius: 999px 0 0 999px; }
+.net-ask-ai-toggle { border-inline-start: 0; border-radius: 0 999px 999px 0; padding-inline: .45rem; }
+.net-ask-ai-primary:hover, .net-ask-ai-primary:focus-visible, .net-ask-ai-toggle:hover { text-decoration: underline; }
+.net-ask-ai-menu { position: absolute; inset-inline-end: 0; top: calc(100% + .35rem); z-index: 30; width: 15rem; max-width: calc(100vw - 2rem); max-height: min(60vh, 25rem); overflow: auto; padding: .35rem; border: 1px solid currentColor; border-radius: 10px; background: Canvas; color: CanvasText; box-shadow: 0 6px 24px #0002; }
+.net-ask-ai-menu[hidden], .net-ask-ai-status[hidden] { display: none !important; }
+.net-ask-ai-menu a, .net-ask-ai-menu button { display: flex; align-items: center; justify-content: space-between; gap: .5rem; width: 100%; box-sizing: border-box; padding: .45rem .6rem; border: 0; border-radius: 5px; font: inherit; color: inherit; background: transparent; cursor: pointer; text-decoration: none; text-align: start; }
+.net-ask-ai-menu a:hover, .net-ask-ai-menu a:focus-visible, .net-ask-ai-menu button:hover, .net-ask-ai-menu a.is-selected { background: color-mix(in srgb, currentColor 10%, transparent); }
+.net-ask-ai-menu small { opacity: .7; font-size: .68rem; }
+.net-ask-ai-status { position: absolute; inset-inline-end: 0; top: calc(100% + .35rem); z-index: 29; width: max-content; max-width: min(20rem, calc(100vw - 2rem)); padding: .4rem .6rem; border-radius: 6px; background: Canvas; color: CanvasText; border: 1px solid currentColor; white-space: normal; user-select: text; }
+@media print { .net-ask-ai { display: none !important; } }
 `;
 
 /** 「计算机网络」章节页：/net/deck/chN */
@@ -194,7 +254,7 @@ function NetUnitInner({ chapter }: { chapter: (typeof netChapters)[number] }) {
 
   useEffect(() => {
     if (!pageRef.current) return;
-    return installNetAskGPT(pageRef.current, chapter);
+    return installNetAskAI(pageRef.current, chapter);
   }, [chapter]);
 
   const level2 = chapter.toc.filter((e) => e.level === 2);
@@ -216,7 +276,7 @@ function NetUnitInner({ chapter }: { chapter: (typeof netChapters)[number] }) {
 
   return (
     <div className="page" ref={pageRef} data-deck={chapter.id}>
-      <style>{askGptStyles}</style>
+      <style>{askAiStyles}</style>
       <h1>{decodeEntities(chapter.title)}</h1>
       <div className="lede">
         <HtmlContent html={chapter.lede} />
