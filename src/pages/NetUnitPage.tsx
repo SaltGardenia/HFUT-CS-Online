@@ -1,8 +1,9 @@
-import { Fragment, useEffect, useRef } from 'react';
+import { Fragment, useEffect, useMemo, useRef } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { NET_BASE } from '../courses/registry';
 import { netChapters } from '../content/net';
 import { netHomework } from '../content/net/homework';
+import { buildSlideReview, sourceExtraNotes } from '../content/net/slide-review';
 import NetHomework from './net/NetHomework';
 import NetHighlights from './net/NetHighlights';
 import { useToc } from '../lib/toc';
@@ -223,34 +224,44 @@ export default function NetUnitPage() {
   return <NetUnitInner key={chapter.id} chapter={chapter} />;
 }
 
-function NetUnitInner({ chapter }: { chapter: (typeof netChapters)[number] }) {
+function NetUnitInner({ chapter: original }: { chapter: (typeof netChapters)[number] }) {
   const navigate = useNavigate();
   const toc = useToc();
   const [params] = useSearchParams();
-  const section = params.get('s');
+  const requested = params.get('s');
+  const review = useMemo(() => buildSlideReview(original), [original]);
+  const legacyAnchor = !!requested && !review.resolve(requested) && original.toc.some((e) => e.id === requested);
+  const extra = params.get('view') === 'extra' || legacyAnchor;
+  const chapter = extra ? original : review.chapter;
+  const section = requested ? (extra ? requested : review.resolve(requested)) : undefined;
+  useEffect(() => {
+    if (legacyAnchor && params.get('view') !== 'extra') {
+      navigate(`${NET_BASE}/deck/${original.id}?view=extra&s=${encodeURIComponent(requested!)}`, { replace: true });
+    }
+  }, [legacyAnchor, params, navigate, original.id, requested]);
   const pageRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
 
   const jump = (id: string) => {
     scrollToId(id);
     toc.setActive(id);
-    navigate(`${NET_BASE}/deck/${chapter.id}?s=${id}`, { replace: true });
+    navigate(`${NET_BASE}/deck/${chapter.id}?${extra ? 'view=extra&' : ''}s=${encodeURIComponent(id)}`, { replace: true });
   };
 
   useEffect(() => {
     toc.report(chapter.toc, jump);
     return () => toc.report([], () => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapter.id]);
+  }, [chapter.id, extra]);
 
   useEffect(() => {
     if (!section) return;
     const t = window.setTimeout(() => scrollToId(section, firstRender.current), 80);
     firstRender.current = false;
     return () => window.clearTimeout(t);
-  }, [section]);
+  }, [section, extra]);
 
-  useScrollSpy(pageRef, [chapter.id]);
+  useScrollSpy(pageRef, [chapter.id, extra]);
 
   useEffect(() => {
     if (!pageRef.current) return;
@@ -266,7 +277,7 @@ function NetUnitInner({ chapter }: { chapter: (typeof netChapters)[number] }) {
   for (const entry of chapter.toc) {
     if (entry.level === 2) parent = entry.id;
     for (const q of questions) {
-      if (q.related !== entry.id) continue;
+      if ((extra ? q.related : review.resolve(q.related)) !== entry.id) continue;
       const existing = questionsForSection.get(parent) ?? [];
       if (!existing.some((item) => item.no === q.no)) {
         questionsForSection.set(parent, [...existing, q]);
@@ -281,7 +292,19 @@ function NetUnitInner({ chapter }: { chapter: (typeof netChapters)[number] }) {
       <div className="lede">
         <HtmlContent html={chapter.lede} />
       </div>
-      <NetHighlights chapterNo={chapterNo} />
+      <nav className="topic-map" aria-label="复习模式">
+        <span className="topic-map-label">复习模式</span>
+        <button className="topic-chip" type="button" aria-pressed={!extra} style={{ fontWeight: !extra ? 700 : 400 }} onClick={() => { if (extra) { navigate(`${NET_BASE}/deck/${chapter.id}`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>课件主线（按顺序）</button>
+        <button className="topic-chip" type="button" aria-pressed={extra} style={{ fontWeight: extra ? 700 : 400 }} onClick={() => { if (!extra) { navigate(`${NET_BASE}/deck/${chapter.id}?view=extra`, { replace: true }); window.scrollTo({ top: 0, behavior: 'auto' }); } }}>原有讲义与拓展</button>
+      </nav>
+      <div className="callout tip">
+        <p className="callout-h">{extra ? '原有讲义与拓展（非课件主线）' : '拓展与待核内容说明'}</p>
+        <p>{sourceExtraNotes[chapterNo]} {extra ? '以下为原有讲义，含与主线重复的解释、拓展及尚未逐段核实的内容，不代表全部属于课件。' : '「理解辅助」用于解释课内概念；「拓展」及「待核」不当作课件原有知识点。'}</p>
+      </div>
+      <details>
+        <summary>荧光笔重点索引（辅助索引，不按正文顺序）</summary>
+        <NetHighlights chapterNo={chapterNo} />
+      </details>
       {level2.length > 1 && (
         <nav className="topic-map" aria-label="本章知识点导航">
           <span className="topic-map-label">本章脉络</span>

@@ -38,9 +38,9 @@ function sectionText(): string | undefined {
  * - 滚动停顿后把当前位置写回本机（登录后自动同步云端）。
  */
 export default function ReadingMark() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const reduced = useReducedMotion();
-  const active = CONTENT_PATH.test(pathname);
+  const active = CONTENT_PATH.test(pathname) && !(pathname.startsWith('/net/deck/') && new URLSearchParams(search).get('view') === 'extra');
 
   const [anchor, setAnchor] = useState<ReadingEntry | null>(null);
   const [visible, setVisible] = useState(false);

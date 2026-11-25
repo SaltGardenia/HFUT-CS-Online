@@ -6,14 +6,14 @@ import { netHomework } from './homework';
 
 /** 按 2025 版章节正文顺序归纳；卡片计数直接读取作业数据。 */
 const chapterMap = [
-  { no: 1, title: '概论', summary: '计算机网络的形成与发展、定义和主要功能；因特网的边缘与核心、C/S 与 P2P、网络拓扑；电路交换、报文交换与分组交换，LAN / MAN / WAN / AN；<strong>速率、带宽、吞吐量、四种时延、时延带宽积及利用率</strong>。' },
-  { no: 2, title: '网络结构与协议', summary: '分层思想、体系结构与网络协议；<strong>协议三要素、协议与服务的区别、实体与 SAP</strong>；OSI/RM 七层功能及 PDU、SDU、PCI；TCP/IP 与五层体系结构、封装与解封装及跨网络传输过程。' },
-  { no: 3, title: '物理层与数据通信', summary: '通信系统模型、数据与信号、通信性能指标；PCM、NRZ、曼彻斯特编码、ASK / FSK / PSK；双绞线、光纤与无线介质；同步与异步传输、FDM / TDM / STDM / WDM / CDM；交换技术、虚电路和数据报、物理层协议。' },
-  { no: 4, title: '数据链路层', summary: '链路层服务与功能、封装成帧、透明传输；差错来源、海明距离与海明码、<strong>CRC 模2除法</strong>；停止等待、连续 ARQ、GBN 与选择重传，滑动窗口及效率计算；HDLC 与 PPP。' },
-  { no: 5, title: '局域网', summary: 'IEEE 802、共享信道接入、<strong>CSMA/CD 争用期与二进制指数退避</strong>；以太网信道利用率、MAC 地址和帧格式；集线器、网桥与交换机、自学习转发表、VLAN；高速以太网及载波延伸、分组突发。' },
-  { no: 6, title: '网络层', summary: '虚电路与数据报；IPv4 首部、分片、分类地址、<strong>子网划分、VLSM、CIDR 与最长前缀匹配</strong>；IP 与 MAC 地址、ARP、ICMP；距离向量和链路状态算法，RIP 路由表更新、OSPF 与 BGP。' },
-  { no: 7, title: '传输层', summary: '进程间通信、端口与复用分用、UDP 与 TCP；可靠传输、TCP 首部与字节序号、滑动窗口、RTT 与超时重传；流量控制、三次握手与四次挥手；<strong>慢开始、拥塞避免、快重传、快恢复</strong>。' },
-  { no: 8, title: '应用层', summary: '网络应用及应用层协议体系架构；DNS 域名服务器与解析过程、FTP 控制连接和数据连接；<strong>WWW、URL、HTTP 请求与响应</strong>；HTML 与动态文档、电子邮件 SMTP / POP3 / IMAP。' },
+  { no: 1, title: '概论', summary: '网络形成与发展、定义、功能、结构、拓扑、分类、交换技术与覆盖范围；<strong>速率、带宽、吞吐量、时延、丢包率、RTT、利用率</strong>。' },
+  { no: 2, title: '网络结构与协议', summary: '网络体系结构形成、协议及三要素、分层、服务与接口；<strong>OSI/RM 七层、PDU、五层体系结构及 TCP/IP</strong>。' },
+  { no: 3, title: '物理层与数据通信', summary: '通信系统、数字编码、ASK/FSK/PSK、PCM、信道极限容量、传输介质；传输方式与同步；<strong>FDM/TDM、T1/E1、STDM、WDM、SONET/SDH</strong>、交换与物理层协议。' },
+  { no: 4, title: '数据链路层', summary: '链路与成帧、透明传输、<strong>CRC 与 FCS</strong>；停止等待、连续 ARQ、GBN/SRP 与窗口；PPP。' },
+  { no: 5, title: '局域网', summary: '局域网与 IEEE 802、MAC/LLC、适配器、<strong>CSMA/CD</strong>；传统以太网、利用率、MAC 帧、集线器/网桥/交换机、生成树、VLAN、高速以太网。' },
+  { no: 6, title: '网络层', summary: '网络层服务、网际协议 IP 与虚拟互连网络、IP 地址、IP/MAC 与 ARP、首部和分片、转发；<strong>子网划分、CIDR、ICMP、RIP 与 OSPF</strong>。' },
+  { no: 7, title: '传输层', summary: '传输层、端口、UDP、TCP 特点与套接字、可靠传输、报文首部、窗口和流量控制、RTT/Karn、连接管理、<strong>拥塞控制</strong>。' },
+  { no: 8, title: '应用层', summary: '应用层概述、DNS、FTP、WWW 与 URL、<strong>HTTP 操作、代理服务器、HTTP 报文、Cookie</strong>、网页文档、CGI 与信息检索。' },
 ] as const;
 
 /** 阅读进度沿用 ReadingMark 的路径键；只展示最近一次记录，不把滚动百分比当成掌握率。 */
@@ -49,7 +49,7 @@ const home: DeckData = {
   toc: [
     { id: 'sec-net-map', text: '八章内容地图', level: 2 },
     { id: 'sec-net-map-h1', text: '章节内容与作业', level: 3 },
-    { id: 'sec-net-map-h2', text: '课件表述与现行实践', level: 3 },
+    { id: 'sec-net-map-h2', text: '拓展与勘误说明', level: 3 },
   ],
   sections: buildNetHomeSections(),
 };
@@ -59,12 +59,12 @@ export function buildNetHomeSections(reading: ReadingMap = {}): Section[] {
     id: 'sec-net-map', heading: '八章内容地图', blocks: [{
       type: 'html', html: `
       <div class="callout tip"><p class="callout-h">复习顺序</p>
-      <p>先阅读知识点与标出的重点，再做每章末的作业。卡片中的百分比表示上次保存的阅读位置，并非知识掌握程度。
+      <p>默认进入按课件顺序整理的主线，另可切换查看原有讲义与拓展；先读主线，再做每章末的作业。卡片中的百分比表示上次保存的阅读位置，并非知识掌握程度。
       答案区分别注明<strong>教师答案（整理）</strong>与<strong>补充参考解答</strong>，
       便于区分已给结论和推导解释；2025 课件未布置的题不虚构为教师作业。</p></div>
       <h3 id="sec-net-map-h1">章节内容与作业</h3>
       <div class="card-grid deck-map">${chapterCards(reading)}</div>
-      <h3 id="sec-net-map-h2">课件表述与现行实践</h3>
+      <h3 id="sec-net-map-h2">拓展与勘误说明</h3>
       <p>按照课件复习时注意<strong>适用前提</strong>：例如 CSMA/CD 属于经典半双工共享以太网，
       不应推广至常见的全双工交换式链路；IPv4 分类编址是教学基础，但实际路由以 CIDR
       与最长前缀匹配为主；HTTP/3 在 QUIC 上运行，QUIC 通常使用 UDP，不等同于

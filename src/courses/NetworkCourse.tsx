@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import { useScrollMemory } from '../lib/scrollMemory';
 import { netChapters, netPapers, netHome } from '../content/net';
+import { buildSlideReview } from '../content/net/slide-review';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -20,7 +21,7 @@ import { decodeEntities } from '../lib/text';
 function buildNetIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of netChapters) {
-    for (const t of ch.toc) {
+    for (const t of buildSlideReview(ch).chapter.toc) {
       items.push({ kind: '章节', unit: ch.id, unitTitle: decodeEntities(ch.title), sectionId: t.id, text: decodeEntities(t.text) });
     }
   }
