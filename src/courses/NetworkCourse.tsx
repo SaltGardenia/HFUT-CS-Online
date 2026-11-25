@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-r
 import { useScrollMemory } from '../lib/scrollMemory';
 import { netChapters, netPapers, netHome } from '../content/net';
 import { buildSlideReview } from '../content/net/slide-review';
+import { buildNetSupplement } from '../content/net/supplement';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -18,9 +19,12 @@ import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
 /** 计网课搜索索引：各章目录 + 试卷入口 + 总目录 */
-function buildNetIndex(): SearchIndexItem[] {
+export function buildNetIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of netChapters) {
+    for (const t of buildNetSupplement(ch).toc) {
+      items.push({kind:'章节',unit:ch.id,unitTitle:decodeEntities(ch.title)+' · 补充',sectionId:t.id,text:decodeEntities(t.text)});
+    }
     for (const t of buildSlideReview(ch).chapter.toc) {
       items.push({ kind: '章节', unit: ch.id, unitTitle: decodeEntities(ch.title), sectionId: t.id, text: decodeEntities(t.text) });
     }
@@ -109,15 +113,6 @@ export default function NetworkCourse() {
     };
   }, [practiceActive, onAtt]);
 
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = practiceActive ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [practiceActive, onAtt]);
 
 
   // 顶栏导航：总目录 + 第1~8章 + 在线练习 + 附件
