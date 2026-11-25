@@ -22,13 +22,18 @@ const ch: NetChapter = {
     { id: 'sec-ch2-protocol', text: '3. 网络协议', level: 2 },
     { id: 'sec-ch2-protocol-h1', text: '★ 协议「三要素」', level: 3 },
     { id: 'sec-ch2-osi', text: '4. OSI 参考模型', level: 2 },
-    { id: 'sec-ch2-osi-h1', text: '三种模型的比较', level: 3 },
-    { id: 'sec-ch2-osi-h2', text: '★ 主机 1 向主机 2 发送数据', level: 3 },
-    { id: 'sec-ch2-protocol-h2', text: '协议数据单元 PDU', level: 3 },
     { id: 'sec-ch2-osi-h3', text: '★ OSI/RM 各层简介', level: 3 },
+    { id: 'sec-ch2-protocol-h2', text: '★ OSI/RM 的数据传输：PDU、SDU 与 PCI', level: 3 },
+    { id: 'sec-ch2-osi-env', text: 'OSI 环境中的数据传输过程', level: 3 },
+    { id: 'sec-ch2-osi-market', text: 'OSI 的开放性及市场化失败原因', level: 3 },
+    { id: 'sec-ch2-osi-h1', text: '三种模型的比较', level: 3 },
+    { id: 'sec-ch2-osi-h2', text: '★ 五层协议体系结构：主机 1 向主机 2 发送数据', level: 3 },
     { id: 'sec-ch2-tcpip', text: '5. Internet 模型', level: 2 },
-    { id: 'sec-ch2-tcpip-h1', text: '★ Internet 模型简介', level: 3 },
-    { id: 'sec-ch2-tcpip-h2', text: 'Internet 模型特点', level: 3 },
+    { id: 'sec-ch2-tcpip-h2', text: 'TCP/IP 的基本概念与特点', level: 3 },
+    { id: 'sec-ch2-tcpip-h1', text: '★ TCP/IP 的层次结构与各层功能', level: 3 },
+    { id: 'sec-ch2-tcpip-services', text: 'OSI 与 TCP/IP 的对照及三个服务层次', level: 3 },
+    { id: 'sec-ch2-tcpip-transfer', text: 'TCP/IP 的封装、解封装与跨网络传输', level: 3 },
+    { id: 'sec-ch2-tcpip-hourglass', text: 'TCP/IP 协议族的沙漏结构', level: 3 },
   ],
   sections: [
     {
@@ -215,62 +220,6 @@ const ch: NetChapter = {
             <p>一些历史材料写「1983 年形成 ISO 7498」，这里可能指标准形成阶段；正式发布的标准版本为 <strong>ISO 7498:1984</strong>。
               正式公开发布的 ISO 7498:1984 与标准形成、研究阶段并非同一个时间点。</p>
           </div>
-          <h3 id="sec-ch2-osi-h1">三种模型的比较</h3>
-          <p>除了 OSI/RM，在实际应用和科学研究领域中还有两个模型非常活跃，分别是 TCP/IP 模型和五层体系结构模型：</p>
-          <table class="tbl">
-            <thead>
-              <tr><th>模型</th><th>层次</th><th>特点与地位</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>OSI 七层体系结构</strong></td>
-                <td>应用层、表示层、会话层、传输层、网络层、数据链路层、物理层</td>
-                <td>概念清楚、理论完整，是一个<strong>理论上的国际标准</strong>，但却不是事实上的国际标准</td>
-              </tr>
-              <tr>
-                <td><strong>TCP/IP 协议簇</strong></td>
-                <td>应用层、传输层、网际层、网络接口层</td>
-                <td>简单易用，是<strong>事实上（de facto）的国际标准</strong></td>
-              </tr>
-              <tr>
-                <td><strong>五层体系结构</strong></td>
-                <td>应用层、传输层、网络层、数据链路层、物理层</td>
-                <td>结合了 OSI/RM 和 TCP/IP 协议簇的优点而提出来的模型，但其只是为了<strong>学术学习研究</strong>，没有具体的实际意义</td>
-              </tr>
-            </tbody>
-          </table>
-          <h3 id="sec-ch2-osi-h2">主机 1 向主机 2 发送数据</h3>
-          <div class="callout tip">
-            <p class="callout-h">重点 B｜分层封装/解封装</p>
-            <p>结合分层传输图辨别各层作用、传输层的端到端通信，以及 TCP/IP 各层的功能对应。</p>
-          </div>
-
-          <h4 id="sec-ch2-protocol-h2">协议数据单元 PDU</h4>
-          <p>
-            计算机网络体系结构中，对等层实体之间按照本层协议交换的信息单元统称为<strong>协议数据单元</strong>（Protocol Data Unit，PDU）。
-            在简单的逐层封装模型中，本层在上层交付的<strong>服务数据单元</strong>（Service Data Unit，SDU）上加入本层的<strong>协议控制信息</strong>（Protocol Control Information，PCI），形成 PDU。
-            PCI 通常位于首部，某些协议也使用尾部，例如数据链路层帧的 FCS。
-            控制信息可包括地址、序号、长度、分段标志、差错控制信息等。各层的 PDU 有不同的名称。
-          </p>
-          <p class="formula">PDU = PCI + SDU（简单封装模型）</p>
-          <p>
-            两个端系统之间的数据通信过程本质上就是 PDU 的不断<strong>封装</strong>和<strong>解封</strong>过程：
-            在源系统，数据在自上而下逐层递交的过程中不断封装；在目的系统，数据自下而上逐层递交的过程中不断解封。
-            在不发生分段、合并等情况下，上层的 PDU 作为下层的 SDU。
-          </p>
-          <p>主机 1 的应用进程 AP1 向主机 2 的应用进程 AP2 发送数据的完整过程（自上而下逐层封装，再自下而上逐层拆封）：</p>
-          <ol>
-            <li>应用进程数据先传送到应用层，加上应用层首部，成为<strong>应用层 PDU</strong>；</li>
-            <li>应用层 PDU 再传送到运输层，加上运输层首部，成为<strong>运输层报文</strong>；</li>
-            <li>运输层报文再传送到网络层，加上网络层首部，成为 <strong>IP 数据报（或分组）</strong>；</li>
-            <li>IP 数据报再传送到数据链路层，加上链路层首部和尾部，成为<strong>数据链路层帧</strong>；</li>
-            <li>数据链路层帧再传送到物理层，最下面的物理层把<strong>比特流</strong>传送到物理媒体（电信号或光信号在物理媒体中传播，从发送端物理层传送到接收端物理层）。</li>
-          </ol>
-          <p>
-            接收方逐层剥去首部（尾部）：物理层接收到比特流上交数据链路层 → 数据链路层剥去帧首部和帧尾部，取出数据部分上交网络层 →
-            网络层剥去首部上交运输层 → 运输层剥去首部上交应用层 → 应用层剥去应用层 PDU 首部，取出应用程序数据上交应用进程。
-            注意观察加入或剥去首部（尾部）的层次：应用层首部 H5、运输层首部 H4、网络层首部 H3、链路层首部 H2 与链路层尾部 T2。
-          </p>
           <h3 id="sec-ch2-osi-h3">OSI/RM 各层简介</h3>
           <div class="callout tip">
             <p class="callout-h">重点 B｜OSI 各层功能</p>
@@ -348,6 +297,123 @@ const ch: NetChapter = {
             <p>差错控制怕传错或传丢，流量控制怕接收方来不及接收，拥塞控制怕网络过载。具体功能取决于协议：普通以太网、PPP 能检错但不提供可靠重传；UDP 不提供 TCP 式可靠交付和流量控制。</p>
           </div>
           <p>后续详见：<a href="/net/deck/ch4?s=sec-ch4-error">第4章差错检测与控制</a>、<a href="/net/deck/ch4?s=sec-ch4-flow">第4章可靠传输与 ARQ</a>、<a href="/net/deck/ch7?s=sec-ch7-reliable-compare">第7章两层控制机制的详细对比</a>。</p>
+          <h3 id="sec-ch2-protocol-h2">OSI/RM 的数据传输：PDU、SDU 与 PCI</h3>
+          <p>
+            计算机网络体系结构中，对等层实体之间按照本层协议交换的信息单元统称为<strong>协议数据单元</strong>（Protocol Data Unit，PDU）。
+            在简单的逐层封装模型中，本层在上层交付的<strong>服务数据单元</strong>（Service Data Unit，SDU）上加入本层的<strong>协议控制信息</strong>（Protocol Control Information，PCI），形成 PDU。
+            PCI 通常位于首部，某些协议也使用尾部，例如数据链路层帧的 FCS。
+            控制信息可包括地址、序号、长度、分段标志、差错控制信息等。各层的 PDU 有不同的名称。
+          </p>
+          <p class="formula">PDU = PCI + SDU（简单封装模型）</p>
+          <p>
+            两个端系统之间的数据通信过程本质上就是 PDU 的不断<strong>封装</strong>和<strong>解封</strong>过程：
+            在源系统，数据在自上而下逐层递交的过程中不断封装；在目的系统，数据自下而上逐层递交的过程中不断解封。
+            在不发生分段、合并等情况下，上层的 PDU 作为下层的 SDU。
+          </p>
+          <table class="tbl">
+            <thead><tr><th>术语</th><th>含义</th><th>记忆方法</th></tr></thead>
+            <tbody>
+              <tr><td><strong>PDU</strong> 协议数据单元</td><td>对等层之间沿水平方向逻辑交换的数据单元，由 SDU 和 PCI 组成（简单封装情形）</td><td>本层对等实体交换什么</td></tr>
+              <tr><td><strong>SDU</strong> 服务数据单元</td><td>上一层交付给本层、请求本层传送的用户数据</td><td>上层交给我什么</td></tr>
+              <tr><td><strong>PCI</strong> 协议控制信息</td><td>本层协议所需的控制信息，用于协调本层对等实体之间的通信</td><td>本层为了通信加什么</td></tr>
+            </tbody>
+          </table>
+          <h4>SDU 的分段处理</h4>
+          <p>若 N 层收到的 N-SDU 较长，而 N 层协议允许的 PDU 长度较短，就需要对 N-SDU 进行分段，将一个 SDU 分成两个或多个 PDU 来传送，并在接收端重组。
+            每个 PDU 含有相应的数据片段及所需的 PCI。因此，一个 SDU 并不总是对应一个 PDU。</p>
+          <p class="formula">一个 N-SDU → 分段 → N-PDU 1、N-PDU 2、… → 接收端重组 → 原 N-SDU</p>
+          <p><strong>例：</strong>上层交付 3000 字节数据，若本层每个 PDU 最多承载 1000 字节 SDU 数据，则可将其分成 3 个 PDU；各 PDU 还需加入本层的控制信息。这里的 1000 字节是有效载荷上限，不是包含 PCI 的 PDU 总长度。</p>
+          <h3 id="sec-ch2-osi-env">OSI 环境中的数据传输过程</h3>
+          <p>OSI 环境（OSI environment）中，主机 A 的应用进程向主机 B 的应用进程传输数据，途中可经过多个路由器。两端主机具有七层协议；普通转发路由器主要执行物理层、数据链路层和网络层的功能。</p>
+          <table class="tbl">
+            <thead><tr><th>层次</th><th>主机 A</th><th>路由器 A</th><th>路由器 B</th><th>主机 B</th></tr></thead>
+            <tbody>
+              <tr><td>应用层</td><td>应用进程 A</td><td>—</td><td>—</td><td>应用进程 B</td></tr>
+              <tr><td>表示层</td><td>数据单元</td><td>—</td><td>—</td><td>数据单元</td></tr>
+              <tr><td>会话层</td><td>数据单元</td><td>—</td><td>—</td><td>数据单元</td></tr>
+              <tr><td>传输层</td><td>报文</td><td>—</td><td>—</td><td>报文</td></tr>
+              <tr><td>网络层</td><td>分组</td><td>分组转发</td><td>分组转发</td><td>分组</td></tr>
+              <tr><td>数据链路层</td><td>帧</td><td>接收帧、重新成帧</td><td>接收帧、重新成帧</td><td>帧</td></tr>
+              <tr><td>物理层</td><td>比特序列</td><td>比特序列</td><td>比特序列</td><td>比特序列</td></tr>
+            </tbody>
+          </table>
+          <p>发送端逐层向下封装：应用数据 → 应用层、表示层及会话层数据单元 → 传输层报文 → 网络层分组 → 数据链路层帧 → 物理层比特序列。
+            接收端按相反方向逐层解封装，最终交付目的应用进程。</p>
+          <p><strong>经过路由器时：</strong>收到的帧由物理层上交链路层，链路层解除本跳封装并将分组交给网络层；网络层选择下一跳，再由出接口的链路层重新成帧并发送。
+            普通路由转发不需要把数据逐层解封到应用层。IP 转发时 TTL 等字段可改变；无 NAT 等地址转换时，源、目的 IP 地址通常保持不变，链路地址则随链路而变化。</p>
+          <h3 id="sec-ch2-osi-market">OSI 的开放性及市场化失败原因</h3>
+          <p>开放意味着任何遵守同一参考模型及相关标准的系统，都具有相互通信的能力。OSI 的七层体系结构成为重要的理论参考，但其协议在市场化方面未取得 TCP/IP 那样的成功。</p>
+          <ol>
+            <li>TCP/IP 已率先在互联网中大范围成功运行，形成先发优势。</li>
+            <li>OSI 标准制定过程中缺乏足够的商业驱动力。</li>
+            <li>OSI 协议实现较复杂，运行效率存在问题。</li>
+            <li>标准制定周期较长，设备难以及时进入市场。</li>
+            <li>部分功能在多个层次重复出现，带来额外开销。</li>
+          </ol>
+          <p><strong>辨析：</strong>OSI 是法律意义上的国际标准（de jure），TCP/IP 是事实上广泛应用的国际标准（de facto）。市场化失败不等于 OSI 分层思想没有价值。</p>
+          <h3 id="sec-ch2-osi-h1">三种模型的比较</h3>
+          <p>除了 OSI/RM，在实际应用和科学研究领域中还有两个模型非常活跃，分别是 TCP/IP 模型和五层体系结构模型：</p>
+          <table class="tbl">
+            <thead>
+              <tr><th>模型</th><th>层次</th><th>特点与地位</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>OSI 七层体系结构</strong></td>
+                <td>应用层、表示层、会话层、传输层、网络层、数据链路层、物理层</td>
+                <td>概念清楚、理论完整，是一个<strong>理论上的国际标准</strong>，但却不是事实上的国际标准</td>
+              </tr>
+              <tr>
+                <td><strong>TCP/IP 协议簇</strong></td>
+                <td>应用层、传输层、网际层、网络接口层</td>
+                <td>简单易用，是<strong>事实上（de facto）的国际标准</strong></td>
+              </tr>
+              <tr>
+                <td><strong>五层体系结构</strong></td>
+                <td>应用层、传输层、网络层、数据链路层、物理层</td>
+                <td>结合了 OSI/RM 和 TCP/IP 协议簇的优点而提出来的模型，是一种用于教学和分析的原理体系结构，并非独立的实际协议栈</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3 id="sec-ch2-osi-h2">五层协议体系结构：主机 1 向主机 2 发送数据</h3>
+          <div class="callout tip">
+            <p class="callout-h">重点 B｜分层封装/解封装</p>
+            <p>结合分层传输图辨别各层作用、传输层的端到端通信，以及 TCP/IP 各层的功能对应。</p>
+          </div>
+
+          <p>五层原理体系结构把 OSI 的会话层、表示层和应用层合为应用层，保留传输层、网络层、数据链路层和物理层，便于理解实际数据传递过程。</p>
+          <table class="tbl">
+            <thead><tr><th>层次</th><th>发送端逐层封装后的数据结构（示意）</th><th>数据单元</th></tr></thead>
+            <tbody>
+              <tr><td>应用层</td><td>H5 | 应用程序数据</td><td>应用层 PDU</td></tr>
+              <tr><td>传输层</td><td>H4 | H5 | 应用程序数据</td><td>运输层报文（如 TCP 报文段）</td></tr>
+              <tr><td>网络层</td><td>H3 | H4 | H5 | 应用程序数据</td><td>IP 数据报（分组）</td></tr>
+              <tr><td>数据链路层</td><td>H2 | H3 | H4 | H5 | 应用程序数据 | T2</td><td>帧（如 MAC 帧）</td></tr>
+              <tr><td>物理层</td><td>010101010…（比特流）</td><td>比特</td></tr>
+            </tbody>
+          </table>
+          <p>H5、H4、H3、H2 分别表示应用层、传输层、网络层、数据链路层的首部，T2 表示链路层尾部。这是便于理解的封装示意，并非所有协议都采用完全相同的格式。</p>
+          <p>主机 1 的应用进程 AP1 向主机 2 的应用进程 AP2 发送数据的完整过程（自上而下逐层封装，再自下而上逐层拆封）：</p>
+          <ol>
+            <li>应用进程数据先传送到应用层，加上应用层首部，成为<strong>应用层 PDU</strong>；</li>
+            <li>应用层 PDU 再传送到运输层，加上运输层首部，成为<strong>运输层报文</strong>；</li>
+            <li>运输层报文再传送到网络层，加上网络层首部，成为 <strong>IP 数据报（或分组）</strong>；</li>
+            <li>IP 数据报再传送到数据链路层，加上链路层首部和尾部，成为<strong>数据链路层帧</strong>；</li>
+            <li>数据链路层帧再传送到物理层，最下面的物理层把<strong>比特流</strong>传送到物理媒体（电信号或光信号在物理媒体中传播，从发送端物理层传送到接收端物理层）。</li>
+          </ol>
+          <p>
+            接收方逐层剥去首部（尾部）：物理层接收到比特流上交数据链路层 → 数据链路层剥去帧首部和帧尾部，取出数据部分上交网络层 →
+            网络层剥去首部上交运输层 → 运输层剥去首部上交应用层 → 应用层剥去应用层 PDU 首部，取出应用程序数据上交应用进程。
+            注意观察加入或剥去首部（尾部）的层次：应用层首部 H5、运输层首部 H4、网络层首部 H3、链路层首部 H2 与链路层尾部 T2。
+          </p>
+          <h4>接收方的逐层解封装</h4>
+          <ol>
+            <li>物理层收到比特流，上交数据链路层。</li>
+            <li>数据链路层去掉 H2 与 T2，把帧的数据部分交给网络层。</li>
+            <li>网络层去掉 H3，把分组的数据部分交给运输层。</li>
+            <li>运输层去掉 H4，把报文的数据部分交给应用层。</li>
+            <li>应用层去掉 H5，将应用程序数据交付 AP2。AP2 收到 AP1 发来的数据。</li>
+          </ol>
           `,
         },
       ],
@@ -360,7 +426,15 @@ const ch: NetChapter = {
           type: 'html',
           html: `
           <p>因为模型中两个核心协议为 TCP 和 IP 协议，Internet 模型也称为 <strong>TCP/IP 模型</strong>。</p>
-          <h3 id="sec-ch2-tcpip-h1">Internet 模型简介</h3>
+          <h3 id="sec-ch2-tcpip-h2">TCP/IP 的基本概念与特点</h3>
+          <p>20 世纪 60 年代起，美国国防部高级研究计划局 ARPA 开展不同类型计算机网络互联的研究，推动了 TCP/IP 协议的形成。</p>
+          <ol>
+            <li><strong>开放的协议标准：</strong>协议规范公开，可免费使用，不依赖特定计算机硬件与操作系统。</li>
+            <li><strong>独立于特定网络硬件：</strong>适用于局域网、广域网及由不同类型网络构成的互联网。</li>
+            <li><strong>统一的网络地址分配方案：</strong>通过 IP 地址标识网络接口，使不同网络能够统一寻址。地址的唯一性应在相应寻址范围内理解；私有地址可在不同网络中重复使用。</li>
+            <li><strong>标准化的高层协议：</strong>为用户提供文件传输、电子邮件、域名解析等多种服务，其中可靠传输可由 TCP 等协议实现。</li>
+          </ol>
+          <h3 id="sec-ch2-tcpip-h1">TCP/IP 的层次结构与各层功能</h3>
           <div class="callout tip">
             <p class="callout-h">重点 B｜TCP/IP 各层职责</p>
             <p>网络接口层连接物理网络；网际层转发 IP 数据报；运输层提供 TCP/UDP 服务；应用层承载 DNS、FTP 等协议。</p>
@@ -380,7 +454,7 @@ const ch: NetChapter = {
               <tr>
                 <td><strong>应用层</strong></td>
                 <td>大体对应 OSI 的应用层、表示层和会话层</td>
-                <td>FTP（文件传输协议）、SMTP（简单邮件传输协议）、TELNET（远程网络登陆协议）、DNS（域名服务）、HTTP（超文本传输协议）等</td>
+                <td>FTP（文件传输协议）、SMTP（简单邮件传输协议）、TELNET（远程网络登录协议）、DNS（域名服务）、HTTP（超文本传输协议）、SNMP（简单网络管理协议）等</td>
               </tr>
               <tr>
                 <td><strong>传输层</strong></td>
@@ -406,14 +480,46 @@ const ch: NetChapter = {
               </tr>
             </tbody>
           </table>
-          <h3 id="sec-ch2-tcpip-h2">Internet 模型特点</h3>
-          <h4>TCP/IP 协议族的“沙漏”结构</h4>
-          <p>沙漏中部是统一的<strong>IP 网际层</strong>：上方可以运行 TCP、UDP 等运输层协议，以及 HTTP、SMTP、DNS 等应用层协议；
+          <h4>各层功能与服务</h4>
+          <p><strong>网络接口层（主机到网络层）：</strong>负责连接物理网络及在具体网络上发送、接收数据。TCP/IP 不规定统一的底层接入实现，各种链路技术可采用各自的协议。</p>
+          <p><strong>网际层（网络互连层）：</strong>是 TCP/IP 协议栈的核心，负责将传输层数据封装成 IP 数据报，依据源、目的 IP 地址进行寻址、路由选择和分组转发。
+            IP 是无连接、尽最大努力交付的协议，不能保证分组不丢失、无重复或按序到达；IP 运行于参与 IP 通信的主机及路由器上。</p>
+          <p><strong>传输层：</strong>在源、目的主机的对等传输实体之间提供端到端服务，面向应用进程，兼顾面向连接和无连接两种服务。
+            TCP 提供可靠的面向连接服务；UDP 提供不保证可靠交付的无连接服务。普通中间路由器转发该通信的数据报时不承担端到端传输层功能。</p>
+          <p><strong>应用层：</strong>面向不同网络应用提供具体服务，例如 FTP 文件传输、Telnet 远程登录、DNS 域名解析和 SNMP 网络管理。</p>
+          <h3 id="sec-ch2-tcpip-services">OSI 与 TCP/IP 的对照及三个服务层次</h3>
+          <table class="tbl">
+            <thead><tr><th>TCP/IP 层次</th><th>OSI 对应层次</th><th>提供的服务</th></tr></thead>
+            <tbody>
+              <tr><td>应用层</td><td>应用层、表示层、会话层</td><td>各种应用服务</td></tr>
+              <tr><td>传输层</td><td>传输层</td><td>运输服务（TCP 可靠或 UDP 不保证可靠）</td></tr>
+              <tr><td>网际层 IP</td><td>网络层</td><td>无连接分组交付服务</td></tr>
+              <tr><td>网络接口层</td><td>数据链路层、物理层</td><td>底层网络接入与数据传送</td></tr>
+            </tbody>
+          </table>
+          <p>TCP/IP 的三个服务层次是：<strong>各种应用服务 → 可靠或不可靠的运输服务 → 无连接分组交付服务</strong>。它们建立在底层网络接口提供的通信能力上。注意三个服务层次并不意味着 TCP/IP 只有三层。</p>
+          <h3 id="sec-ch2-tcpip-transfer">TCP/IP 的封装、解封装与跨网络传输</h3>
+          <p>TCP/IP 同样采用对等层逻辑通信和逐层封装、解封装。以 TCP 经以太网发送数据为例：</p>
+          <p class="formula">应用层数据 → TCP 首部 + 应用层数据 → IP 首部 + TCP 报文段 → 以太网首部 + IP 数据报 + 帧尾 → 比特流</p>
+          <p>目的端按相反方向去除各层控制信息并向上交付。TCP 可将字节流分段；UDP 则保持报文边界，不能把 UDP 的处理概括为 TCP 式的字节流分段。较大的 IP 数据报是否分片取决于 IP 版本、MTU 及相应机制。</p>
+          <table class="tbl">
+            <thead><tr><th>TCP/IP 层次</th><th>主机 A</th><th>路由器（网络 1 ↔ 网络 2）</th><th>主机 B</th></tr></thead>
+            <tbody>
+              <tr><td>4 应用层</td><td>应用协议</td><td>—</td><td>应用协议</td></tr>
+              <tr><td>3 运输层</td><td>TCP/UDP</td><td>—</td><td>TCP/UDP</td></tr>
+              <tr><td>2 网际层</td><td>IP</td><td>IP 转发</td><td>IP</td></tr>
+              <tr><td>1 网络接口层</td><td>接入网络 1</td><td>网络 1 入接口、网络 2 出接口</td><td>接入网络 2</td></tr>
+            </tbody>
+          </table>
+          <p>路由器在入接口接收数据、由网际层决定下一跳，再利用出接口所在网络的协议重新封装发送。主机 A、B 使用完整四层协议，普通中间路由器执行下两层的转发功能，不终止两主机之间的 TCP 连接。</p>
+          <h3 id="sec-ch2-tcpip-hourglass">TCP/IP 协议族的沙漏结构</h3>
+          <p>沙漏中部是统一的<strong>IP 网际层</strong>：上方可以运行 TCP、UDP 等运输层协议，以及 HTTP、SMTP、DNS、RTP 等应用层协议；
             下方可以使用以太网、无线局域网等不同网络接口技术。</p>
           <p><strong>Everything over IP：</strong>各种应用都能通过 IP 网络传送；
             <strong>IP over Everything：</strong>IP 又能够运行在多种不同底层网络之上。
             <strong>速记：</strong>中间统一用 IP，上层多种应用，下层多种接入。</p>
           
+          <h4>进一步理解 TCP/IP 的工程特点</h4>
           <ul>
             <li><strong>免费开放</strong>：协议标准完全开放，可以供普通用户和相关厂商自由、免费使用；</li>
             <li><strong>平台无关</strong>：可在任意硬件平台和操作系统环境中运行；</li>
