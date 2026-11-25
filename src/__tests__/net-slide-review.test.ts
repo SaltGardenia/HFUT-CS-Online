@@ -94,6 +94,28 @@ describe('2025 计网课件主线', () => {
       expect((html.match(/data-source-highlight="true"/g)??[]).length).toBe(originalHighlightTargets[n].length);
     }
   });
+  it('八章文字结构图均转为具备可访问说明的SVG，保留原始计算和报文代码', () => {
+    let count=0;
+    for(const original of netChapters){
+      const {chapter}=buildSlideReview(original);
+      const html=chapter.sections.flatMap(s=>s.blocks).filter(b=>b.type==='html').map(b=>b.html).join('');
+      const figures=[...html.matchAll(/<figure class="fig net-review-diagram" data-review-diagram="([^"]+)"[\s\S]*?<\/figure>/g)];
+      expect(figures.length,original.title).toBeGreaterThan(0);
+      for(const fig of figures){
+        expect(fig[0]).toContain('<svg');
+        expect(fig[0]).toContain('role="img"');
+        expect(fig[0]).toContain('<desc>');
+        expect(fig[0]).toContain('<figcaption>');
+      }
+      count+=figures.length;
+      expect(new Set(figures.map(f=>f[1])).size).toBe(figures.length);
+    }
+    expect(count).toBe(55);
+    const ch4=buildSlideReview(netChapters[3]).chapter.sections.find(s=>s.id==='sec-ch4-src-crc')!;
+    expect(ch4.blocks.filter(b=>b.type==='html').map(b=>b.html).join('')).toContain('<pre>1100110000');
+    const ch8=buildSlideReview(netChapters[7]).chapter.sections.find(s=>s.id==='sec-ch8-src-message')!;
+    expect(ch8.blocks.filter(b=>b.type==='html').map(b=>b.html).join('')).toContain('<pre>GET /index.html HTTP/1.1');
+  });
   it('全部课程作业仍可在主线定位且题目锚点不变', () => {
     for (const [i, original] of netChapters.entries()) {
       const no = i + 1;
