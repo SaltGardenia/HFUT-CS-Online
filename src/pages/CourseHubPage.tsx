@@ -61,8 +61,8 @@ function CountUp({ value }: { value: number }) {
 }
 
 /**
- * 访问量一行：数据在路上时先摆一条骨架占住数字槽；结果到达后骨架退场，
- * 数字接着从 0 数到终值。行盒始终由 <b> 决定，所以账目栏不会因为数字晚到而上下跳。
+ * 访问量一行：数据在路上时只占住数字槽（不画任何色块），结果到达后数字从 0 数到终值。
+ * 行盒始终由 <b> 决定，所以账目栏不会因为数字晚到而上下跳。
  */
 function VisitStat({
   label,
@@ -70,36 +70,25 @@ function VisitStat({
   group,
 }: {
   label: string;
-  /** null：请求还没回来（显示骨架）；数字：从 0 数到位 */
+  /** null：请求还没回来（空出数字槽）；数字：从 0 数到位 */
   value: number | null | undefined;
   group?: boolean;
 }) {
-  const reduced = useReducedMotion();
-
   return (
     <div className={group ? 'hub-stat hub-stat-group' : 'hub-stat'}>
       <span className="hub-stat-k">{label}</span>
       <span className="hub-stat-leader" aria-hidden="true" />
       <span className="hub-stat-v">
-        <AnimatePresence initial={false}>
-          {value == null ? (
-            // 骨架也用 <b>：字体行盒与数字完全一致，占位期和到位后行高不变
-            <motion.b
-              key="skeleton"
-              className="hub-stat-skel"
-              aria-hidden="true"
-              exit={reduced ? { opacity: 0 } : { opacity: 0, scaleX: 0.9 }}
-              // 骨架退得快一点：数位要动近一秒，横条不能陪着糊在那儿
-              transition={reduced ? { duration: 0.15 } : { duration: 0.22, ease: 'easeOut' }}
-            >
-              &#8203;
-            </motion.b>
-          ) : (
-            <b key="value">
-              <CountUp value={value} />
-            </b>
-          )}
-        </AnimatePresence>
+        {/* 占位也用 <b>：字体行盒与数字完全一致，占位期和到位后行高、行位都不变 */}
+        {value == null ? (
+          <b className="hub-stat-pad" aria-hidden="true">
+            &#8203;
+          </b>
+        ) : (
+          <b>
+            <CountUp value={value} />
+          </b>
+        )}
       </span>
     </div>
   );

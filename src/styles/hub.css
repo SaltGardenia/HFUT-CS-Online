@@ -235,7 +235,7 @@
   color: var(--ink);
 }
 
-/* 访问量的数字槽：骨架与数字叠在同一格里交叉淡入。
+/* 访问量的数字槽：占位与数字都落在同一格里。
    两者都是 <b>，行盒同高，所以数字晚到也不会挤动账目栏。 */
 .hub-hero-stats .hub-stat-v {
   flex: none;
@@ -245,35 +245,10 @@
 .hub-hero-stats .hub-stat-v > * {
   grid-area: 1 / 1;
 }
-/* 骨架：一条呼吸的细横条（字色透明，只画中间那条），提示计数还在路上 */
-.hub-hero-stats .hub-stat b.hub-stat-skel {
+/* 占位只占住数字的宽高（字色透明、不画任何底色），等计数回来直接换数字 */
+.hub-hero-stats .hub-stat b.hub-stat-pad {
   width: 46px;
   color: transparent;
-  /* 退场时向右收，像把位置让给右边的数字 */
-  transform-origin: right center;
-  background-image: linear-gradient(
-    color-mix(in srgb, var(--ink) 16%, transparent),
-    color-mix(in srgb, var(--ink) 16%, transparent)
-  );
-  background-size: 100% 13px;
-  background-position: center;
-  background-repeat: no-repeat;
-  animation: hub-stat-breathe 1.2s ease-in-out infinite;
-}
-@keyframes hub-stat-breathe {
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hub-hero-stats .hub-stat b.hub-stat-skel {
-    animation: none;
-    opacity: 0.7;
-  }
 }
 
 /* 名册：细线 + 头像 + 招呼，收住整页 */
