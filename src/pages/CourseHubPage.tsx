@@ -37,10 +37,10 @@ const CONTRIB_LINKS: Record<string, string> = {
 };
 
 /**
- * 账目里的数字：从 0 数到终值，和整块淡入一起「落定」，不要一上来就是死数。
- * 整栏共用同一节奏（0.9s、同一条缓动），访问量到位时也走这里。
+ * 账目里的数字：从 0 数到终值——数字是「数出来」的，不做淡入/上移那套入场，
+ * 免得和数数叠成两个动画。整栏共用同一节奏（0.9s、同一条缓动）。
  */
-function CountUp({ value, delay = 0 }: { value: number; delay?: number }) {
+function CountUp({ value }: { value: number }) {
   const reduced = useReducedMotion();
   const [shown, setShown] = useState(() => (reduced ? value : 0));
 
@@ -51,20 +51,18 @@ function CountUp({ value, delay = 0 }: { value: number; delay?: number }) {
     }
     const controls = animate(0, value, {
       duration: 0.9,
-      delay,
       ease: [0.25, 0.1, 0.25, 1],
       onUpdate: (v) => setShown(Math.round(v)),
     });
     return () => controls.stop();
-  }, [value, delay, reduced]);
+  }, [value, reduced]);
 
   return <>{shown}</>;
 }
 
 /**
  * 访问量一行：数据在路上时先摆一条骨架占住数字槽；结果到达后骨架退场，
- * 数字淡入的同时从 0 数到终值——数字是「数出来」的而不是「换上去」的，
- * 交接才有连续感。行盒始终由 <b> 决定，所以账目栏不会因为数字晚到而上下跳。
+ * 数字接着从 0 数到终值。行盒始终由 <b> 决定，所以账目栏不会因为数字晚到而上下跳。
  */
 function VisitStat({
   label,
@@ -72,7 +70,7 @@ function VisitStat({
   group,
 }: {
   label: string;
-  /** null：请求还没回来（显示骨架）；数字：淡入并数到位 */
+  /** null：请求还没回来（显示骨架）；数字：从 0 数到位 */
   value: number | null | undefined;
   group?: boolean;
 }) {
@@ -90,8 +88,6 @@ function VisitStat({
               key="skeleton"
               className="hub-stat-skel"
               aria-hidden="true"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
               exit={reduced ? { opacity: 0 } : { opacity: 0, scaleX: 0.9 }}
               // 骨架退得快一点：数位要动近一秒，横条不能陪着糊在那儿
               transition={reduced ? { duration: 0.15 } : { duration: 0.22, ease: 'easeOut' }}
@@ -99,17 +95,9 @@ function VisitStat({
               &#8203;
             </motion.b>
           ) : (
-            <motion.b
-              key="value"
-              // 数位自己会动近一秒，淡入只负责把「换上去」那一下藏住
-              initial={reduced ? { opacity: 0 } : { opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={
-                reduced ? { duration: 0.2, ease: 'easeOut' } : { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }
-              }
-            >
+            <b key="value">
               <CountUp value={value} />
-            </motion.b>
+            </b>
           )}
         </AnimatePresence>
       </span>
@@ -352,40 +340,40 @@ export default function CourseHubPage() {
             </motion.div>
           </div>
           {/* 馆藏账目：标签在左、数目右对齐，虚点引导——目录卡的记数方式 */}
-          <motion.div className="hub-hero-stats" {...rise(0.18)}>
+          <div className="hub-hero-stats">
             <div className="hub-stat">
               <span className="hub-stat-k">学期</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.semesters} delay={0.2} />
+                <CountUp value={stats.semesters} />
               </b>
             </div>
             <div className="hub-stat">
               <span className="hub-stat-k">门课程</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.courses} delay={0.2} />
+                <CountUp value={stats.courses} />
               </b>
             </div>
             <div className="hub-stat hub-stat-group">
               <span className="hub-stat-k">份文件</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.files} delay={0.2} />
+                <CountUp value={stats.files} />
               </b>
             </div>
             <div className="hub-stat">
               <span className="hub-stat-k">份课件</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.courseware} delay={0.2} />
+                <CountUp value={stats.courseware} />
               </b>
             </div>
             <div className="hub-stat">
               <span className="hub-stat-k">份试题</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.exams} delay={0.2} />
+                <CountUp value={stats.exams} />
               </b>
             </div>
             {visits.enabled && (visits.pending || visits.visits) && (
@@ -394,7 +382,7 @@ export default function CourseHubPage() {
                 <VisitStat label="今日访问量" value={visits.visits?.today} />
               </>
             )}
-          </motion.div>
+          </div>
         </div>
         {/* 名册：一条细线收住整页，贡献者在左，招呼在右 */}
         <motion.div className="hub-hero-foot" {...rise(0.24)}>
