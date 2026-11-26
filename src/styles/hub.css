@@ -245,10 +245,9 @@
 .hub-hero-stats .hub-stat-v > * {
   grid-area: 1 / 1;
 }
-/* 占位只占住数字的宽高（字色透明、不画任何底色），等计数回来直接换数字 */
-.hub-hero-stats .hub-stat b.hub-stat-pad {
-  width: 46px;
-  color: transparent;
+/* 等访问量回来时数字先隐身（行盒还在，布局不动），到齐后整栏一起露面、一起数 */
+.hub-hero-stats.is-waiting b {
+  visibility: hidden;
 }
 
 /* 名册：细线 + 头像 + 招呼，收住整页 */

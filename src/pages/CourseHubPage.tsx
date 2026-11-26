@@ -37,10 +37,11 @@ const CONTRIB_LINKS: Record<string, string> = {
 };
 
 /**
- * 账目里的数字：从 0 数到终值——数字是「数出来」的，不做淡入/上移那套入场，
- * 免得和数数叠成两个动画。整栏共用同一节奏（0.9s、同一条缓动）。
+ * 账目里的数字：整栏同时开数——等访问量回来（或判定拿不到）后一起从 0 数到终值，
+ * 不做淡入/上移那套入场，免得和数数叠成两个动画。开数前只留一个零宽占位，
+ * 保证行高不变。
  */
-function CountUp({ value }: { value: number }) {
+function CountUp({ value, started }: { value: number; started: boolean }) {
   const reduced = useReducedMotion();
   const [shown, setShown] = useState(() => (reduced ? value : 0));
 
@@ -49,29 +50,35 @@ function CountUp({ value }: { value: number }) {
       setShown(value);
       return;
     }
+    if (!started) {
+      setShown(0);
+      return;
+    }
     const controls = animate(0, value, {
       duration: 0.9,
       ease: [0.25, 0.1, 0.25, 1],
       onUpdate: (v) => setShown(Math.round(v)),
     });
     return () => controls.stop();
-  }, [value, reduced]);
+  }, [value, started, reduced]);
 
   return <>{shown}</>;
 }
 
 /**
- * 访问量一行：数据在路上时只占住数字槽（不画任何色块），结果到达后数字从 0 数到终值。
- * 行盒始终由 <b> 决定，所以账目栏不会因为数字晚到而上下跳。
+ * 访问量一行：数据在路上时只占住数字槽（不画任何色块），
+ * 数据到达和其余数字一起开数。行盒始终由 <b> 决定，账目栏不会上下跳。
  */
 function VisitStat({
   label,
   value,
+  started,
   group,
 }: {
   label: string;
   /** null：请求还没回来（空出数字槽）；数字：从 0 数到位 */
   value: number | null | undefined;
+  started: boolean;
   group?: boolean;
 }) {
   return (
@@ -81,12 +88,10 @@ function VisitStat({
       <span className="hub-stat-v">
         {/* 占位也用 <b>：字体行盒与数字完全一致，占位期和到位后行高、行位都不变 */}
         {value == null ? (
-          <b className="hub-stat-pad" aria-hidden="true">
-            &#8203;
-          </b>
+          <b aria-hidden="true">&#8203;</b>
         ) : (
           <b>
-            <CountUp value={value} />
+            <CountUp value={value} started={started} />
           </b>
         )}
       </span>
@@ -103,8 +108,20 @@ export default function CourseHubPage() {
   const recentNames = useRecentCourses();
   // 收藏的课程（收藏先后序）；卡片星标与合并展示区共用
   const favs = useFavoriteCourses();
-  // 站点访问量（Supabase 计数；请求未到时先占位，失败则不渲染）
+  // 站点访问量（Supabase 计数；请求未到时先空出槽位，失败则不渲染）
   const visits = useSiteVisits();
+  // 账目统一开数：等访问量回来（或确认拿不到）后整栏一起从 0 数。
+  // 请求特别慢时最多等 3s，宁可让这两项晚到，也不让整栏一直空着。
+  const [ledgerStarted, setLedgerStarted] = useState(!visits.pending);
+  useEffect(() => {
+    if (ledgerStarted) return;
+    if (!visits.pending) {
+      setLedgerStarted(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setLedgerStarted(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [ledgerStarted, visits.pending]);
 
   // 置顶按钮：滚过约一屏内容后出现（rAF 节流，与在线练习页同款）
   const [showTop, setShowTop] = useState(false);
@@ -328,47 +345,49 @@ export default function CourseHubPage() {
               </button>
             </motion.div>
           </div>
-          {/* 馆藏账目：标签在左、数目右对齐，虚点引导——目录卡的记数方式 */}
-          <div className="hub-hero-stats">
+          {/* 馆藏账目：标签在左、数目右对齐，虚点引导——目录卡的记数方式。
+              开数前只露标签与虚点（数字隐身），等访问量回来（或确认拿不到）后
+              整栏数字一起出现、一起数。 */}
+          <div className={`hub-hero-stats${ledgerStarted || reduced ? '' : ' is-waiting'}`}>
             <div className="hub-stat">
               <span className="hub-stat-k">学期</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.semesters} />
+                <CountUp value={stats.semesters} started={ledgerStarted} />
               </b>
             </div>
             <div className="hub-stat">
               <span className="hub-stat-k">门课程</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.courses} />
+                <CountUp value={stats.courses} started={ledgerStarted} />
               </b>
             </div>
             <div className="hub-stat hub-stat-group">
               <span className="hub-stat-k">份文件</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.files} />
+                <CountUp value={stats.files} started={ledgerStarted} />
               </b>
             </div>
             <div className="hub-stat">
               <span className="hub-stat-k">份课件</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.courseware} />
+                <CountUp value={stats.courseware} started={ledgerStarted} />
               </b>
             </div>
             <div className="hub-stat">
               <span className="hub-stat-k">份试题</span>
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>
-                <CountUp value={stats.exams} />
+                <CountUp value={stats.exams} started={ledgerStarted} />
               </b>
             </div>
             {visits.enabled && (visits.pending || visits.visits) && (
               <>
-                <VisitStat label="累计访问量" value={visits.visits?.total} group />
-                <VisitStat label="今日访问量" value={visits.visits?.today} />
+                <VisitStat label="累计访问量" value={visits.visits?.total} started={ledgerStarted} group />
+                <VisitStat label="今日访问量" value={visits.visits?.today} started={ledgerStarted} />
               </>
             )}
           </div>

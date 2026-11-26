@@ -58,6 +58,9 @@ export async function requestSiteVisit(
   visitor = visitorId(),
   session = visitSessionId(),
 ): Promise<SiteVisits | null> {
+  // 首页整栏数字都在等这次上报：请求挂住也要有个头，超时就当拿不到
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
   try {
     const res = await fetch(`${url}/rest/v1/rpc/record_site_visit`, {
       method: 'POST',
@@ -69,6 +72,7 @@ export async function requestSiteVisit(
       body: JSON.stringify({ p_visitor: visitor, p_session: session }),
       // 用户可能上报后立刻关页；keepalive 让请求有机会完成
       keepalive: true,
+      signal: controller.signal,
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { total?: unknown; today?: unknown };
@@ -78,6 +82,8 @@ export async function requestSiteVisit(
     return { total, today };
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
