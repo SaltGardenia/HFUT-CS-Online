@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { courses } from '../courses/registry';
 import { useToc } from '../lib/toc';
@@ -76,14 +76,6 @@ function formatFileSource(node: AttNode): string {
 
 /** 与类别同名的顶层目录（课件/课件）拍平到类别下，避免组头与目录重名 */
 const flattenCats = (m: AttManifest) => m.cats.map((c) => ({ name: c.name, tree: c.tree.flatMap((t) => (t.c && t.n === c.name ? t.c : [t])) }));
-
-/** 树按当前展开集摊平成可见行（深度随层级递增），保持清单原有的「目录在前、名称排序」 */
-const visibleRows = (nodes: AttNode[], open: Set<string>, depth: number, out: { node: AttNode; depth: number }[]) => {
-  for (const n of nodes) {
-    out.push({ node: n, depth });
-    if (n.c && open.has(n.p)) visibleRows(n.c, open, depth + 1, out);
-  }
-};
 
 /**
  * 课程附件页 —— 所有课程共用的「附件」导航页。
@@ -185,8 +177,70 @@ export default function CourseAttachmentsPage() {
   const cats = manifest ? flattenCats(manifest) : [];
   const total = manifest ? countFiles(manifest.cats.reduce<AttNode[]>((a, c) => a.concat(c.tree), [])) : 0;
 
-  /** 行内缩进：类别卡内基础 16px，每层 +22px */
-  const indent = (depth: number) => ({ paddingLeft: 16 + depth * 22 });
+  /**
+   * 递归渲染一层清单。目录行一律占满整行当分组头，展开后的子项落在跟随其后的缩进块里，
+   * 缩进块同样占满整行——展开/收起只会把后面的内容往下推，任何文件都不会在两栏之间换位置。
+   * depth 从 1 起：手机上第 5 层起不再加缩进（.att-children[data-deep]），深目录不把文件名挤没。
+   */
+  const renderRows = (nodes: AttNode[], depth: number): ReactNode => (
+    <div className="att-rows">
+      {nodes.map((node) => {
+        if (!node.c) {
+          return (
+            <div key={node.p} className="att-row att-row-file">
+              <div className="att-row-main">
+                <span className="att-row-name" title={node.n}>
+                  {node.n}
+                </span>
+                <span className="att-row-path">
+                  {node.s == null ? '' : fmtSize(node.s)}
+                  {formatFileSource(node)}
+                </span>
+              </div>
+              {node.r ? (
+                <button type="button" className="btn att-dl" disabled={pending === node.p} onClick={() => download(node)}>
+                  {pending === node.p ? '下载中…' : '下载'}
+                </button>
+              ) : (
+                <button type="button" className="btn att-dl" disabled title="该文件未溯源到上游仓库">
+                  下载
+                </button>
+              )}
+            </div>
+          );
+        }
+        const open = openDirs.has(node.p);
+        return (
+          <Fragment key={node.p}>
+            <div className={`att-row att-row-dir${open ? ' open' : ''}`}>
+              <button type="button" className="att-dir-btn" aria-expanded={open} onClick={() => toggleDir(node.p)}>
+                <span className="att-caret" aria-hidden>
+                  ▸
+                </span>
+                <span className="att-row-name" title={node.n}>
+                  {node.n}
+                </span>
+                <span className="att-row-path">
+                  {countFiles(node.c)} 份文件
+                  {formatDirSource(node)}
+                </span>
+              </button>
+              {node.r && (
+                <a className="btn att-dl att-jump" href={treeUrl(node)} target="_blank" rel="noreferrer" title="在上游仓库打开该目录">
+                  仓库 ↗
+                </a>
+              )}
+            </div>
+            {open && (
+              <div className="att-children" data-deep={depth > 4 ? '' : undefined}>
+                {renderRows(node.c, depth + 1)}
+              </div>
+            )}
+          </Fragment>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="page att-page">
@@ -208,70 +262,17 @@ export default function CourseAttachmentsPage() {
 
       {!loading && manifest && (
         <div className="att-list">
-          {cats.map((cat) => {
-            if (cat.tree.length === 0) return null;
-            const rows: { node: AttNode; depth: number }[] = [];
-            visibleRows(cat.tree, openDirs, 0, rows);
-            return (
+          {cats.map((cat) =>
+            cat.tree.length === 0 ? null : (
               <section key={cat.name} className="att-cat material">
                 <p className="att-cat-h">
                   {cat.name}
                   <span className="att-cat-count">{countFiles(cat.tree)}</span>
                 </p>
-                <div className="att-rows">
-                  {rows.map(({ node, depth }) =>
-                    node.c ? (
-                      <div key={node.p} className="att-row att-row-dir" style={indent(depth)}>
-                        <button
-                          type="button"
-                          className="att-dir-btn"
-                          aria-expanded={openDirs.has(node.p)}
-                          onClick={() => toggleDir(node.p)}
-                        >
-                          <span className="att-caret" aria-hidden>
-                            ▸
-                          </span>
-                          <span className="att-row-name" title={node.n}>
-                            {node.n}
-                          </span>
-                          <span className="att-row-path">
-                            {countFiles(node.c)} 份文件
-                            {formatDirSource(node)}
-                          </span>
-                        </button>
-                        {node.r && (
-                          <a className="btn att-dl att-jump" href={treeUrl(node)} target="_blank" rel="noreferrer" title="在上游仓库打开该目录">
-                            仓库 ↗
-                          </a>
-                        )}
-                      </div>
-                    ) : (
-                      <div key={node.p} className="att-row att-row-file" style={indent(depth)}>
-                        <div className="att-row-main">
-                          <span className="att-row-name" title={node.n}>
-                            {node.n}
-                          </span>
-                          <span className="att-row-path">
-                            {node.s == null ? '' : fmtSize(node.s)}
-                            {formatFileSource(node)}
-                          </span>
-                        </div>
-                        {node.r ? (
-                          <button type="button" className="btn att-dl" disabled={pending === node.p} onClick={() => download(node)}>
-                            {pending === node.p ? '下载中…' : '下载'}
-                          </button>
-                        ) : (
-                          <button type="button" className="btn att-dl" disabled title="该文件未溯源到上游仓库">
-                            下载
-                          </button>
-                        )}
-                      </div>
-                    ),
-                  )}
-                </div>
+                {renderRows(cat.tree, 1)}
               </section>
-            );
-          })}
+            ),
+          )}
         </div>
       )}
     </div>

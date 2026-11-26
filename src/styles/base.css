@@ -3752,20 +3752,43 @@ pre.code .cl-code:empty + .cl-com {
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--deck-accent);
-  border-bottom: 1px solid var(--hairline-soft);
 }
 .att-cat-count {
   font-size: 0.6875rem;
   color: var(--ink-3);
+}
+/* 行清单：文件行两栏并排（窄屏一栏），目录行整行当分组头。
+   展开的目录把子项放进紧跟其后的缩进块（.att-children 同样占满整行），
+   于是展开/收起只会把后面的内容往下推，文件不会在两栏之间换位置。 */
+.att-rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .att-row {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-}
-.att-row + .att-row {
   border-top: 1px solid var(--hairline-soft);
+}
+/* 目录行与子级块都占满整行，是「展开不换栏」的前提 */
+.att-row-dir,
+.att-children {
+  grid-column: 1 / -1;
+}
+/* 子级块：整块右缩进并挂一条竖线，层级一眼可辨 */
+.att-children {
+  position: relative;
+  padding-left: 18px;
+}
+.att-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  width: 1px;
+  background: var(--hairline-soft);
 }
 .att-row-main {
   flex: 1;
@@ -3796,7 +3819,7 @@ pre.code .cl-code:empty + .cl-com {
 .att-dl {
   flex-shrink: 0;
 }
-/* 目录行：整体按钮折叠展开，单一来源目录右侧带仓库跳转链接 */
+/* 目录行：整行当分组头，名称、份数与来源同一行，右侧带仓库跳转链接 */
 .att-dir-btn {
   flex: 1;
   min-width: 0;
@@ -3833,6 +3856,10 @@ pre.code .cl-code:empty + .cl-com {
   text-align: center;
 }
 @media (max-width: 640px) {
+  /* 手机一栏：文件行单列，目录分组头行为不变 */
+  .att-rows {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .att-row {
     flex-wrap: wrap;
     gap: 8px;
@@ -3840,7 +3867,21 @@ pre.code .cl-code:empty + .cl-com {
   .att-dl {
     margin-left: auto;
   }
-  /* 目录行：仓名独占第一行，文件数/来源折到第二行，320px 下不再只剩一个字 */
+  /* 手机端第 5 层起停止缩进（.att-children[data-deep]），深目录不再把文件名挤成一个字 */
+  .att-children {
+    padding-left: 10px;
+  }
+  .att-children::before {
+    left: 4px;
+  }
+  /* 名字区太窄时让按钮换到下一行，而不是把文件名挤成一个字 */
+  .att-children[data-deep] {
+    padding-left: 0;
+  }
+  .att-children[data-deep]::before {
+    display: none;
+  }
+  /* 目录头：名称独占第一行，份数/来源折到第二行，320px 下不再只剩一个字 */
   .att-dir-btn {
     flex-wrap: wrap;
     row-gap: 2px;
