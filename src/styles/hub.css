@@ -249,6 +249,8 @@
 .hub-hero-stats .hub-stat b.hub-stat-skel {
   width: 46px;
   color: transparent;
+  /* 退场时向右收，像把位置让给右边的数字 */
+  transform-origin: right center;
   background-image: linear-gradient(
     color-mix(in srgb, var(--ink) 16%, transparent),
     color-mix(in srgb, var(--ink) 16%, transparent)
