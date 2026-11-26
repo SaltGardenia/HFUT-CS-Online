@@ -219,7 +219,8 @@
   gap: 14px 44px;
   margin-top: 52px;
 }
-/* 手机：3+2 网格，避免 4+1 折行把最后一个统计孤行居中 */
+/* 手机：默认 3+2 网格，避免 4+1 折行把最后一个统计孤行居中；
+   访问量两项到位后是 7 项，改为 4+3，不再留下孤行。 */
 @media (max-width: 480px) {
   .hub-hero-stats {
     display: grid;
@@ -227,6 +228,10 @@
     justify-content: center;
     justify-items: center;
     gap: 16px 36px;
+  }
+  .hub-hero-stats:has(> .hub-stat:nth-child(7)) {
+    grid-template-columns: repeat(4, auto);
+    gap: 16px 18px;
   }
 }
 .hub-stat {

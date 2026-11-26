@@ -5,6 +5,7 @@ import { catalog } from '../content/catalog';
 import { courses, findCourseByName, STUB_BASE } from '../courses/registry';
 import SiteHeader from '../components/SiteHeader';
 import { useFavoriteCourses, useRecentCourses } from '../lib/sync';
+import { useSiteVisits } from '../lib/visits';
 import { contributors } from '../content/contributors';
 import ContactCard from '../components/ContactCard';
 import { IconChevronDown, IconChevronUp, IconGitHub, IconStar } from '../components/icons';
@@ -43,6 +44,8 @@ export default function CourseHubPage() {
   const recentNames = useRecentCourses();
   // 收藏的课程（收藏先后序）；卡片星标与合并展示区共用
   const favs = useFavoriteCourses();
+  // 站点访问量（Supabase 计数；数据库未就绪时不渲染）
+  const visits = useSiteVisits();
 
   // 置顶按钮：滚过约一屏内容后出现（rAF 节流，与在线练习页同款）
   const [showTop, setShowTop] = useState(false);
@@ -269,6 +272,12 @@ export default function CourseHubPage() {
           <div className="hub-stat"><b>{stats.files}</b><span>份文件</span></div>
           <div className="hub-stat"><b>{stats.courseware}</b><span>份课件</span></div>
           <div className="hub-stat"><b>{stats.exams}</b><span>份试题</span></div>
+          {visits && (
+            <>
+              <div className="hub-stat"><b>{visits.total}</b><span>累计访问量</span></div>
+              <div className="hub-stat"><b>{visits.today}</b><span>今日访问量</span></div>
+            </>
+          )}
         </motion.div>
         <motion.div className="hub-hero-contribs" {...rise(0.22)}>
           {contributors.length > 0 && (

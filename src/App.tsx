@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import CourseHubPage from './pages/CourseHubPage';
 import CourseStubPage from './pages/CourseStubPage';
+import { recordSiteVisit } from './lib/visits';
 import { ALGO_BASE, OS_BASE, NET_BASE, PAT_BASE, AI_BASE, SA_BASE, PHYS_BASE, CA_BASE, MATH_BASE, PD_BASE, NCD_BASE, NAP_BASE, HD_BASE, MC_BASE, NLU_BASE, OSCD_BASE, CPD_BASE, NTR_BASE, CV_BASE, SPM_BASE, BD_BASE, CAP_BASE, AIE_BASE, SEC_BASE, DB_BASE, SE_BASE, ST_BASE, DP_BASE, SWT_BASE, DSD_BASE, IP_BASE, PY_BASE, DM_BASE, CM_BASE, PROB_BASE, ASM_BASE, EDA_BASE, RES_BASE, PHYS_LAB_BASE, JAVA_BASE, DL_BASE, ROBOT_BASE, DS_BASE, DSCD_BASE, LA_BASE, EE_BASE } from './courses/registry';
 import { ErrataProvider } from './lib/errata/context';
 
@@ -66,6 +67,11 @@ function LegacyDeckRedirect() {
  * 每门课程是自包含布局（自带导航栏），在这里以一条 Route 接入。
  */
 export default function App() {
+  // 每次打开站点上报一次访问（首页数字行展示累计/今日访问量；未配置数据库时静默跳过）
+  useEffect(() => {
+    void recordSiteVisit();
+  }, []);
+
   return (
     <>
       {/* 双色光晕背景：全站最底层，首页/课程页共用（CSS 在 base.css） */}

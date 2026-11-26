@@ -8,11 +8,14 @@
 --   user_favorites  课程收藏（按课程一行，favorited=false 为取消收藏墓碑）
 --   user_recent     最近查看（按课程一行，取最大 viewed_at）
 --   user_reading    阅读进度（按页面一行，记录滚动位置与百分比）
+--   site_visits     首页访问计数（按访客 + 会话 + 日期去重，匿名可上报、不可直接读写）
 --
 -- 安全
 --   * 所有表启用 RLS，只允许 auth.uid() = user_id 的读写；
 --   * 前端只使用 Publishable Key，Service Role Key 不要出现在任何前端环境变量里；
---   * sync_push 为 security invoker，函数内仍受 RLS 约束。
+--   * sync_push 为 security invoker，函数内仍受 RLS 约束；
+--   * site_visits 只通过 security definer 的 record_site_visit 写入与读取。}
+
 -- ============================================================================
 
 -- ---------------------------------------------------------------- profiles
@@ -202,6 +205,52 @@ create policy "reading delete own"
   on public.user_reading for delete to authenticated
   using (auth.uid() = user_id);
 
+-- -------------------------------------------------------------- 访问统计
+-- 每行 = 一个访客的一次会话（同一天内同一会话只记一次），用于首页「累计/今日访问量」。
+-- 匿名访客不能直接读写本表，只能调用 record_site_visit() 上报并取回计数。
+create table if not exists public.site_visits (
+  visitor text not null,
+  session text not null,
+  visited_day date not null default ((now() at time zone 'Asia/Shanghai')::date),
+  visited_at timestamptz not null default now(),
+  primary key (visitor, session, visited_day)
+);
+
+create index if not exists site_visits_day_idx on public.site_visits (visited_day);
+
+alter table public.site_visits enable row level security;
+
+-- 只允许 security definer 函数访问；service_role 仍可在 Dashboard/后台查询。
+revoke all on public.site_visits from public, anon, authenticated;
+
+-- 上报一次访问并返回累计/今日计数。非法标识不写入，只返回当前计数。
+create or replace function public.record_site_visit(
+  p_visitor text default null,
+  p_session text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_day date := (now() at time zone 'Asia/Shanghai')::date;
+  v_total bigint;
+  v_today bigint;
+begin
+  if p_visitor ~ '^[A-Za-z0-9_-]{8,64}$' and p_session ~ '^[A-Za-z0-9_-]{8,64}$' then
+    insert into public.site_visits (visitor, session, visited_day)
+    values (p_visitor, p_session, v_day)
+    on conflict (visitor, session, visited_day) do nothing;
+  end if;
+
+  select count(*) into v_total from public.site_visits;
+  select count(*) into v_today from public.site_visits where visited_day = v_day;
+
+  return jsonb_build_object('total', v_total, 'today', v_today);
+end;
+$$;
+
 -- --------------------------------------------------------------- 批量同步
 -- 一次请求上传全部脏数据。冲突规则：updated_at 更新者胜；同一毫秒时保留云端。
 -- 函数以调用者身份执行（security invoker），越权写会被 RLS 拒绝。
@@ -344,6 +393,10 @@ grant execute on function public.sync_push(jsonb, jsonb, jsonb) to authenticated
 revoke all on function public.sync_push_reading(jsonb) from public;
 revoke all on function public.sync_push_reading(jsonb) from anon;
 grant execute on function public.sync_push_reading(jsonb) to authenticated;
+
+-- 访问统计：游客也要能上报，所以匿名角色可执行；表本身仍不开放直接访问。
+revoke all on function public.record_site_visit(text, text) from public;
+grant execute on function public.record_site_visit(text, text) to anon, authenticated;
 
 -- 可选：实时订阅（跨设备即时刷新，当前前端按「回到前台拉取」处理，无需开启）
 -- alter publication supabase_realtime add table public.user_progress;
