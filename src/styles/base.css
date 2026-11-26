@@ -320,9 +320,9 @@ button {
   text-decoration: none;
   transition: color 140ms var(--press-ease), transform 100ms var(--press-ease);
 }
+/* hover 不再铺色底：全场只有一枚指示器（白色药丸），悬停时它滑到鼠标所在的页签 */
 .deck-tab:hover {
   color: var(--ink);
-  background: var(--pressed);
 }
 .deck-tab:active {
   transform: scale(0.94);
@@ -332,6 +332,7 @@ button {
   z-index: 1;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  transition: color 140ms var(--press-ease);
 }
 .deck-tab-pill {
   position: absolute;
@@ -339,7 +340,8 @@ button {
   border-radius: 999px;
   background: var(--selected);
 }
-.deck-tab.active .deck-tab-no {
+/* 指示器所在的页签（当前页签或悬停页签）统一用主色加粗，避免「药丸 + 文字高亮」两处指示 */
+.deck-tab.has-pill .deck-tab-no {
   color: var(--deck-accent);
   font-weight: 700;
 }

@@ -48,43 +48,76 @@ interface Props {
   onOpenSidebar: () => void;
 }
 
+/** 指示器：全场只有一枚，靠 layoutId 在页签之间滑动 */
+function TabPill({ reduced }: { reduced: boolean | null }) {
+  return (
+    <motion.span
+      className="deck-tab-pill"
+      layoutId="deck-tab-pill"
+      transition={reduced ? { duration: 0 } : { type: 'tween', duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+    />
+  );
+}
+
 /** 顶栏中部的课程导航：一项对应一页，线性排列无回环 */
 function SiteTabs({ tabs }: { tabs: CourseTab[] }) {
   const reduced = useReducedMotion();
+  // 指示器只有一个：默认停在当前页签，鼠标悬浮时跟到悬停的页签，移出导航后滑回当前页签
+  const [hoverTo, setHoverTo] = useState<string | null>(null);
+  const hovered = hoverTo && tabs.some((t) => t.to === hoverTo) ? hoverTo : null;
+  const pillTo = hovered ?? tabs.find((t) => t.active)?.to ?? null;
+
   return (
-    <nav className="deck-tabs nav-pill" aria-label="课程导航">
-      {tabs.map((t) =>
-        t.menu ? (
-          <TabGroup key={t.to} tab={t} reduced={reduced} />
+    <nav
+      className="deck-tabs nav-pill"
+      aria-label="课程导航"
+      onMouseLeave={() => setHoverTo(null)}
+    >
+      {tabs.map((t) => {
+        // 承载指示器的页签同时用主色高亮文字，保证「一个指示器」而不是「一枚药丸 + 一处高亮」
+        const hasPill = pillTo === t.to;
+        return t.menu ? (
+          <TabGroup
+            key={t.to}
+            tab={t}
+            reduced={reduced}
+            hasPill={hasPill}
+            onHover={() => setHoverTo(t.to)}
+          />
         ) : (
           <Link
             key={t.to}
             to={t.to}
-            className={`deck-tab${t.active ? ' active' : ''}${t.extra ? ' ' + t.extra : ''}`}
+            className={`deck-tab${t.active ? ' active' : ''}${hasPill ? ' has-pill' : ''}${t.extra ? ' ' + t.extra : ''}`}
             data-deck={t.key ?? undefined}
             data-title={t.tip}
             aria-current={t.active ? 'page' : undefined}
+            onMouseEnter={() => setHoverTo(t.to)}
           >
-            {t.active && (
-              <motion.span
-                className="deck-tab-pill"
-                layoutId="deck-tab-pill"
-                transition={reduced ? { duration: 0 } : { type: 'tween', duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              />
-            )}
+            {hasPill && <TabPill reduced={reduced} />}
             <span className="deck-tab-no">
               <span className="tab-full">{t.full}</span>
               <span className="tab-short">{t.short}</span>
             </span>
           </Link>
-        ),
-      )}
+        );
+      })}
     </nav>
   );
 }
 
 /** 单元分组按钮：悬停/点击展开讲次菜单（讲次较多的课程用，替代一长排 tab） */
-function TabGroup({ tab, reduced }: { tab: CourseTab; reduced: boolean | null }) {
+function TabGroup({
+  tab,
+  reduced,
+  hasPill,
+  onHover,
+}: {
+  tab: CourseTab;
+  reduced: boolean | null;
+  hasPill: boolean;
+  onHover: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -109,24 +142,21 @@ function TabGroup({ tab, reduced }: { tab: CourseTab; reduced: boolean | null })
     <div
       ref={ref}
       className="deck-tab-group"
-      onMouseEnter={() => setOpen(true)}
+      onMouseEnter={() => {
+        onHover();
+        setOpen(true);
+      }}
       onMouseLeave={() => setOpen(false)}
     >
       <button
         type="button"
-        className={`deck-tab${tab.active ? ' active' : ''}`}
+        className={`deck-tab${tab.active ? ' active' : ''}${hasPill ? ' has-pill' : ''}`}
         aria-haspopup="menu"
         aria-expanded={open}
         data-title={tab.tip}
         onClick={() => setOpen((o) => !o)}
       >
-        {tab.active && (
-          <motion.span
-            className="deck-tab-pill"
-            layoutId="deck-tab-pill"
-            transition={reduced ? { duration: 0 } : { type: 'tween', duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          />
-        )}
+        {hasPill && <TabPill reduced={reduced} />}
         <span className="deck-tab-no">
           <span className="tab-full">{tab.full}</span>
           <span className="tab-short">{tab.short}</span>
