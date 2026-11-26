@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.4.0 (2026-11-26)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### 新功能
+* feat(hub): 访问量数字晚到时先占位再淡入，首屏不再突然跳字 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/34
+* feat(attachments): 附件清单两栏排列，目录展开改为分组块 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/35
+
+
+**Full Changelog**: https://github.com/SaltGardenia/HFUT-CS-Online/compare/v2.3.0...v2.4.0
+
 ## 2.3.0 (2026-11-26)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
