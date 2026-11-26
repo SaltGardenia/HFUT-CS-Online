@@ -4,8 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { AI_BASE } from '../../courses/registry';
 import { aiPaper } from '../../content/ai';
 import PracticeCard from '../../components/practice/PracticeCard';
+import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
-import { useProgressStore } from '../../lib/sync';
+import { clearProgress, useProgressStore } from '../../lib/sync';
 
 /** 单卷进度存储 key（与算法课/计网课各自独立） */
 const AI_STORE_KEY = 'ai-practice-progress-v1';
@@ -140,6 +141,11 @@ export default function AiPracticePage() {
           <span>
             本卷进度：<span className="pq-frag">已查阅 <b>{done}</b> / {total} 题</span>
           </span>
+          <ClearProgress
+            done={done}
+            onClear={() => clearProgress(AI_STORE_KEY, aiPaper.questions.map((q) => q.id))}
+            tip="清空本卷的全部查阅记录？"
+          />
         </div>
         <div className="pq-progress-bar" role="progressbar" aria-valuenow={done} aria-valuemax={total}>
           <span style={{ width: `${(done / total) * 100}%` }} />

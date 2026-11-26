@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { IconX } from '../../components/icons';
+import ClearProgress from '../../components/practice/ClearProgress';
 import PracticeCard from '../../components/practice/PracticeCard';
 import { NET_BASE } from '../../courses/registry';
 import { netChapters } from '../../content/net';
@@ -42,7 +42,6 @@ export default function NetHomework({
 }) {
   const reducedMotion = useReducedMotion();
   const [results, setResults] = useState<HomeworkResults>(() => loadHomeworkResults());
-  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -51,15 +50,6 @@ export default function NetHomework({
       /* 浏览器拒绝本地存储时，保留当前页面的交互能力 */
     }
   }, [results]);
-
-  useEffect(() => {
-    if (!confirmOpen) return;
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setConfirmOpen(false);
-    };
-    window.addEventListener('keydown', onEscape);
-    return () => window.removeEventListener('keydown', onEscape);
-  }, [confirmOpen]);
 
   const onResult = (id: string, result: HomeworkResult | null) => setResults((previous) => {
     const next = { ...previous };
@@ -79,7 +69,6 @@ export default function NetHomework({
       questions.forEach((question) => delete next[homeworkId(chapterNo, question.no)]);
       return next;
     });
-    setConfirmOpen(false);
   };
 
   const jumpToQuestion = (no: number) =>
@@ -105,9 +94,12 @@ export default function NetHomework({
               <span className="pq-frag">已掌握 <b>{mastered}</b> 题</span> ·{' '}
               <span className="pq-frag">需复习 <b>{revisit}</b> 题</span>
             </span>
-            <button type="button" className="btn pq-danger" disabled={seen === 0} onClick={() => setConfirmOpen(true)}>
-              清空本章进度
-            </button>
+            <ClearProgress
+              done={seen}
+              onClear={clearChapter}
+              label="清空本章进度"
+              tip={`清空第 ${chapterNo} 章全部 ${questions.length} 道题的查看与自评记录？其他章节不受影响。`}
+            />
           </div>
           <div className="pq-progress-bar" role="progressbar"
             aria-label={`第${chapterNo}章作业已查看进度`}
@@ -165,32 +157,6 @@ export default function NetHomework({
           />
         );
       })}
-      <AnimatePresence>
-        {confirmOpen && (
-          <motion.div className="hub-modal-scrim"
-            initial={reducedMotion ? undefined : { opacity: 0 }} animate={{ opacity: 1 }}
-            exit={reducedMotion ? undefined : { opacity: 0 }} transition={{ duration: 0.16 }}
-            onClick={() => setConfirmOpen(false)}>
-            <motion.div className="hub-modal material" role="dialog" aria-modal="true"
-              aria-label="清空本章进度"
-              initial={reducedMotion ? undefined : { opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1 }} exit={reducedMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: 0.2 }} onClick={(event) => event.stopPropagation()}>
-              <div className="hub-modal-head">
-                <h2>清空本章进度</h2>
-                <button type="button" className="icon-btn" onClick={() => setConfirmOpen(false)} aria-label="关闭">
-                  <IconX size={16} />
-                </button>
-              </div>
-              <p className="hub-modal-tip">清空第 {chapterNo} 章全部 {questions.length} 道题的查看与自评记录？其他章节不受影响。</p>
-              <div className="hub-modal-actions">
-                <button type="button" className="btn" onClick={() => setConfirmOpen(false)}>取消</button>
-                <button type="button" className="btn pq-danger" onClick={clearChapter}>清空</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }

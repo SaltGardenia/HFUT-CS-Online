@@ -5,8 +5,9 @@ import { MATH_BASE } from '../courses/registry';
 import { mathPapers, MATH_KIND_LABEL, MATH_SECTIONS } from '../content/math';
 import type { MathPaper, MathQuizKind, MathTag } from '../content/math';
 import PracticeCard from '../components/practice/PracticeCard';
-import { IconChevronUp, IconX } from '../components/icons';
-import { useProgressStore } from '../lib/sync';
+import ClearProgress from '../components/practice/ClearProgress';
+import { IconChevronUp } from '../components/icons';
+import { clearProgress, useProgressStore } from '../lib/sync';
 
 /** 作答结果的持久化 key（高等数学课程独立于其它课程） */
 const STORE_KEY = 'math-practice-progress-v1';
@@ -32,17 +33,7 @@ function PaperInner({ paper }: { paper: MathPaper }) {
     () => KINDS.find((k) => paper.questions.some((q) => q.kind === k)) ?? 'fill',
   );
   const firstKindRun = useRef(true);
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const pendingJump = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!confirmOpen) return;
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') setConfirmOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [confirmOpen]);
 
   const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
 
@@ -222,9 +213,11 @@ function PaperInner({ paper }: { paper: MathPaper }) {
               题
             </span>
           </span>
-          <button className="btn pq-danger" onClick={() => setConfirmOpen(true)} disabled={done === 0}>
-            清空进度
-          </button>
+          <ClearProgress
+            done={done}
+            onClear={() => clearProgress(STORE_KEY, paper.questions.map((q) => q.id))}
+            tip="清空本卷的全部作答进度？"
+          />
         </div>
         <div className="pq-progress-bar" role="progressbar" aria-valuenow={done} aria-valuemax={total}>
           <span style={{ width: `${(done / total) * 100}%` }} />
@@ -338,52 +331,6 @@ function PaperInner({ paper }: { paper: MathPaper }) {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {confirmOpen && (
-          <motion.div
-            className="hub-modal-scrim"
-            initial={reduced ? undefined : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduced ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            onClick={() => setConfirmOpen(false)}
-          >
-            <motion.div
-              className="hub-modal material"
-              role="dialog"
-              aria-modal="true"
-              aria-label="清空进度"
-              initial={reduced ? undefined : { opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, scale: 0.97, y: 6 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="hub-modal-head">
-                <h2>清空进度</h2>
-                <button className="icon-btn" onClick={() => setConfirmOpen(false)} aria-label="关闭">
-                  <IconX size={16} />
-                </button>
-              </div>
-              <p className="hub-modal-tip">清空本份试卷的全部作答进度？</p>
-              <div className="hub-modal-actions">
-                <button className="btn" onClick={() => setConfirmOpen(false)}>
-                  取消
-                </button>
-                <button
-                  className="btn pq-danger"
-                  onClick={() => {
-                    setResults({});
-                    setConfirmOpen(false);
-                  }}
-                >
-                  清空
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

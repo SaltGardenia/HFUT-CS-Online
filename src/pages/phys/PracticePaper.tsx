@@ -4,8 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { PHYS_BASE } from '../../courses/registry';
 import { findPhysPaper, type PhysPaper, type PhysQuestion } from '../../content/phys';
 import PracticeCard from '../../components/practice/PracticeCard';
+import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
-import { useProgressStore } from '../../lib/sync';
+import { clearProgress, useProgressStore } from '../../lib/sync';
 import { PHYS_PRACTICE_STORE_KEY, physPaperStats, type PhysResult } from './PracticeList';
 
 /** 右侧进度轨的分段大小 */
@@ -176,6 +177,11 @@ function PhysPaperInner({ paper }: { paper: PhysPaper }) {
               题
             </span>
           </span>
+          <ClearProgress
+            done={done}
+            onClear={() => clearProgress(PHYS_PRACTICE_STORE_KEY, paper.questions.map((q) => `${paper.id}:${q.id}`))}
+            tip="清空本卷的全部作答进度？其它试卷不受影响。"
+          />
         </div>
         <div className="pq-progress-bar" role="progressbar" aria-valuenow={done} aria-valuemax={total}>
           <span style={{ width: `${(done / total) * 100}%` }} />

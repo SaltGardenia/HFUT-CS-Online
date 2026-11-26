@@ -169,6 +169,27 @@ export function writeProgress(key: string, map: ProgressMap): string[] {
   return changed;
 }
 
+/**
+ * 清掉指定题目（或 `${paperId}:${qid}`）的作答记录，同表里其它试卷、其它题原样保留。
+ * 与页面作答走同一条写入路径，所以被清掉的题会留下 `r: null` 墓碑，账号同步能跟着删。
+ */
+export function clearProgress(key: string, ids: readonly string[]): string[] {
+  const map = readProgress(key);
+  let hit = false;
+  for (const id of ids) {
+    if (!(id in map)) continue;
+    delete map[id];
+    hit = true;
+  }
+  if (!hit) return [];
+  return writeProgress(key, map);
+}
+
+/** 清掉整份进度表（本课全部试卷）；旧版本残留的 id 也一起清，同样留墓碑 */
+export function clearProgressStore(key: string): string[] {
+  return clearProgress(key, Object.keys(readProgress(key)));
+}
+
 /** 首次登录前就存在的本地作答没有时间戳：补成「现在」，视为本机最新进度上传。 */
 export function ensureProgressStamps(key: string): string[] {
   const map = readProgress(key);

@@ -4,8 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { NET_BASE } from '../../courses/registry';
 import { findNetPaper, type NetPaper } from '../../content/net';
 import PracticeCard from '../../components/practice/PracticeCard';
+import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
-import { useProgressStore } from '../../lib/sync';
+import { clearProgress, useProgressStore } from '../../lib/sync';
 import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
 
 /** 右侧进度轨的分段大小 */
@@ -139,6 +140,11 @@ function NetPaperInner({ paper }: { paper: NetPaper }) {
               题
             </span>
           </span>
+          <ClearProgress
+            done={done}
+            onClear={() => clearProgress(NET_PRACTICE_STORE_KEY, paper.questions.map((q) => `${paper.id}:${q.id}`))}
+            tip="清空本卷的全部作答进度？其它试卷不受影响。"
+          />
         </div>
         <div className="pq-progress-bar" role="progressbar" aria-valuenow={done} aria-valuemax={total}>
           <span style={{ width: `${(done / total) * 100}%` }} />

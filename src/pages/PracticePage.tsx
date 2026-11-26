@@ -2,8 +2,9 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
 import { practiceQuestions, KIND_META, type PracticeKind } from '../content/practice';
 import PracticeCard from '../components/practice/PracticeCard';
-import { IconChevronUp, IconX } from '../components/icons';
-import { useProgressStore } from '../lib/sync';
+import ClearProgress from '../components/practice/ClearProgress';
+import { IconChevronUp } from '../components/icons';
+import { clearProgressStore, useProgressStore } from '../lib/sync';
 
 /** 题型（固定顺序，与热力图分块一一对应） */
 const KINDS: PracticeKind[] = ['single', 'multi', 'judge', 'fill', 'essay'];
@@ -53,22 +54,8 @@ export default function PracticePage() {
   const [kind, setKind] = useState<PracticeKind>('single');
   const [results, setResults] = useProgressStore<Result>(STORE_KEY);
   const firstKindRun = useRef(true);
-  // 清空进度确认层：复用全站玻璃模态，替代原生 confirm
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  // 确认层打开时支持 Esc 退出
-  useEffect(() => {
-    if (!confirmOpen) return;
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') setConfirmOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [confirmOpen]);
 
   const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
-
-  const resetAll = () => setConfirmOpen(true);
 
   const bankOf = (k: PracticeKind) => practiceQuestions.filter((q) => q.kind === k);
 
@@ -191,9 +178,11 @@ export default function PracticePage() {
               题
             </span>
           </span>
-          <button className="btn pq-danger" onClick={resetAll} disabled={totalDone === 0}>
-            清空进度
-          </button>
+          <ClearProgress
+            done={totalDone}
+            onClear={() => clearProgressStore(STORE_KEY)}
+            tip="清空本课全部题目的作答进度？"
+          />
         </div>
         <div className="pq-progress-bar" role="progressbar" aria-valuenow={totalDone} aria-valuemax={total}>
           <span style={{ width: `${(totalDone / total) * 100}%` }} />
@@ -309,54 +298,6 @@ export default function PracticePage() {
           >
             <IconChevronUp size={16} />
           </motion.button>
-        )}
-      </AnimatePresence>
-
-      {/* 清空进度确认：复用全站玻璃模态（Esc / 遮罩 / 关闭钮均可退出） */}
-      <AnimatePresence>
-        {confirmOpen && (
-          <motion.div
-            className="hub-modal-scrim"
-            initial={reduced ? undefined : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduced ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            onClick={() => setConfirmOpen(false)}
-          >
-            <motion.div
-              className="hub-modal material"
-              role="dialog"
-              aria-modal="true"
-              aria-label="清空进度"
-              initial={reduced ? undefined : { opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, scale: 0.97, y: 6 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="hub-modal-head">
-                <h2>清空进度</h2>
-                <button className="icon-btn" onClick={() => setConfirmOpen(false)} aria-label="关闭">
-                  <IconX size={16} />
-                </button>
-              </div>
-              <p className="hub-modal-tip">清空全部作答进度？</p>
-              <div className="hub-modal-actions">
-                <button className="btn" onClick={() => setConfirmOpen(false)}>
-                  取消
-                </button>
-                <button
-                  className="btn pq-danger"
-                  onClick={() => {
-                    setResults({});
-                    setConfirmOpen(false);
-                  }}
-                >
-                  清空
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
         )}
       </AnimatePresence>
 

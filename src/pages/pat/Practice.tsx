@@ -5,8 +5,9 @@ import { PAT_BASE } from '../../courses/registry';
 import { papers } from '../../content/pat';
 import type { PatPaper } from '../../content/pat';
 import PracticeCard from '../../components/practice/PracticeCard';
-import { IconChevronUp, IconX } from '../../components/icons';
-import { useProgressStore } from '../../lib/sync';
+import ClearProgress from '../../components/practice/ClearProgress';
+import { IconChevronUp } from '../../components/icons';
+import { clearProgress, useProgressStore } from '../../lib/sync';
 
 /** 作答结果的持久化 key（与算法课的 practice-progress-v1 分开） */
 const STORE_KEY = 'pat-practice-progress-v1';
@@ -20,19 +21,9 @@ export default function PatPractice() {
   // 试卷选择：多份试卷先出列表；本课现只有一份省赛卷，直接进入答题
   const [paperId, setPaperId] = useState<string | null>(papers.length === 1 ? papers[0].id : null);
   const [results, setResults] = useProgressStore<Result>(STORE_KEY);
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [showTop, setShowTop] = useState(false);
 
   const paper: PatPaper | undefined = papers.find((p) => p.id === paperId);
-
-  useEffect(() => {
-    if (!confirmOpen) return;
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') setConfirmOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [confirmOpen]);
 
   // 置顶按钮：滚过一屏出现
   useEffect(() => {
@@ -115,9 +106,11 @@ export default function PatPractice() {
             {paper.title} · <span className="pq-frag">{paper.questions.length} 题</span> ·{' '}
             <span className="pq-frag">已展开解析 <b>{seenAnswer}</b> / {total}</span> · 参考答案：{paper.answerSource}
           </span>
-          <button className="btn pq-danger" onClick={() => setConfirmOpen(true)} disabled={totalDone === 0}>
-            清空进度
-          </button>
+          <ClearProgress
+            done={totalDone}
+            onClear={() => clearProgress(STORE_KEY, paper.questions.map((q) => q.id))}
+            tip="清空本卷的全部作答进度？"
+          />
         </div>
         <div className="pq-progress-bar" role="progressbar" aria-valuenow={totalDone} aria-valuemax={total}>
           <span style={{ width: `${(totalDone / total) * 100}%` }} />
@@ -209,53 +202,6 @@ export default function PatPractice() {
         )}
       </AnimatePresence>
 
-      {/* 清空进度确认：复用全站玻璃模态 */}
-      <AnimatePresence>
-        {confirmOpen && (
-          <motion.div
-            className="hub-modal-scrim"
-            initial={reduced ? undefined : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduced ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            onClick={() => setConfirmOpen(false)}
-          >
-            <motion.div
-              className="hub-modal material"
-              role="dialog"
-              aria-modal="true"
-              aria-label="清空进度"
-              initial={reduced ? undefined : { opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, scale: 0.97, y: 6 }}
-              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="hub-modal-head">
-                <h2>清空进度</h2>
-                <button className="icon-btn" onClick={() => setConfirmOpen(false)} aria-label="关闭">
-                  <IconX size={16} />
-                </button>
-              </div>
-              <p className="hub-modal-tip">清空本试卷的作答进度？</p>
-              <div className="hub-modal-actions">
-                <button className="btn" onClick={() => setConfirmOpen(false)}>
-                  取消
-                </button>
-                <button
-                  className="btn pq-danger"
-                  onClick={() => {
-                    setResults({});
-                    setConfirmOpen(false);
-                  }}
-                >
-                  清空
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
