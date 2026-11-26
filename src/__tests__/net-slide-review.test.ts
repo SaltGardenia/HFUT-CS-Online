@@ -78,6 +78,8 @@ describe('2025 计网课件主线', () => {
     const sw=chapter.sections.find(s=>s.id==='sec-ch4-src-sw')!;
     expect(sw.heading).not.toContain('★');
     expect(chapter.toc.find(e=>e.id===id)?.text).toContain('★');
+    // 星号跟在标题文字后面，不挡住序号
+    expect(chapter.toc.find(e=>e.id===id)?.text.endsWith(' ★')).toBe(true);
     expect(sw.blocks.some(b=>b.type==='demo'&&b.name==='net-stop-wait')).toBe(true);
   });
   it('荧光笔严格来自原PDF，旧版星号与作业优先级不再传播', () => {
@@ -91,7 +93,10 @@ describe('2025 计网课件主线', () => {
     expect(stars(3).some(e=>e.text.includes('字符同步'))).toBe(true);
     expect(stars(5).some(e=>e.text.includes('双绞线星形'))).toBe(true);
     for(let n=1;n<=8;n++){
+      // 星号统一跟在标题文字后面，不能回到序号/标题开头
+      for(const entry of stars(n)) expect(entry.text.startsWith('★')).toBe(false);
       const html=lookup(n).sections.flatMap(s=>s.blocks).filter(b=>b.type==='html').map(b=>b.html).join('');
+      expect(html).not.toMatch(/<h3 id="[^"]+">★/);
       expect((html.match(/data-source-highlight="true"/g)??[]).length).toBe(originalHighlightTargets[n].length);
     }
   });
@@ -166,7 +171,7 @@ describe('2025 计网课件主线', () => {
   it('同一知识点的说明与例题保持学习顺序', () => {
     const ordered = (n: number, headings: string[]) => {
       const toc = buildSlideReview(netChapters[n-1]).chapter.toc;
-      const indices = headings.map(h => toc.findIndex(e => e.text.replace('★ ', '').includes(h)));
+      const indices = headings.map(h => toc.findIndex(e => e.text.replace(/\s*★\s*$/, '').includes(h)));
       for (let i = 0; i < indices.length; i++) {
         expect(indices[i], headings[i]).toBeGreaterThanOrEqual(0);
         if (i > 0) expect(indices[i], headings[i]).toBeGreaterThan(indices[i-1]);

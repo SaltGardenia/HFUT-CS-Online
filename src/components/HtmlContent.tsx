@@ -173,19 +173,27 @@ function enhance(root: HTMLElement) {
     a.appendChild(meta);
   }
 
-  // 已有 figure 包装的计网图：独立按钮避免滑动时误触放大。
+  // 已有 figure 包装的计网图：与其他课程一致，点击图本身直接放大。
   for (const plate of Array.from(root.querySelectorAll<HTMLElement>('figure.net-review-diagram'))) {
     if (plate.dataset.figEnhanced) continue;
     const svg = plate.querySelector<SVGElement>('svg');
     if (!svg) continue;
     plate.dataset.figEnhanced = '1';
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'net-diagram-expand';
-    btn.textContent = '放大查看';
-    btn.setAttribute('aria-label', '放大查看：' + (svg.getAttribute('aria-label') ?? '示意图'));
-    btn.addEventListener('click', () => openLightbox(plate, svg));
-    plate.appendChild(btn);
+    // 复用其他插图图版的手型光标、悬浮反馈与「点击放大」角标
+    plate.classList.add('has-lightbox');
+    const scroller = plate.querySelector<HTMLElement>('.net-diagram-scroll');
+    let downX = 0;
+    let downY = 0;
+    plate.addEventListener('pointerdown', (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+    });
+    plate.addEventListener('click', (e) => {
+      // 拖动横向滚动条（或被挤压的滚动区空白）不算点图
+      if (scroller && e.target === scroller) return;
+      if (Math.abs(e.clientX - downX) > 6 || Math.abs(e.clientY - downY) > 6) return;
+      openLightbox(plate, svg);
+    });
   }
 
   // 插图图版：内容里的 <svg class="fig"> 包一层 <figure>，挂上点击放大（lightbox）

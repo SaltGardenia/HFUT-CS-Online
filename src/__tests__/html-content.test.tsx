@@ -62,6 +62,42 @@ describe('HtmlContent 里的链接', () => {
   });
 });
 
+describe('HtmlContent 里的计网图版', () => {
+  const html =
+    '<figure class="fig net-review-diagram"><div class="net-diagram-scroll" tabindex="0" role="region">' +
+    '<svg viewBox="0 0 680 190" role="img" aria-label="计算机互连与资源共享">' +
+    '<title>计算机互连与资源共享</title><desc>A机连接打印机，B机连接存储器</desc>' +
+    '<rect x="0" y="0" width="680" height="190" fill="none"/></svg></div>' +
+    '<figcaption class="fig-cap">计算机互连与资源共享</figcaption></figure>';
+
+  it('不再单独生成「放大查看」按钮，点图本身直接放大', async () => {
+    render(
+      <MemoryRouter initialEntries={['/net/deck/ch1']}>
+        <HtmlContent html={html} />
+      </MemoryRouter>,
+    );
+
+    expect(document.querySelector('.net-diagram-expand')).toBeNull();
+    expect(document.querySelector('.net-review-diagram')?.classList.contains('has-lightbox')).toBe(true);
+
+    await userEvent.click(screen.getByRole('img'));
+    const overlay = document.querySelector('.fig-lightbox');
+    expect(overlay).not.toBeNull();
+    expect(overlay?.querySelector('svg')).not.toBeNull();
+  });
+
+  it('点击横向滚动区的空白不触发放大', async () => {
+    render(
+      <MemoryRouter initialEntries={['/net/deck/ch1']}>
+        <HtmlContent html={html} />
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(document.querySelector('.net-diagram-scroll') as HTMLElement);
+    expect(document.querySelector('.fig-lightbox')).toBeNull();
+  });
+});
+
 describe('HtmlContent 长代码折叠与完整代码覆盖层', () => {
   // 课程内容里没有 .code-pair 包裹时，折叠态落在 .code-wrap 自身（覆盖层克隆的根节点）
   const codeLines = Array.from({ length: 12 }, (_, i) => `int v${i} = ${i};`).join('\n');

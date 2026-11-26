@@ -1855,10 +1855,10 @@ export function buildSlideReview(original: DeckData): SlideReview {
   for(const topic of source){
     const section=byKey.get(topic.key)!;
     for(const [i,part] of parts.get(topic.key)!.entries()){
-      const text=part.focus?(i===0?part.title.replace(/^(\d+\.\s*)/,'$1★ '):'★ '+part.title):part.title;
+      const text=part.focus?part.title+' ★':part.title;
       if(i===0)section.heading=text;
       toc.push({id:part.id,text,level:i===0?2:3});
-      let html=i>0&&part.focus?part.html.replace(/(<h3 id="[^"]+">)/,'$1★ '):part.html;
+      let html=i>0&&part.focus?part.html.replace(/(<h3 id="[^"]+">)([\s\S]*?)(<\/h3>)/,'$1$2 ★$3'):part.html;
       if(part.marks?.length){
         const note=part.marks.map(m=>'<p class="quiz-note" data-source-highlight="true"><strong>★ 原课件荧光笔（'+m.pages+'页）：</strong>'+m.scope+'。</p>').join('');
         const at=i>0?html.indexOf('</h3>')+5:0;
@@ -1886,6 +1886,6 @@ export function buildSlideReview(original: DeckData): SlideReview {
     return legacyTargets.get(anchor);
   };
   return {chapter:{...original,
-    lede:'<p>按<strong>'+sourceNames[no]+'</strong>顺序组织复习讲义。定义、公式、例题、图解与复习重点集中在相应知识点内；旧讲义不再自动重复拼接，历年考点与课外拓展单独查阅；★ 仅表示2025版原PDF上实际黄色荧光笔标记；具体划线范围和页码在对应正文中注明，未划线内容保持普通样式。历史原讲义仅供对照。</p>',
+    lede:'<p>按<strong>'+sourceNames[no]+'</strong>顺序组织复习讲义。定义、公式、例题、图解与复习重点集中在相应知识点内；旧讲义不再自动重复拼接，历年考点与课外拓展单独查阅；标题末尾的 ★ 仅表示2025版原PDF上实际黄色荧光笔标记；具体划线范围和页码在对应正文中注明，未划线内容保持普通样式。历史原讲义仅供对照。</p>',
     toc,sections},resolve};
 }
