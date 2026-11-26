@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.4.1 (2026-11-26)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### 修复
+* fix(hub): 账目只留数数，去掉叠在数字上的旧入场动画 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/37
+
+
+**Full Changelog**: https://github.com/SaltGardenia/HFUT-CS-Online/compare/v2.4.0...v2.4.1
+
 ## 2.4.0 (2026-11-26)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
