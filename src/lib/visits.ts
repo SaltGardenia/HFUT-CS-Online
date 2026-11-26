@@ -82,6 +82,8 @@ export async function requestSiteVisit(
 }
 
 let visitRequest: Promise<SiteVisits | null> | null = null;
+/** 请求结果缓存：首页晚于上报挂载时直接取用，不必先闪一帧骨架 */
+let visitResult: SiteVisits | null | undefined;
 
 /**
  * 每次打开站点只上报一次：SPA 内部跳转、React StrictMode 的重复执行
@@ -89,21 +91,41 @@ let visitRequest: Promise<SiteVisits | null> | null = null;
  */
 export function recordSiteVisit(): Promise<SiteVisits | null> {
   if (!syncEnabled) return Promise.resolve(null);
-  visitRequest ??= requestSiteVisit(SUPABASE_URL, SUPABASE_ANON_KEY);
+  visitRequest ??= requestSiteVisit(SUPABASE_URL, SUPABASE_ANON_KEY).then((value) => {
+    visitResult = value;
+    return value;
+  });
   return visitRequest;
 }
 
-/** 首页数字行：数据库暂不可用时返回 null，不渲染访问量两项。 */
-export function useSiteVisits(): SiteVisits | null {
-  const [visits, setVisits] = useState<SiteVisits | null>(null);
+export interface SiteVisitsState {
+  /** 是否接入访问统计：未配置数据库时首页不渲染这两项，也不显示占位 */
+  enabled: boolean;
+  /** 请求仍在路上：首页用骨架占位，数字到位后交叉淡入 */
+  pending: boolean;
+  /** 计数；上报失败时为 null（此时两项会收起） */
+  visits: SiteVisits | null;
+}
+
+/** 首页数字行：区分「还没到」与「拿不到」，前者占位、后者不渲染。 */
+export function useSiteVisits(): SiteVisitsState {
+  const [state, setState] = useState<{ pending: boolean; visits: SiteVisits | null }>(() =>
+    visitResult !== undefined
+      ? { pending: false, visits: visitResult }
+      : { pending: syncEnabled, visits: null },
+  );
+
   useEffect(() => {
+    if (!syncEnabled) return;
     let alive = true;
     void recordSiteVisit().then((value) => {
-      if (alive && value) setVisits(value);
+      // 已有结果时不再改写，避免一次无谓的重渲染
+      if (alive) setState((prev) => (prev.pending ? { pending: false, visits: value } : prev));
     });
     return () => {
       alive = false;
     };
   }, []);
-  return visits;
+
+  return { enabled: syncEnabled, ...state };
 }

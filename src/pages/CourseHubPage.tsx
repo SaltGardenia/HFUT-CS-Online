@@ -35,6 +35,58 @@ const HOME_SCROLL_KEY = 'home-scroll-y';
 const CONTRIB_LINKS: Record<string, string> = {
   SaltGardenia: 'https://saltgardenia.github.io/',
 };
+
+/**
+ * 访问量一行：数据在路上时先摆一条骨架占住数字槽，结果到达后数字淡入上升、
+ * 骨架同时淡出。行高由数字自身的行盒决定，所以账目栏不会因为数字晚到而上下跳。
+ */
+function VisitStat({
+  label,
+  value,
+  group,
+}: {
+  label: string;
+  /** null：请求还没回来（显示骨架）；数字：淡入 */
+  value: number | null | undefined;
+  group?: boolean;
+}) {
+  const reduced = useReducedMotion();
+  return (
+    <div className={group ? 'hub-stat hub-stat-group' : 'hub-stat'}>
+      <span className="hub-stat-k">{label}</span>
+      <span className="hub-stat-leader" aria-hidden="true" />
+      <span className="hub-stat-v">
+        <AnimatePresence initial={false}>
+          {value == null ? (
+            // 骨架也用 <b>：字体行盒与数字完全一致，占位期和到位后行高不变
+            <motion.b
+              key="skeleton"
+              className="hub-stat-skel"
+              aria-hidden="true"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              &#8203;
+            </motion.b>
+          ) : (
+            <motion.b
+              key="value"
+              initial={reduced ? { opacity: 0 } : { opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduced ? 0.15 : 0.36, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {value}
+            </motion.b>
+          )}
+        </AnimatePresence>
+      </span>
+    </div>
+  );
+}
+
 export default function CourseHubPage() {
   const toc = useToc();
   const reduced = useReducedMotion();
@@ -44,7 +96,7 @@ export default function CourseHubPage() {
   const recentNames = useRecentCourses();
   // 收藏的课程（收藏先后序）；卡片星标与合并展示区共用
   const favs = useFavoriteCourses();
-  // 站点访问量（Supabase 计数；数据库未就绪时不渲染）
+  // 站点访问量（Supabase 计数；请求未到时先占位，失败则不渲染）
   const visits = useSiteVisits();
 
   // 置顶按钮：滚过约一屏内容后出现（rAF 节流，与在线练习页同款）
@@ -296,18 +348,10 @@ export default function CourseHubPage() {
               <span className="hub-stat-leader" aria-hidden="true" />
               <b>{stats.exams}</b>
             </div>
-            {visits && (
+            {visits.enabled && (visits.pending || visits.visits) && (
               <>
-                <div className="hub-stat hub-stat-group">
-                  <span className="hub-stat-k">累计访问量</span>
-                  <span className="hub-stat-leader" aria-hidden="true" />
-                  <b>{visits.total}</b>
-                </div>
-                <div className="hub-stat">
-                  <span className="hub-stat-k">今日访问量</span>
-                  <span className="hub-stat-leader" aria-hidden="true" />
-                  <b>{visits.today}</b>
-                </div>
+                <VisitStat label="累计访问量" value={visits.visits?.total} group />
+                <VisitStat label="今日访问量" value={visits.visits?.today} />
               </>
             )}
           </motion.div>
