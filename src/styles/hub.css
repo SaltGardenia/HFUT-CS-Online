@@ -81,51 +81,72 @@
   padding: 52px 0 40px;
 }
 
-/* ---------------------------------------------------------- 首屏 Hero */
+/* ---------------------------------------------------------- 首屏 Hero
+   构图取「档案馆扉页」：左边刊头（站名 / 简介 / 入口），右边馆藏账目
+   （标签在左、数目右对齐，中间虚点引导），底边一条细线把贡献者名册收进来。
+   展示内容与旧的居中堆叠完全一致，只把数字从「一排大字」改回目录卡的记数方式。 */
 .hub-hero {
   position: relative;
   min-height: calc(100vh - var(--topbar-h));
   min-height: calc(100svh - var(--topbar-h));
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  text-align: center;
-  /* 内容轻微上移：加大底部留白 */
-  padding: 56px 24px 120px;
+  padding: 48px 24px 104px;
 }
 
-/* 向下滚动提示：纯图标，滚离首屏即退场 */
-.hub-hero-scroll {
-  position: absolute;
-  bottom: 22px;
-  left: calc(50% - 18px);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  color: var(--ink-3);
-  background: var(--panel);
-  border: 1px solid var(--hairline-soft);
-  box-shadow: var(--shadow-soft);
-  transition: color 140ms, border-color 140ms;
+.hub-hero-grid {
+  width: min(var(--measure-wide), 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 336px;
+  gap: 28px 72px;
+  /* 两栏同顶：站名与账目起于同一条横线 */
+  align-items: start;
 }
-.hub-hero-scroll:hover {
-  color: var(--ink);
-  border-color: var(--hairline);
+
+.hub-hero-lead {
+  min-width: 0;
 }
 
 .hub-hero-name {
   margin: 0;
-  font-size: clamp(42px, 6.5vw, 68px);
+  font-size: min(11.2vw, 60px);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.038em;
+  line-height: 1;
   color: var(--ink);
 }
+/* 平板：单栏，站名按窗口宽度放大一档 */
+@media (min-width: 641px) and (max-width: 1000px) {
+  .hub-hero-name {
+    font-size: clamp(56px, 7.4vw, 72px);
+  }
+}
+/* 桌面：右栏固定 336px，站名随视口放大，仍短于左栏宽度 */
+@media (min-width: 1001px) {
+  .hub-hero-name {
+    font-size: clamp(56px, 7vw, 88px);
+  }
+}
 
-/* Hero 次级按钮（GitHub 仓库 / 联系作者） */
+.hub-hero-sub {
+  margin: 18px 0 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  /* 窄屏折成两行时均分，避免末行只剩一两个字 */
+  text-wrap: balance;
+}
+
+.hub-hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+/* Hero 按钮（GitHub 仓库 / 联系作者）。GitHub 是主入口，实底反白 */
 .hub-cta {
   display: inline-flex;
   align-items: center;
@@ -156,48 +177,115 @@
   transform: scale(0.97);
   transition-duration: 0.06s;
 }
+/* 主按钮排在基础按钮之后：同特异性下用顺序覆盖悬浮底色 */
+.hub-cta-main,
+.hub-cta-main:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+  font-weight: 600;
+}
+.hub-cta-main:hover {
+  box-shadow: var(--shadow-2);
+}
 
-.hub-hero-sub {
-  margin: 16px 0 0;
-  font-size: 14px;
+/* 馆藏账目：一行一项，标签—虚点—数目 */
+.hub-hero-stats {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.hub-hero-stats .hub-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 5px 0;
+  text-align: left;
+}
+/* 分三组（规模 / 资料量 / 访问量），靠留白分组，不再加线 */
+.hub-hero-stats .hub-stat-group {
+  margin-top: 18px;
+}
+
+.hub-hero-stats .hub-stat-k {
+  flex: none;
+  font-size: 13.5px;
   color: var(--ink-2);
 }
 
-.hub-hero-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 30px;
+.hub-hero-stats .hub-stat-leader {
+  flex: 1;
+  min-width: 16px;
+  height: 2px;
+  /* 虚点引导：1px 圆点、5px 间距，落在文字基线上 */
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 24%, transparent) 0.9px, transparent 1.1px);
+  background-size: 5px 2px;
+  background-repeat: repeat-x;
+  background-position: 0 0;
 }
 
-.hub-hero-contribs {
-  margin-top: 34px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+.hub-hero-stats .hub-stat b {
+  flex: none;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
+
+/* 名册：细线 + 头像 + 招呼，收住整页 */
+.hub-hero-foot {
+  position: relative;
+  width: min(var(--measure-wide), 100%);
+  margin: 64px auto 0;
+  padding-top: 20px;
+}
+.hub-hero-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--hairline);
+  transform-origin: left center;
+}
+.hub-hero-credits {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
 .contrib-avatars {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+  align-items: center;
 }
-/* 头像圆形抠图 */
+/* 头像叠成一列名册：互相压 8px，用底色描一圈把彼此分开 */
 .contrib-avatar {
   display: block;
-  width: 42px;
-  height: 42px;
+  width: 30px;
+  height: 30px;
+  margin-right: -8px;
   border-radius: 50%;
   overflow: hidden;
   border: 1px solid var(--hairline);
-  box-shadow: var(--shadow-soft);
+  background: var(--bg-dim);
+  /* 底色环用半透明，叠在渐变底上不出现一圈死白 */
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--bg) 78%, transparent);
   transition: transform 0.18s var(--press-ease), box-shadow 0.18s var(--press-ease);
 }
-.contrib-avatar:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: var(--shadow-2);
+.contrib-avatar:last-child {
+  margin-right: 0;
+}
+.contrib-avatar:hover,
+.contrib-avatar:focus-visible {
+  position: relative;
+  z-index: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--bg) 78%, transparent), var(--shadow-1);
 }
 .contrib-avatar img {
   display: block;
@@ -212,42 +300,56 @@
   color: var(--ink-3);
 }
 
-.hub-hero-stats {
-  display: flex;
-  flex-wrap: wrap;
+/* 向下滚动提示：纯图标，滚离首屏即退场 */
+.hub-hero-scroll {
+  position: absolute;
+  bottom: 22px;
+  left: calc(50% - 18px);
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 14px 44px;
-  margin-top: 52px;
-}
-/* 手机：默认 3+2 网格，避免 4+1 折行把最后一个统计孤行居中；
-   访问量两项到位后是 7 项，改为 4+3，不再留下孤行。 */
-@media (max-width: 480px) {
-  .hub-hero-stats {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    justify-content: center;
-    justify-items: center;
-    gap: 16px 36px;
-  }
-  .hub-hero-stats:has(> .hub-stat:nth-child(7)) {
-    grid-template-columns: repeat(4, auto);
-    gap: 16px 18px;
-  }
-}
-.hub-stat {
-  text-align: center;
-}
-.hub-stat b {
-  display: block;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-.hub-stat span {
-  font-size: 12.5px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
   color: var(--ink-3);
+  background: var(--panel);
+  border: 1px solid var(--hairline-soft);
+  box-shadow: var(--shadow-soft);
+  transition: color 140ms, border-color 140ms;
+}
+.hub-hero-scroll:hover {
+  color: var(--ink);
+  border-color: var(--hairline);
+}
+
+/* 窄屏：单栏，刊头在上、账目在下，账目拉满版心宽度 */
+@media (max-width: 1000px) {
+  .hub-hero {
+    padding: 28px 24px 88px;
+  }
+  .hub-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    align-items: start;
+  }
+  .hub-hero-stats .hub-stat b {
+    font-size: 24px;
+  }
+  .hub-hero-foot {
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* 手机：简介降到 14px，常见宽度（375 及以上）能排成一行；更窄时均分两行 */
+  .hub-hero-sub {
+    font-size: 14px;
+  }
+  .hub-hero-credits {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 }
 
 
@@ -480,7 +582,23 @@
 }
 
 /* ---------------------------------------------------------- 占位页 */
-/* 占位页的统计盒（首屏 hero 用的是无盒版 .hub-hero-stats） */
+/* 占位页的统计盒：数字在上、标签在下（首屏账目行自带排版，不用这组基础样式） */
+.hub-stat {
+  text-align: center;
+}
+.hub-stat b {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.hub-stat span {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
 .hub-stats {
   display: flex;
   flex-wrap: wrap;

@@ -251,46 +251,89 @@ export default function CourseHubPage() {
       <SiteHeader />
 
       <section className="hub-hero" aria-label="站点简介">
-        <motion.h1 className="hub-hero-name" {...rise(0)}>
-          HFUT-CS-Online
-        </motion.h1>
-        <motion.p className="hub-hero-sub" {...rise(0.06)}>
-          汇总合肥工业大学计算机与信息学院的在线课程资料
-        </motion.p>
-        <motion.div className="hub-hero-links" {...rise(0.08)}>
-          <a className="hub-cta" href={REPO_URL} target="_blank" rel="noreferrer">
-            <IconGitHub size={16} />
-            Github
-          </a>
-          <button type="button" className="hub-cta" onClick={() => setContactOpen(true)}>
-            联系作者
-          </button>
-        </motion.div>
-        <motion.div className="hub-hero-stats" {...rise(0.16)}>
-          <div className="hub-stat"><b>{stats.semesters}</b><span>学期</span></div>
-          <div className="hub-stat"><b>{stats.courses}</b><span>门课程</span></div>
-          <div className="hub-stat"><b>{stats.files}</b><span>份文件</span></div>
-          <div className="hub-stat"><b>{stats.courseware}</b><span>份课件</span></div>
-          <div className="hub-stat"><b>{stats.exams}</b><span>份试题</span></div>
-          {visits && (
-            <>
-              <div className="hub-stat"><b>{visits.total}</b><span>累计访问量</span></div>
-              <div className="hub-stat"><b>{visits.today}</b><span>今日访问量</span></div>
-            </>
-          )}
-        </motion.div>
-        <motion.div className="hub-hero-contribs" {...rise(0.22)}>
-          {contributors.length > 0 && (
-            <div className="contrib-avatars">
-              {contributors.map((c) => (
-                <a key={c.login} className="contrib-avatar" href={CONTRIB_LINKS[c.login] ?? c.html_url} target="_blank" rel="noreferrer"
-                   aria-label={c.login} title={`${c.login} · ${c.repo}`}>
-                  <img src={c.avatar_url} alt={c.login} loading="lazy" />
-                </a>
-              ))}
+        <div className="hub-hero-grid">
+          <div className="hub-hero-lead">
+            <motion.h1 className="hub-hero-name" {...rise(0)}>
+              HFUT-CS-Online
+            </motion.h1>
+            <motion.p className="hub-hero-sub" {...rise(0.06)}>
+              汇总合肥工业大学计算机与信息学院的在线课程资料
+            </motion.p>
+            <motion.div className="hub-hero-links" {...rise(0.12)}>
+              <a className="hub-cta hub-cta-main" href={REPO_URL} target="_blank" rel="noreferrer">
+                <IconGitHub size={16} />
+                Github
+              </a>
+              <button type="button" className="hub-cta" onClick={() => setContactOpen(true)}>
+                联系作者
+              </button>
+            </motion.div>
+          </div>
+          {/* 馆藏账目：标签在左、数目右对齐，虚点引导——目录卡的记数方式 */}
+          <motion.div className="hub-hero-stats" {...rise(0.18)}>
+            <div className="hub-stat">
+              <span className="hub-stat-k">学期</span>
+              <span className="hub-stat-leader" aria-hidden="true" />
+              <b>{stats.semesters}</b>
             </div>
-          )}
-          <p className="hub-hero-welcome">欢迎 Issue &amp; PR</p>
+            <div className="hub-stat">
+              <span className="hub-stat-k">门课程</span>
+              <span className="hub-stat-leader" aria-hidden="true" />
+              <b>{stats.courses}</b>
+            </div>
+            <div className="hub-stat hub-stat-group">
+              <span className="hub-stat-k">份文件</span>
+              <span className="hub-stat-leader" aria-hidden="true" />
+              <b>{stats.files}</b>
+            </div>
+            <div className="hub-stat">
+              <span className="hub-stat-k">份课件</span>
+              <span className="hub-stat-leader" aria-hidden="true" />
+              <b>{stats.courseware}</b>
+            </div>
+            <div className="hub-stat">
+              <span className="hub-stat-k">份试题</span>
+              <span className="hub-stat-leader" aria-hidden="true" />
+              <b>{stats.exams}</b>
+            </div>
+            {visits && (
+              <>
+                <div className="hub-stat hub-stat-group">
+                  <span className="hub-stat-k">累计访问量</span>
+                  <span className="hub-stat-leader" aria-hidden="true" />
+                  <b>{visits.total}</b>
+                </div>
+                <div className="hub-stat">
+                  <span className="hub-stat-k">今日访问量</span>
+                  <span className="hub-stat-leader" aria-hidden="true" />
+                  <b>{visits.today}</b>
+                </div>
+              </>
+            )}
+          </motion.div>
+        </div>
+        {/* 名册：一条细线收住整页，贡献者在左，招呼在右 */}
+        <motion.div className="hub-hero-foot" {...rise(0.24)}>
+          <motion.span
+            className="hub-hero-rule"
+            aria-hidden="true"
+            initial={reduced ? undefined : { scaleX: 0 }}
+            animate={reduced ? undefined : { scaleX: 1 }}
+            transition={reduced ? undefined : { duration: 0.7, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <div className="hub-hero-credits">
+            {contributors.length > 0 && (
+              <div className="contrib-avatars">
+                {contributors.map((c) => (
+                  <a key={c.login} className="contrib-avatar" href={CONTRIB_LINKS[c.login] ?? c.html_url} target="_blank" rel="noreferrer"
+                     aria-label={c.login} title={`${c.login} · ${c.repo}`}>
+                    <img src={c.avatar_url} alt={c.login} loading="lazy" />
+                  </a>
+                ))}
+              </div>
+            )}
+            <p className="hub-hero-welcome">欢迎 Issue &amp; PR</p>
+          </div>
         </motion.div>
         {/* 向下滚动提示：滚离首屏即退场 */}
         <AnimatePresence>
