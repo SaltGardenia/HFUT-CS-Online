@@ -263,8 +263,10 @@
   display: flex;
   align-items: center;
 }
-/* 头像叠成一列名册：互相压 8px，用底色描一圈把彼此分开 */
+/* 头像叠成一列名册：互相压 8px，左边的压在上面（层级由 JSX 的 z-index 递减给出），
+   用底色描一圈把彼此分开 */
 .contrib-avatar {
+  position: relative;
   display: block;
   width: 30px;
   height: 30px;
@@ -282,8 +284,8 @@
 }
 .contrib-avatar:hover,
 .contrib-avatar:focus-visible {
-  position: relative;
-  z-index: 1;
+  /* 内联 z-index 会压过样式表，悬浮时必须 !important 才能提到整列之上 */
+  z-index: 1000 !important;
   transform: translateY(-3px);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--bg) 78%, transparent), var(--shadow-1);
 }

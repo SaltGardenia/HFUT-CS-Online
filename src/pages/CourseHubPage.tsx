@@ -324,8 +324,10 @@ export default function CourseHubPage() {
           <div className="hub-hero-credits">
             {contributors.length > 0 && (
               <div className="contrib-avatars">
-                {contributors.map((c) => (
+                {/* 名册左压右：序号越小层级越高，左边头像盖住右边 */}
+                {contributors.map((c, i) => (
                   <a key={c.login} className="contrib-avatar" href={CONTRIB_LINKS[c.login] ?? c.html_url} target="_blank" rel="noreferrer"
+                     style={{ zIndex: contributors.length - i }}
                      aria-label={c.login} title={`${c.login} · ${c.repo}`}>
                     <img src={c.avatar_url} alt={c.login} loading="lazy" />
                   </a>
