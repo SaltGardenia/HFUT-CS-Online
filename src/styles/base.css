@@ -121,7 +121,7 @@ button {
   }
 }
 
-/* 双色光晕背景（复刻 saltgardenia.github.io）：全站最底层，首页/课程页共用；
+/* 双色光晕背景（复刻 saltgardenia.github.io）：仅首页挂载，课程页保持纯色空白底；
    颜色令牌 --aura-1（玫红）/ --aura-2（蓝）随主题切换，取原站配色 */
 .bg-aura {
   position: fixed;

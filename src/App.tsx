@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import CourseHubPage from './pages/CourseHubPage';
 import CourseStubPage from './pages/CourseStubPage';
 import { recordSiteVisit } from './lib/visits';
@@ -67,6 +67,10 @@ function LegacyDeckRedirect() {
  * 每门课程是自包含布局（自带导航栏），在这里以一条 Route 接入。
  */
 export default function App() {
+  const { pathname } = useLocation();
+  // 双色光晕只属于首页；课程页用纯色空白底，不沿用首页的装饰背景
+  const isHub = pathname === '/';
+
   // 每次打开站点上报一次访问（首页数字行展示累计/今日访问量；未配置数据库时静默跳过）
   useEffect(() => {
     void recordSiteVisit();
@@ -74,8 +78,8 @@ export default function App() {
 
   return (
     <>
-      {/* 双色光晕背景：全站最底层，首页/课程页共用（CSS 在 base.css） */}
-      <div className="bg-aura" aria-hidden="true" />
+      {/* 双色光晕背景：仅首页最底层（CSS 在 base.css） */}
+      {isHub && <div className="bg-aura" aria-hidden="true" />}
       <Suspense fallback={null}>
       <ErrataProvider>
       <Routes>
