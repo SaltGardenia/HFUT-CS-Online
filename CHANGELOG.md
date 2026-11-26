@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.3.0 (2026-11-26)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### 新功能
+* feat(hub): 首页数字行新增累计/今日访问量 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/25
+* feat(nav): 顶栏指示器全场唯一，悬停跟随鼠标移动 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/28
+* feat(courses): 所有课程章节页标题挂载「问问 AI」 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/30
+* feat(hub): 首页 hero 改为「刊头 + 馆藏账目」版式 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/31
+* feat(practice): 每套试题独立清空进度，统一确认层组件 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/32
+### 修复
+* fix(net): 图版改为点图放大，荧光笔星号移到标题末尾 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/26
+* fix(practice): 总进度卡与下方两栏留白过窄 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/29
+* fix(courses): 课程页改为纯色空白底，双色光晕只留在首页 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/33
+
+
+**Full Changelog**: https://github.com/SaltGardenia/HFUT-CS-Online/compare/v2.2.2...v2.3.0
+
 ## 2.2.2 (2026-11-25)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
