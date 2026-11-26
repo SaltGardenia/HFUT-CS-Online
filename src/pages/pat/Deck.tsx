@@ -54,7 +54,7 @@ function DeckInner({ deck }: { deck: (typeof patDecks)[number] }) {
   const level2 = deck.toc.filter((e) => e.level === 2);
 
   return (
-    <div className="page" ref={pageRef}>
+    <div className="page" ref={pageRef} data-deck={deck.id}>
       <h1>{decodeEntities(deck.title)}</h1>
       <div className="lede">
         <HtmlContent html={deck.lede} />

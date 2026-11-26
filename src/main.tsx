@@ -6,6 +6,7 @@ import { TocProvider } from './lib/toc';
 import { syncManager } from './lib/sync';
 import App from './App';
 import ReadingMark from './components/ReadingMark';
+import AskAiLayer from './components/AskAiLayer';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/hub.css';
@@ -24,6 +25,8 @@ createRoot(document.getElementById('root')!).render(
       <TocProvider>
         <HashRouter>
           <App />
+          {/* 章节页标题右侧的「问问 AI」：按路由在所有课程页统一挂载 */}
+          <AskAiLayer />
           <ReadingMark />
         </HashRouter>
       </TocProvider>
