@@ -2578,11 +2578,13 @@ pre.code .cl-code:empty + .cl-com {
   }
 }
 
+/* 总进度卡与下方两列（左工具列 / 右题卡）之间留出与列间距同级的呼吸感；
+   紧贴 4px 时两张卡的边框会叠成一条粗线 */
 .pq-progress {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 18px 0 4px;
+  margin: 18px 0 22px;
   padding: 14px 18px;
   border: 1px solid var(--hairline-soft);
   border-radius: var(--r-l);
@@ -2680,7 +2682,8 @@ pre.code .cl-code:empty + .cl-com {
 /* 窄屏：工具区压缩，让第一屏尽快出现第一道题 */
 @media (max-width: 1199.9px) {
   .pq-rail-block { margin-bottom: 12px; }
-  .pq-progress { margin-top: 12px; }
+  /* 窄屏同列堆叠，留白收一档但仍要能分清两张卡 */
+  .pq-progress { margin: 12px 0 16px; }
 }
 @media (max-width: 560px) {
   /* 「总进度」文案与清空按钮同行，缩小一号避免尾字孤行 */
