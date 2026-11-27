@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.5.0 (2026-11-27)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### 新功能
+* feat(search): 支持讲义正文搜索与当前章节优先排序 by @Junpgle in https://github.com/SaltGardenia/HFUT-CS-Online/pull/39
+* feat(practice): 试题与课程两级练习报告，图表化呈现知识点掌握 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/43
+* feat(practice): 在线练习页顶部新增历年试题考点分析 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/42
+* feat(practice): 错题本与收藏本——每课一份账，覆盖全部题集 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/44
+* feat(hub): 课程卡片精简为名称+星标+进入箭头 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/45
+* feat(search): 课程内全局检索——试题与附件内容可检索，命中深链定位 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/46
+### 修复
+* fix(hub): 访问量兜底用当天缓存，慢网/失败时两项不再消失 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/41
+
+
+**Full Changelog**: https://github.com/SaltGardenia/HFUT-CS-Online/compare/v2.4.1...v2.5.0
+
 ## 2.4.1 (2026-11-26)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
