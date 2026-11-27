@@ -253,7 +253,6 @@ export default function NetworkCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="net"
-                      base={NET_BASE}
                       storeKey={NET_PRACTICE_STORE_KEY}
                       entries={NET_BOOK_ENTRIES}
                       tagNav={(t) => ({

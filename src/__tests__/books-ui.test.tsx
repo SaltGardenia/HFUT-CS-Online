@@ -87,10 +87,9 @@ describe('错题本页', () => {
     setQMark(COURSE, 'wrong', 'p2-s1', true);
     render(
       <MemoryRouter initialEntries={['/t/practice/wrongbook']}>
-        <QuestionBookPage kind="wrong" course={COURSE} base="/t" storeKey="test-progress-store" entries={ENTRIES} />
+        <QuestionBookPage kind="wrong" course={COURSE} storeKey="test-progress-store" entries={ENTRIES} />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('link', { name: '返回在线练习' }).getAttribute('href')).toBe('/t/practice');
     expect(screen.getByText('试卷一 · 1 题')).toBeTruthy();
     expect(screen.getByText('试卷二 · 1 题')).toBeTruthy();
     expect(screen.getAllByRole('button', { name: '移出' }).length).toBe(2);
@@ -107,7 +106,7 @@ describe('错题本页', () => {
     localStorage.setItem('test-progress-store', JSON.stringify({ 'p1-s1': 'wrong' }));
     render(
       <MemoryRouter initialEntries={['/t/practice/wrongbook']}>
-        <QuestionBookPage kind="wrong" course={COURSE} base="/t" storeKey="test-progress-store" entries={ENTRIES} />
+        <QuestionBookPage kind="wrong" course={COURSE} storeKey="test-progress-store" entries={ENTRIES} />
       </MemoryRouter>,
     );
     // 错题恢复成已答错状态，可重做
@@ -122,7 +121,7 @@ describe('错题本页', () => {
   it('空账诚实空态', () => {
     render(
       <MemoryRouter>
-        <QuestionBookPage kind="wrong" course={COURSE} base="/t" storeKey="test-progress-store" entries={ENTRIES} />
+        <QuestionBookPage kind="wrong" course={COURSE} storeKey="test-progress-store" entries={ENTRIES} />
       </MemoryRouter>,
     );
     expect(screen.getByText('暂无错题')).toBeTruthy();
@@ -136,7 +135,7 @@ describe('收藏本页', () => {
     setQMark(COURSE, 'fav', 'p2-s1', true);
     render(
       <MemoryRouter>
-        <QuestionBookPage kind="fav" course={COURSE} base="/t" storeKey="test-progress-store" entries={ENTRIES} />
+        <QuestionBookPage kind="fav" course={COURSE} storeKey="test-progress-store" entries={ENTRIES} />
       </MemoryRouter>,
     );
     expect(document.querySelector('.qbook-page .pq-progress')?.textContent).toContain('共 2 题');
@@ -149,7 +148,7 @@ describe('收藏本页', () => {
     setQMark(COURSE, 'wrong', 'p1-s1', true);
     render(
       <MemoryRouter>
-        <QuestionBookPage kind="wrong" course={COURSE} base="/t" storeKey="test-progress-store" entries={ENTRIES} />
+        <QuestionBookPage kind="wrong" course={COURSE} storeKey="test-progress-store" entries={ENTRIES} />
       </MemoryRouter>,
     );
     fireEvent.click(screen.getByRole('button', { name: '收藏本题' }));

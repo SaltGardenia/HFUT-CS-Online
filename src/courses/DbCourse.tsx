@@ -234,7 +234,6 @@ export default function DbCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="db"
-                      base={DB_BASE}
                       storeKey="db-practice-progress-v1"
                       entries={DB_BOOK_ENTRIES}
                       tagNav={(t) => ({

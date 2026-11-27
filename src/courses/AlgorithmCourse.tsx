@@ -189,13 +189,13 @@ export default function AlgorithmCourse() {
               <Route
                 path="practice/wrongbook"
                 element={
-                  <QuestionBookPage kind="wrong" course="algo" base={ALGO_BASE} storeKey="practice-progress-v1" entries={ALGO_BOOK_ENTRIES} />
+                  <QuestionBookPage kind="wrong" course="algo" storeKey="practice-progress-v1" entries={ALGO_BOOK_ENTRIES} />
                 }
               />
               <Route
                 path="practice/favorites"
                 element={
-                  <QuestionBookPage kind="fav" course="algo" base={ALGO_BASE} storeKey="practice-progress-v1" entries={ALGO_BOOK_ENTRIES} />
+                  <QuestionBookPage kind="fav" course="algo" storeKey="practice-progress-v1" entries={ALGO_BOOK_ENTRIES} />
                 }
               />
               <Route path="*" element={<Navigate to={ALGO_BASE} replace />} />

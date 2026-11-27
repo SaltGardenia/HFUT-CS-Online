@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
-import { Link } from 'react-router-dom';
 import type {
   CourseConfig,
   CoursePaper,
@@ -13,7 +12,7 @@ import { BookCards } from '../practice/books';
 import PracticeReport from '../practice/report/PracticeReport';
 import { shellDeckMeta } from '../practice/report/aggregates';
 import ClearProgress from '../practice/ClearProgress';
-import { IconArrowLeft, IconChevronUp } from '../icons';
+import { IconChevronUp } from '../icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 import { useQuestionBooks } from '../../lib/questionBooks';
 
@@ -202,15 +201,7 @@ export default function CoursePaperView({
 
   return (
     <div className="page practice-page">
-      <div className="paper-title-row">
-          {!config.singlePaperDirect && (
-            <Link to={`${config.base}/practice`} className="paper-back">
-              <IconArrowLeft size={13} />
-              返回试卷列表
-            </Link>
-          )}
-        <h1>{paper.title}</h1>
-      </div>
+      <h1>{paper.title}</h1>
       {config.singlePaperDirect && <BookCards base={config.base} course={config.base.replace(/^\/+/, '')} />}
       <div className="lede">
         <p>

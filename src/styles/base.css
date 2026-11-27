@@ -1384,7 +1384,7 @@ button {
   margin: 5px 0;
 }
 /* 链接：hover 用下划线示意可点，不铺色底（块级卡片锚点不参与药丸/下划线，走各自的抬升+阴影） */
-.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):not(.paper-back) {
+.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row) {
   color: var(--deck-accent);
   text-decoration: none;
   padding: 1px 3px;
@@ -1392,7 +1392,7 @@ button {
   border-radius: 5px;
   transition: color 140ms var(--press-ease);
 }
-.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):not(.paper-back):hover {
+.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -3728,34 +3728,6 @@ pre.code .cl-code:empty + .cl-com {
   background: color-mix(in srgb, var(--deck-accent) 10%, transparent);
 }
 
-/* 书页标题行左侧的返回键：与顶栏返回胶囊同款（玻璃圆胶囊 + icon-btn） */
-.qbook-back {
-  display: inline-flex;
-  align-items: center;
-  flex: none;
-  height: 42px;
-  padding: 4px;
-  border-radius: 999px;
-  border: 1px solid var(--hairline-soft);
-  background: var(--glass);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  backdrop-filter: blur(14px) saturate(1.2);
-  box-shadow: var(--shadow-soft);
-  text-decoration: none;
-  transition: border-color 140ms, box-shadow 140ms;
-}
-.qbook-back:hover {
-  border-color: var(--hairline);
-  box-shadow: var(--shadow-1);
-}
-.qbook-back .icon-btn {
-  background: none;
-}
-/* 标题行里的 h1 收掉默认下边距，行内对齐 */
-.paper-title-row h1 {
-  margin: 0;
-}
-
 /* 书页：账目摘要行 + 按试卷分组的题卡列表 */
 .qbook-page .pq-progress {
   margin-bottom: 22px;
@@ -3919,39 +3891,6 @@ pre.code .cl-code:empty + .cl-com {
   color: var(--ink-3);
   line-height: 1.6;
 }
-/* 试卷页标题行：胶囊返回按钮在标题左侧（net/phys 答题页共用） */
-.paper-title-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.paper-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: none;
-  padding: 6px 13px;
-  border-radius: 999px;
-  border: 1px solid var(--hairline);
-  background: var(--panel-solid);
-  font-size: 0.8125rem;
-  color: var(--ink-2);
-  text-decoration: none;
-  white-space: nowrap;
-  transition: color 140ms, border-color 140ms, transform 100ms var(--press-ease), box-shadow 140ms;
-}
-.paper-back:hover {
-  color: var(--deck-accent);
-  border-color: color-mix(in srgb, var(--deck-accent) 45%, transparent);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-2);
-  text-decoration: none;
-}
-.paper-back:active {
-  transform: scale(0.97);
-}
-
 /* --------------------------------------------- 方向背景折叠块（人工智能原理题库） */
 .ai-kp {
   margin: -4px 0 14px;

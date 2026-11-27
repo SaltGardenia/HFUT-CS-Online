@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { OS_BASE } from '../courses/registry';
 import { osChapters, osPapers, OS_KIND_LABEL } from '../content/os';
 import type { OsPaper, OsQuizKind, OsTag } from '../content/os';
@@ -8,7 +8,7 @@ import PracticeCard from '../components/practice/PracticeCard';
 import PracticeReport from '../components/practice/report/PracticeReport';
 import { shellDeckMeta } from '../components/practice/report/aggregates';
 import ClearProgress from '../components/practice/ClearProgress';
-import { IconArrowLeft, IconChevronUp } from '../components/icons';
+import { IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
 import { useQuestionBooks } from '../lib/questionBooks';
 
@@ -209,13 +209,7 @@ function PaperInner({ paper }: { paper: OsPaper }) {
 
   return (
     <div className="page practice-page">
-      <div className="paper-title-row">
-            <Link to={`${OS_BASE}/practice`} className="paper-back">
-              <IconArrowLeft size={13} />
-              返回试卷列表
-            </Link>
-        <h1>{paper.title}</h1>
-      </div>
+      <h1>{paper.title}</h1>
       <div className="lede">
         <p>
           {paper.source} · 共 {total} 题 · 参考答案：{paper.answerSource}。左侧热力图可切换题型、点击格子跳到具体题；

@@ -234,7 +234,6 @@ export default function OsCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="os"
-                      base={OS_BASE}
                       storeKey="os-practice-progress-v1"
                       entries={OS_BOOK_ENTRIES}
                       tagNav={(t) => ({

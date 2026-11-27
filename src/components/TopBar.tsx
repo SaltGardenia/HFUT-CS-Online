@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { IconArrowLeft, IconMenu } from './icons';
 import ThemeToggle from './ThemeToggle';
 import SearchBox, { type SearchIndexItem } from './SearchBox';
@@ -195,15 +195,20 @@ export default function TopBar({
   searchLinkTo,
   onOpenSidebar,
 }: Props) {
+  // 深层练习页（试卷页 / 错题本 / 收藏本）：左箭头回上一级「在线练习」；其余页面回站点首页
+  const { pathname } = useLocation();
+  const practiceRoot = /^\/[^/]+\/practice\/./.test(pathname)
+    ? pathname.slice(0, pathname.indexOf('/practice/') + '/practice'.length)
+    : null;
   return (
     <header className="topbar">
       <div className="topbar-left">
-        {/* 独立返回胶囊：左箭头回站点首页（手机上收进抽屉，把顶栏宽度让给课程名） */}
+        {/* 独立返回胶囊（手机上收进抽屉，把顶栏宽度让给课程名） */}
         <Link
-          to="/"
+          to={practiceRoot ?? '/'}
           className="topbar-ctl nav-pill topbar-home"
-          aria-label="返回课程资料库首页"
-          title="返回课程资料库首页"
+          aria-label={practiceRoot ? '返回在线练习' : '返回课程资料库首页'}
+          title={practiceRoot ? '返回在线练习' : '返回课程资料库首页'}
         >
           <span className="icon-btn">
             <IconArrowLeft size={18} />

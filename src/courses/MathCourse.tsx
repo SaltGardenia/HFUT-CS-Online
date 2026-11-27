@@ -217,7 +217,6 @@ export default function MathCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="math"
-                      base={MATH_BASE}
                       storeKey="math-practice-progress-v1"
                       entries={MATH_BOOK_ENTRIES}
                       tagNav={(t) => ({

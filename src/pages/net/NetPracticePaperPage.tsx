@@ -1,12 +1,12 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { NET_BASE } from '../../courses/registry';
 import { findNetPaper, type NetPaper } from '../../content/net';
 import PracticeCard from '../../components/practice/PracticeCard';
 import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
-import { IconArrowLeft, IconChevronUp } from '../../components/icons';
+import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 import { useQuestionBooks } from '../../lib/questionBooks';
 import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
@@ -128,13 +128,7 @@ function NetPaperInner({ paper }: { paper: NetPaper }) {
   return (
     <div className="page practice-page">
       <div className="net-paper-head">
-        <div className="paper-title-row">
-          <Link to={`${NET_BASE}/practice`} className="paper-back">
-            <IconArrowLeft size={13} />
-            返回试卷列表
-          </Link>
-          <h1>{paper.title}</h1>
-        </div>
+        <h1>{paper.title}</h1>
         <p className="net-paper-sub">
           {paper.meta} · {paper.answerSource} · 原卷：{paper.source}
         </p>

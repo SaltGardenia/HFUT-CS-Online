@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { PracticeQuestion, PracticeTag } from '../../content/practice';
 import { useProgressStore } from '../../lib/sync';
 import { useQuestionBooks } from '../../lib/questionBooks';
-import { IconArrowLeft, IconArrowRight, IconStar, IconX } from '../icons';
+import { IconArrowRight, IconStar, IconX } from '../icons';
 import PracticeCard from './PracticeCard';
 
 /**
@@ -90,8 +90,6 @@ export function BookCards({ base, course }: { base: string; course: string }) {
 interface BookPageProps {
   /** 'wrong' 错题本 / 'fav' 收藏本 */
   kind: 'wrong' | 'fav';
-  /** 课程路由前缀（标题左侧返回键 → 在线练习） */
-  base: string;
   /** 课程 slug（数据边界） */
   course: string;
   /** 本课作答进度键：书页里可以重做，结果照常入进度 */
@@ -106,7 +104,6 @@ interface BookPageProps {
 /** 错题本 / 收藏本页：按题集分组列出在册题目，可移出 / 取消收藏，也可就地重做 */
 export default function QuestionBookPage({
   kind,
-  base,
   course,
   storeKey,
   entries,
@@ -138,14 +135,7 @@ export default function QuestionBookPage({
 
   return (
     <div className="page practice-page qbook-page">
-      <div className="paper-title-row">
-        <Link to={`${base}/practice`} className="qbook-back" aria-label="返回在线练习" title="返回在线练习">
-          <span className="icon-btn">
-            <IconArrowLeft size={18} />
-          </span>
-        </Link>
-        <h1>{title}</h1>
-      </div>
+      <h1>{title}</h1>
 
       <div className="pq-progress material">
         <div className="pq-progress-text">

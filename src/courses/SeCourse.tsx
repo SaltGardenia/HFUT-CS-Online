@@ -234,7 +234,6 @@ export default function SeCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="se"
-                      base={SE_BASE}
                       storeKey="se-practice-progress-v1"
                       entries={SE_BOOK_ENTRIES}
                       tagNav={(t) => ({
