@@ -4913,3 +4913,180 @@ pre.code .cl-code:empty + .cl-com {
 .net-diagram-scroll { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-inline: contain; }
 .net-diagram-scroll > svg { display: block; max-width: none; height: auto; }
 .net-diagram-scroll:focus-visible { outline: 2px solid var(--deck-accent); outline-offset: 2px; }
+
+/* ============================================================================
+   学习通题库 · 毛概背题（html[data-deck='maogai']，朱红主题见 tokens.css）。
+   不走课程外壳（无导航栏），顶栏复用站点层 SiteHeader（hub.css）。
+   ============================================================================ */
+.mq-main {
+  flex: 1;
+  width: min(880px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 44px 0 56px;
+}
+
+.mq-center {
+  min-height: 62vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.mq-head h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.mq-head p { margin: 6px 0 0; font-size: 13.5px; color: var(--ink-3); }
+
+/* 总览数字 */
+.mq-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 26px 0 18px;
+}
+.mq-stat {
+  padding: 16px 18px;
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--r-l);
+  background: var(--panel-strong);
+  box-shadow: var(--shadow-1);
+}
+.mq-stat b {
+  display: block;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.mq-stat span { display: block; margin-top: 2px; font-size: 12.5px; color: var(--ink-3); }
+
+/* 模式入口：课程卡片同款悬浮（放大 + 外阴影，无色底） */
+.mq-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0 0 22px;
+}
+.mq-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--r-l);
+  background: var(--panel-strong);
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+  transition: transform 160ms var(--press-ease), box-shadow 160ms, border-color 160ms;
+}
+.mq-mode:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-2);
+  border-color: var(--hairline);
+}
+.mq-mode:disabled { opacity: 0.45; pointer-events: none; }
+.mq-mode b { font-size: 16px; font-weight: 650; color: var(--ink); }
+.mq-mode span { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+/* 图表卡片 */
+.mq-card {
+  padding: 20px 22px;
+  border: 1px solid var(--hairline-soft);
+  border-radius: var(--r-l);
+  background: var(--panel-strong);
+  box-shadow: var(--shadow-1);
+  margin-bottom: 16px;
+}
+.mq-card h2 { margin: 0 0 16px; font-size: 15px; font-weight: 650; color: var(--ink); }
+
+/* 到期柱状图 */
+.mq-chart { display: flex; gap: 6px; }
+.mq-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mq-col-n { height: 15px; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.mq-bar-track { width: 100%; height: 84px; display: flex; align-items: flex-end; }
+.mq-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--deck-accent);
+  opacity: 0.5;
+}
+.mq-bar[data-now] { opacity: 0.92; }
+.mq-col-x { font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
+
+/* 进度行（章节 / 题型） */
+.mq-rows { display: flex; flex-direction: column; gap: 11px; }
+.mq-row { display: grid; grid-template-columns: 64px 1fr 56px; align-items: center; gap: 12px; }
+.mq-row-name { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.mq-row-track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--panel-2);
+  border: 1px solid var(--hairline-soft);
+  display: flex;
+  overflow: hidden;
+}
+.mq-row-track i { display: block; height: 100%; }
+.mq-seg-done { background: var(--deck-accent); }
+.mq-seg-learn { background: var(--deck-accent); opacity: 0.42; }
+.mq-row-n { font-size: 12px; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+.mq-legend { display: flex; gap: 16px; align-items: center; margin: 16px 0 0; font-size: 12px; color: var(--ink-3); }
+.mq-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 6px; }
+.mq-legend .mq-seg-todo { background: var(--panel-2); border: 1px solid var(--hairline-soft); }
+
+.mq-foot { display: flex; justify-content: flex-end; margin-top: 6px; }
+
+/* 答题页 */
+.mq-top { display: flex; align-items: baseline; gap: 14px; margin: 0 0 10px; }
+.mq-top-n { margin-left: auto; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.mq-top-bar { height: 4px; border-radius: 2px; background: var(--panel-2); overflow: hidden; margin: 0 0 16px; }
+.mq-top-bar i { display: block; height: 100%; background: var(--deck-accent); transition: width 300ms var(--press-ease); }
+.mq-exit { font-size: 13px; color: var(--ink-2); text-decoration: none; transition: color 160ms ease; }
+.mq-exit:hover { color: var(--deck-accent); }
+
+.mq-qcard {
+  margin: 0;
+  padding: 20px 22px;
+  border-radius: var(--r-l);
+  background: var(--panel-strong);
+  border: 1px solid var(--hairline-soft);
+  box-shadow: var(--shadow-1);
+}
+.mq-chip {
+  display: inline-block;
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--deck-accent);
+  border: 1px solid var(--hairline-soft);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+/* 艾宾浩斯自评：建议档描边提示（静态描边，非悬浮色底） */
+.mq-grade { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+.mq-grade .btn { min-width: 132px; justify-content: center; }
+.mq-grade-bad[data-suggest] { border-color: var(--hot); color: var(--hot); box-shadow: inset 0 0 0 1px var(--hot); }
+.mq-grade-good[data-suggest] { border-color: var(--ok); color: var(--ok); box-shadow: inset 0 0 0 1px var(--ok); }
+
+.mq-done-h { margin: 0; font-size: 26px; font-weight: 700; color: var(--ink); }
+.mq-done-s { margin: 0; font-size: 14px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.mq-center .mq-modes { width: 100%; max-width: 520px; }
+.mq-center .mq-mode { width: 100%; }
+.mq-empty { margin: 0; font-size: 14px; color: var(--ink-3); }
+
+@media (max-width: 640px) {
+  .mq-main { width: calc(100% - 32px); padding: 28px 0 40px; }
+  .mq-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0 14px; }
+  .mq-modes { grid-template-columns: 1fr; }
+  .mq-card { padding: 16px; }
+  .mq-row { grid-template-columns: 52px 1fr 48px; }
+  .mq-chart { gap: 3px; }
+  .mq-col:nth-child(2n) .mq-col-x { visibility: hidden; }
+}

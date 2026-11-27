@@ -98,6 +98,7 @@
   --np: #3644a1;                 /* 网络程序设计 · 宝蓝（比大数据靛蓝更亮更纯） */
   --micro: #7a5048;              /* 微机原理与接口技术 · 陶褐灰 */
   --het: #a13656;                /* 硬件工程师综合训练 · 暗玫红 */
+  --maogai: #de2910;             /* 学习通题库 · 毛概（朱红；对全站课程基础色 min ΔE 12.2，白底对比 4.74） */
 
   /* ---- 章节配色：各课程导航到的每一章/讲一色（与算法课 deck1..8 同机制）。
    * 序数为该课章节列表中的序号；课程首页与在线练习仍用上方课程基础色。
@@ -348,6 +349,7 @@
   --comp: #6c60dc;  --co: #dbaf76;  --emb: #b8d666;  --ml: #81dc60;  --ste: #e0c671;
   --comb: #d176db;  --cg: #dc60bb;  --sma: #60dc96;  --dmt: #aae4c1;  --np: #82c6e3;
   --micro: #dc6060; --het: #dc607d;
+  --maogai: #ec6f5e;             /* 毛概（暗色提亮变体） */
   /* 章节配色（暗色提亮变体，与上方亮色一一对应） */
   --os1: #74b3d2;  --os2: #e0975f;  --os3: #7cc9a3;  --os4: #b39be0;
   --os5: #ec8ea0;  --os6: #d4b95a;  --os7: #6cc4c9;  --os8: #d69ab8;
@@ -623,6 +625,9 @@
 :root[data-deck='np'] { --deck-accent: var(--np); }
 :root[data-deck='micro'] { --deck-accent: var(--micro); }
 :root[data-deck='het'] { --deck-accent: var(--het); }
+
+/* --------------------- 学习通题库（毛概）→ 朱红主题 */
+:root[data-deck='maogai'] { --deck-accent: var(--maogai); }
 
 /* --------- 各章一色：章节页写 html[data-ch='序数']，覆盖课程基础色；
  * 首页/在线练习不带 data-ch，仍用课程基础色（与算法课 deck1..8 同机制） --------- */

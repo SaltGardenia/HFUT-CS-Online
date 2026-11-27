@@ -426,6 +426,26 @@ export default function CourseHubPage() {
             <div className="hub-grid">{shownCards.map(card)}</div>
           </section>
         )}
+        {/* 学习通题库：背题应用（非学期课程），不走资料目录 */}
+        <section className="hub-sem" aria-label="学习通题库">
+          <div className="hub-sem-h">
+            <h2>学习通题库</h2>
+            <span>课程 · 1 门</span>
+          </div>
+          <div className="hub-grid">
+            <motion.div
+              className="course-cell"
+              initial={reduced ? undefined : { opacity: 0, y: 10 }}
+              animate={reduced ? undefined : { opacity: 1, y: 0 }}
+              transition={reduced ? { duration: 0 } : { duration: 0.24, delay: 0.06, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <Link to="/maogai" className="course-card ready" aria-label="毛概，进入背题">
+                <span className="course-title">毛概</span>
+                <span className="course-go" aria-hidden="true">→</span>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
         {groups.map((g) => (
           <section className="hub-sem" key={g.semester}>
             <div className="hub-sem-h">
