@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, animate, motion, useReducedMotion } from 'motion/react';
 import { catalog } from '../content/catalog';
@@ -37,27 +37,33 @@ const CONTRIB_LINKS: Record<string, string> = {
 };
 
 /**
- * 账目里的数字：整栏同时开数——等访问量回来（或判定拿不到）后一起从 0 数到终值，
- * 不做淡入/上移那套入场，免得和数数叠成两个动画。开数前只留一个零宽占位，
- * 保证行高不变。
+ * 账目里的数字：整栏同时开数，一起从 0 数到终值，不做淡入/上移那套入场。
+ * 已经有当天缓存时不等待，直接开数；稍后请求回来若数值变了，再从当前值补数上去。
  */
 function CountUp({ value, started }: { value: number; started: boolean }) {
   const reduced = useReducedMotion();
   const [shown, setShown] = useState(() => (reduced ? value : 0));
+  // 补数时要从「当前显示的值」接着数，不能回到 0
+  const shownRef = useRef(shown);
 
   useEffect(() => {
+    const set = (v: number) => {
+      shownRef.current = v;
+      setShown(v);
+    };
     if (reduced) {
-      setShown(value);
+      set(value);
       return;
     }
     if (!started) {
-      setShown(0);
+      set(0);
       return;
     }
-    const controls = animate(0, value, {
-      duration: 0.9,
+    const controls = animate(shownRef.current, value, {
+      // 首次开数走完整节奏；后来刷新到新值只补一小段
+      duration: shownRef.current === 0 ? 0.9 : 0.35,
       ease: [0.25, 0.1, 0.25, 1],
-      onUpdate: (v) => setShown(Math.round(v)),
+      onUpdate: (v) => set(Math.round(v)),
     });
     return () => controls.stop();
   }, [value, started, reduced]);
@@ -110,18 +116,18 @@ export default function CourseHubPage() {
   const favs = useFavoriteCourses();
   // 站点访问量（Supabase 计数；请求未到时先空出槽位，失败则不渲染）
   const visits = useSiteVisits();
-  // 账目统一开数：等访问量回来（或确认拿不到）后整栏一起从 0 数。
-  // 请求特别慢时最多等 3s，宁可让这两项晚到，也不让整栏一直空着。
-  const [ledgerStarted, setLedgerStarted] = useState(!visits.pending);
+  // 账目统一开数：有当天缓存就立即开数；没有就等访问量回来（或确认拿不到）再一起数。
+  // 请求特别慢、又没缓存时最多等 3s，宁可让这两项晚到，也不让整栏一直空着。
+  const [ledgerStarted, setLedgerStarted] = useState(!visits.pending || visits.visits != null);
   useEffect(() => {
     if (ledgerStarted) return;
-    if (!visits.pending) {
+    if (!visits.pending || visits.visits) {
       setLedgerStarted(true);
       return;
     }
     const timer = window.setTimeout(() => setLedgerStarted(true), 3000);
     return () => window.clearTimeout(timer);
-  }, [ledgerStarted, visits.pending]);
+  }, [ledgerStarted, visits.pending, visits.visits]);
 
   // 置顶按钮：滚过约一屏内容后出现（rAF 节流，与在线练习页同款）
   const [showTop, setShowTop] = useState(false);

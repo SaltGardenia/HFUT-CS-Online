@@ -58,9 +58,9 @@ export async function requestSiteVisit(
   visitor = visitorId(),
   session = visitSessionId(),
 ): Promise<SiteVisits | null> {
-  // 首页整栏数字都在等这次上报：请求挂住也要有个头，超时就当拿不到
+  // 请求挂住也要有个头；放长到 8s，慢网也尽量让它跑完（计数会写进缓存兜底）
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
+  const timer = setTimeout(() => controller.abort(), 8000);
   try {
     const res = await fetch(`${url}/rest/v1/rpc/record_site_visit`, {
       method: 'POST',
@@ -91,6 +91,38 @@ let visitRequest: Promise<SiteVisits | null> | null = null;
 /** 请求结果缓存：首页晚于上报挂载时直接取用，不必先闪一帧骨架 */
 let visitResult: SiteVisits | null | undefined;
 
+/** 上一次成功拿到的计数：请求慢或失败时先用它兜底，别让首页两项忽然消失 */
+const VISITS_CACHE_KEY = 'hb-site-visits';
+
+function todayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** 读缓存；只认同一天的计数（「今日访问量」跨天就作废） */
+export function readVisitsCache(): SiteVisits | null {
+  try {
+    const raw = readStorage('local')?.getItem(VISITS_CACHE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as { total?: unknown; today?: unknown; day?: unknown };
+    const total = Number(data.total);
+    const today = Number(data.today);
+    if (data.day !== todayKey()) return null;
+    if (!Number.isFinite(total) || !Number.isFinite(today)) return null;
+    return { total, today };
+  } catch {
+    return null;
+  }
+}
+
+function writeVisitsCache(visits: SiteVisits): void {
+  try {
+    readStorage('local')?.setItem(VISITS_CACHE_KEY, JSON.stringify({ ...visits, day: todayKey() }));
+  } catch {
+    // 存储被禁用时忽略：只是少了兜底，不影响显示
+  }
+}
+
 /**
  * 每次打开站点只上报一次：SPA 内部跳转、React StrictMode 的重复执行
  * 都复用同一个请求；服务端再按「访客 + 会话 + 日期」去重。
@@ -99,34 +131,36 @@ export function recordSiteVisit(): Promise<SiteVisits | null> {
   if (!syncEnabled) return Promise.resolve(null);
   visitRequest ??= requestSiteVisit(SUPABASE_URL, SUPABASE_ANON_KEY).then((value) => {
     visitResult = value;
+    if (value) writeVisitsCache(value);
     return value;
   });
   return visitRequest;
 }
 
 export interface SiteVisitsState {
-  /** 是否接入访问统计：未配置数据库时首页不渲染这两项，也不显示占位 */
+  /** 是否接入访问统计：未配置数据库时首页不渲染这两项 */
   enabled: boolean;
-  /** 请求仍在路上：首页用骨架占位，数字到位后交叉淡入 */
+  /** 请求仍在路上 */
   pending: boolean;
-  /** 计数；上报失败时为 null（此时两项会收起） */
+  /** 计数：优先当天缓存，拿不到又没缓存时为 null（两项收起） */
   visits: SiteVisits | null;
 }
 
-/** 首页数字行：区分「还没到」与「拿不到」，前者占位、后者不渲染。 */
+/** 首页数字行：有当天缓存就先拿缓存顶上，请求回来再换成新值。 */
 export function useSiteVisits(): SiteVisitsState {
-  const [state, setState] = useState<{ pending: boolean; visits: SiteVisits | null }>(() =>
-    visitResult !== undefined
-      ? { pending: false, visits: visitResult }
-      : { pending: syncEnabled, visits: null },
-  );
+  const [state, setState] = useState<{ pending: boolean; visits: SiteVisits | null }>(() => {
+    if (visitResult) return { pending: false, visits: visitResult };
+    const cached = readVisitsCache();
+    // 已经判定拿不到（visitResult === null）时只剩缓存可用
+    return { pending: visitResult !== null && syncEnabled, visits: cached };
+  });
 
   useEffect(() => {
     if (!syncEnabled) return;
     let alive = true;
     void recordSiteVisit().then((value) => {
-      // 已有结果时不再改写，避免一次无谓的重渲染
-      if (alive) setState((prev) => (prev.pending ? { pending: false, visits: value } : prev));
+      // 已有结果时不再改写，避免一次无谓的重渲染；失败则保留缓存兜底
+      if (alive) setState((prev) => (prev.pending ? { pending: false, visits: value ?? prev.visits } : prev));
     });
     return () => {
       alive = false;

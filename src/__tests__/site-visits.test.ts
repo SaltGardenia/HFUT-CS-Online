@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { requestSiteVisit, visitSessionId, visitorId } from '../lib/visits';
+import { readVisitsCache, requestSiteVisit, visitSessionId, visitorId } from '../lib/visits';
 
 const BASE = 'https://demo.supabase.co';
 const KEY = 'sb_publishable_test';
@@ -61,5 +61,34 @@ describe('站点访问量上报', () => {
     expect(visitSessionId()).toBe(session);
     expect(localStorage.getItem('hb-visitor-id')).toBe(visitor);
     expect(sessionStorage.getItem('hb-visit-session')).toBe(session);
+  });
+});
+
+describe('访问量缓存兜底', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+
+  function day(offset = 0): string {
+    const d = new Date();
+    d.setDate(d.getDate() + offset);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  it('当天的缓存直接可用', () => {
+    localStorage.setItem('hb-site-visits', JSON.stringify({ total: 190, today: 31, day: day() }));
+    expect(readVisitsCache()).toEqual({ total: 190, today: 31 });
+  });
+
+  it('跨天或损坏的缓存作废（「今日访问量」不能沿用昨天）', () => {
+    localStorage.setItem('hb-site-visits', JSON.stringify({ total: 190, today: 31, day: day(-1) }));
+    expect(readVisitsCache()).toBeNull();
+
+    localStorage.setItem('hb-site-visits', JSON.stringify({ total: 'x', today: 1, day: day() }));
+    expect(readVisitsCache()).toBeNull();
+
+    localStorage.setItem('hb-site-visits', 'not json');
+    expect(readVisitsCache()).toBeNull();
   });
 });
