@@ -41,12 +41,6 @@ export default function SePracticeIndex() {
   return (
     <div className="page">
       <h1>在线练习</h1>
-      <div className="lede">
-        <p>
-          按试卷整理的课程试题：先选择一份试卷，进入答题页后作答——左侧为题型热力图（一格一题、绿对红错），
-          右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
-        </p>
-      </div>
       <ExamInsights
         papers={sePapers}
         kindLabel={SE_KIND_LABEL}

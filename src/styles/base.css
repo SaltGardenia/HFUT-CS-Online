@@ -4245,7 +4245,7 @@ pre.code .cl-code:empty + .cl-com {
   box-shadow: none;
 }
 
-/* 悬停明细：行内弹出，不进 JS */
+/* 悬停明细：行内弹出，不进 JS；背景必须不透明（panel-solid），否则行文字会透出来 */
 .ei-tip {
   position: absolute;
   z-index: 30;
@@ -4256,7 +4256,7 @@ pre.code .cl-code:empty + .cl-com {
   gap: 2px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: var(--panel-strong);
+  background: var(--panel-solid);
   border: 1px solid var(--hairline);
   box-shadow: var(--shadow-2);
   font-size: 12px;
