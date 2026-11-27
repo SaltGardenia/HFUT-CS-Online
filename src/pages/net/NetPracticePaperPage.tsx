@@ -6,7 +6,7 @@ import { findNetPaper, type NetPaper } from '../../content/net';
 import PracticeCard from '../../components/practice/PracticeCard';
 import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
-import { IconChevronUp } from '../../components/icons';
+import { IconArrowLeft, IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
 
@@ -113,13 +113,16 @@ function NetPaperInner({ paper }: { paper: NetPaper }) {
   return (
     <div className="page practice-page">
       <div className="net-paper-head">
-        <h1>{paper.title}</h1>
+        <div className="paper-title-row">
+          <Link to={`${NET_BASE}/practice`} className="paper-back">
+            <IconArrowLeft size={13} />
+            返回试卷列表
+          </Link>
+          <h1>{paper.title}</h1>
+        </div>
         <p className="net-paper-sub">
           {paper.meta} · {paper.answerSource} · 原卷：{paper.source}
         </p>
-        <Link to={`${NET_BASE}/practice`} className="net-paper-back">
-          ← 返回试卷列表
-        </Link>
       </div>
 
       {/* 总进度条 */}
