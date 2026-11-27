@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { maoBank, type MaoQuestion } from '../../content/maogai';
@@ -16,9 +16,6 @@ import { useCourseQMarks } from '../../lib/sync';
 import QuestionCard from './QuestionCard';
 
 const MAO_COURSE = 'maogai';
-/** 答对后停留（给判分反馈）/ 答错后停留（看正确答案）的时长 */
-const NEXT_DELAY_GOOD = 420;
-const NEXT_DELAY_BAD = 1150;
 
 export default function MaoQuizSession() {
   const { mode } = useParams();
@@ -39,7 +36,8 @@ export default function MaoQuizSession() {
   });
   const [idx, setIdx] = useState(0);
   const [tally, setTally] = useState({ good: 0, bad: 0 });
-  const timerRef = useRef(0);
+  // 判分后手动点「下一题」推进（Enter 等价）
+  const next = () => setIdx((i) => i + 1);
 
   const q = queue[idx];
   const finished = idx >= queue.length;
@@ -49,7 +47,6 @@ export default function MaoQuizSession() {
   const favOn = (id: string) => !!marks.fav[id]?.on;
   const toggleFav = (id: string) => setQMark(MAO_COURSE, 'fav', id, !favOn(id));
 
-  useEffect(() => () => window.clearTimeout(timerRef.current), []);
 
   /** 学习队列（不限量）；复习队列带溢出顺延 */
   const buildQueue = (m: 'learn' | 'review', now = Date.now()) => {
@@ -77,8 +74,6 @@ export default function MaoQuizSession() {
       const stillLearning = !rec || rec.st === 0 ? !good || streakAfter < LEARN_STREAK : false;
       if (stillLearning) setQueue((qu) => [...qu, item]);
     }
-    window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => setIdx((i) => i + 1), good ? NEXT_DELAY_GOOD : NEXT_DELAY_BAD);
   };
 
   const endActions = useMemo(() => {
@@ -147,7 +142,7 @@ export default function MaoQuizSession() {
       >
         <QuestionCard
           q={q}
-          autoAdvance
+          onNext={next}
           onGrade={onGrade(q)}
           fav={{ on: favOn(q.id), onToggle: () => toggleFav(q.id) }}
         />

@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { maoKindLabel, JUDGE_OPTIONS, optionsOf, type MaoQuestion } from '../../content/maogai';
 import { decodeEntities } from '../../lib/text';
-import { IconCheck, IconStar, IconX } from '../../components/icons';
+import { IconCheck, IconReset, IconStar, IconX } from '../../components/icons';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const normalize = (s: string) => s.replace(/\s+/g, '').replace(/　/g, '');
@@ -17,8 +17,8 @@ interface Props {
   q: MaoQuestion;
 /** 判分上报：good = 答对；elapsedMs = 本题反应时长（间隔增幅修正）；「看答案」按没答上处理（回炉） */
   onGrade: (good: boolean, elapsedMs: number) => void;
-  /** 会话模式：判分后由外层定时推进；书页模式：判分后出现「重做」 */
-  autoAdvance: boolean;
+/** 下一题动作：传入则判分后出现「下一题」按钮（会话模式）；不传显示「重做」（书页模式） */
+  onNext?: () => void;
   /** 收藏星标 */
   fav: { on: boolean; onToggle: () => void };
   /** 角标动作（错题本：移出错题本） */
@@ -30,7 +30,7 @@ interface Props {
  * 单选/判断点选项立即判分；多选勾选后提交；填空输入比对；
  * 「直接看答案」视为没答上。判分结果经 onGrade 交给外层（调度账 + 错题本）。
  */
-export default function QuestionCard({ q, onGrade, autoAdvance, fav, cornerAction }: Props) {
+export default function QuestionCard({ q, onGrade, onNext, fav, cornerAction }: Props) {
   const options = optionsOf(q);
   const answerIdx = q.kind === 'fill' ? [] : (q.answer as number[]);
   const [picked, setPicked] = useState<string[]>([]);
@@ -108,6 +108,18 @@ export default function QuestionCard({ q, onGrade, autoAdvance, fav, cornerActio
     if (revealed && !correct) return 'dim';
     return '';
   };
+
+  // 判分后 Enter = 下一题（会话模式）
+  useEffect(() => {
+    if (!locked || !onNext) return;
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      onNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [locked, onNext]);
 
   const cls = submitted === 'right' ? ' answered-right' : submitted === 'wrong' ? ' answered-wrong' : '';
   const hasCorner = fav || cornerAction;
@@ -198,10 +210,15 @@ export default function QuestionCard({ q, onGrade, autoAdvance, fav, cornerActio
         <p className="quiz-note">不完全一致——术语要写全，可对照上方答案核对。</p>
       )}
 
-      {!autoAdvance && locked && (
+      {locked && onNext && (
+        <div className="quiz-actions">
+          <button className="btn primary" onClick={onNext}>下一题</button>
+        </div>
+      )}
+      {locked && !onNext && (
         <div className="quiz-actions">
           <button className="btn" onClick={reset}>
-            重做
+            <IconReset size={14} /> 重做
           </button>
         </div>
       )}

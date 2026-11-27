@@ -41,7 +41,6 @@ export default function MaoQuizBook() {
             <QuestionCard
               key={q.id}
               q={q}
-              autoAdvance={false}
               onGrade={(good, elapsedMs) => {
                 gradeCard(q.id, good, elapsedMs, q.kind);
                 if (!good) setQMark(MAO_COURSE, 'wrong', q.id, true);

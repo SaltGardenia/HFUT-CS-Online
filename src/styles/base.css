@@ -5007,6 +5007,12 @@ pre.code .cl-code:empty + .cl-com {
 }
 .mq-card h2 { margin: 0 0 16px; font-size: 15px; font-weight: 650; color: var(--ink); }
 
+/* 总进度条：pq-progress 原本坐在 .page 白卡上，毛概页直接铺在页面底色上，补齐面板底 */
+.mq-main .pq-progress {
+  background: var(--panel-strong);
+  box-shadow: var(--shadow-1);
+}
+
 /* 到期柱状图 */
 .mq-chart { display: flex; gap: 6px; }
 .mq-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
