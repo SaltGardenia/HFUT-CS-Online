@@ -21,6 +21,15 @@ export function physPaperStats(paperId: string, results: Record<string, PhysResu
   return { done, right, total: paper.questions.length };
 }
 
+/** 卡片小字只留题型信息（大学物理固定为简答/计算两类） */
+function physKindSummary(paper: { questions: { kind: string }[] }): string {
+  const label: Record<string, string> = { essay: '简答', calc: '计算' };
+  return ['essay', 'calc']
+    .filter((k) => paper.questions.some((q) => q.kind === k))
+    .map((k) => `${label[k]} ${paper.questions.filter((q) => q.kind === k).length}`)
+    .join(' · ');
+}
+
 /** 「大学物理」在线练习 · 试卷列表：多份试卷先选卷，再进入答题页 */
 export default function PhysPracticeList() {
   const reduced = useReducedMotion();
@@ -65,10 +74,7 @@ export default function PhysPracticeList() {
             >
               <Link to={`${PHYS_BASE}/practice/${p.id}`} className="net-paper-card material" aria-label={`进入 ${p.title}`}>
                 <span className="net-paper-title">{p.title}</span>
-                <span className="net-paper-meta">{p.source}</span>
-                <span className="net-paper-source">
-                  {p.answerSource} · {n} 题
-                </span>
+                <span className="net-paper-source">{physKindSummary(p)}</span>
                 <span className="net-paper-progress">
                   已作答 {done} / {n} · 已展开解析 {right} 题
                   <i aria-hidden="true">

@@ -18,6 +18,14 @@ const NET_KIND_LABEL: Record<string, string> = {
   fill: '填空',
   essay: '解答',
 };
+const NET_KINDS: (keyof typeof NET_KIND_LABEL)[] = ['single', 'multi', 'judge', 'fill', 'essay'];
+
+/** 卡片小字只留题型信息 */
+function netKindSummary(paper: { questions: { kind: string }[] }): string {
+  return NET_KINDS.filter((k) => paper.questions.some((q) => q.kind === k))
+    .map((k) => `${NET_KIND_LABEL[k]} ${paper.questions.filter((q) => q.kind === k).length}`)
+    .join(' · ');
+}
 
 /** 「计算机网络」在线练习 · 试卷列表：多份试卷先选卷，再进入答题页 */
 export default function NetPracticeListPage() {
@@ -63,10 +71,7 @@ export default function NetPracticeListPage() {
             >
               <Link to={`${NET_BASE}/practice/${p.id}`} className="net-paper-card material" aria-label={`进入 ${p.title}`}>
                 <span className="net-paper-title">{p.title}</span>
-                <span className="net-paper-meta">{p.meta}</span>
-                <span className="net-paper-source">
-                  {p.answerSource} · {n} 题
-                </span>
+                <span className="net-paper-source">{netKindSummary(p)}</span>
                 <span className="net-paper-progress">
                   已作答 {done} / {n} · 答对 {right} 题
                   <i aria-hidden="true">

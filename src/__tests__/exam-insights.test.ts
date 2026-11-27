@@ -9,7 +9,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
 import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import {
   buildExamInsights,
@@ -137,7 +136,6 @@ describe('ExamInsights 组件渲染', () => {
         chapterNames: { 1: '绪论', 2: '进程管理' },
       }),
     );
-    const html = container.innerHTML;
     expect(container.querySelector('.exam-insights')).toBeTruthy();
     expect(container.textContent).toContain('考点分析');
     expect(container.textContent).toContain('2 份试卷 · 3 道题 · 覆盖 2/2 章');

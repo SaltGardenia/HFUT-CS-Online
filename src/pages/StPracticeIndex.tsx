@@ -56,9 +56,7 @@ export default function StPracticeIndex() {
             </span>
             <span className="ext-card-body">
               <span className="ext-card-title">{p.title}</span>
-              <span className="ext-card-desc">
-                {p.source} · {p.questions.length} 题（{kinds}） · 参考答案：{p.answerSource}
-              </span>
+              <span className="ext-card-desc">{kinds}</span>
               <span className="ext-card-progress">
                 <i aria-hidden="true">
                   <span style={{ width: `${(done / p.questions.length) * 100}%` }} />
