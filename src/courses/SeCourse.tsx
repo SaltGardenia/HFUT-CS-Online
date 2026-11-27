@@ -8,7 +8,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import { type SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import SeHomePage from '../pages/SeHomePage';
 import SeChapterPage from '../pages/SeChapterPage';
 import SePracticeIndex from '../pages/SePracticeIndex';
@@ -18,7 +18,7 @@ import QuestionBookPage, { buildBookEntries } from '../components/practice/books
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
-/** 软件工程课程搜索索引：章节目录 + 试卷 */
+/** 软件工程课程搜索索引：章节目录 + 试卷 + 全部试题 */
 function buildSeIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of seChapters) {
@@ -31,6 +31,7 @@ function buildSeIndex(): SearchIndexItem[] {
   for (const p of sePapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习 · 试卷', sectionId: p.id, text: p.title });
   }
+  appendPaperIndex(items, sePapers);
   return items;
 }
 
@@ -188,7 +189,7 @@ export default function SeCourse() {
   const searchLinkTo = (item: SearchIndexItem) =>
     item.unit
       ? `${SE_BASE}/deck/${item.unit}?s=${item.sectionId}`
-      : `${SE_BASE}/practice/${item.sectionId}`;
+      : `${SE_BASE}/practice/${item.sectionId}${item.questionId ? `?s=${item.questionId}` : ''}`;
 
   return (
     <div className="shell">

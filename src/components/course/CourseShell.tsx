@@ -8,7 +8,8 @@ import TopBar, { type CourseTab, type CourseTabMenuItem } from '../TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../Sidebar';
 import MobileDrawer from '../MobileDrawer';
 import type { SearchIndexItem } from '../SearchBox';
-import { appendOutlineIndex } from '../../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../../lib/outlineSearch';
+import { useAttachmentSearchIndex } from '../../lib/attachmentSearch';
 import CourseHomeView from './CourseHomeView';
 import CourseChapterView from './CourseChapterView';
 import CoursePracticeIndex from './CoursePracticeIndex';
@@ -235,6 +236,8 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
     [config, currentChapter, onPractice, onAtt, onExtra, extras],
   );
 
+  // 纯附件课（无章节与试卷）：课程内容即附件清单，按文件名检索
+  const attachmentIndex = useAttachmentSearchIndex(config.base, !config.chapters.length && !config.papers.length);
   const searchIndex = useMemo<SearchIndexItem[]>(() => {
     const items: SearchIndexItem[] = [];
     for (const ch of config.chapters) {
@@ -259,15 +262,17 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
         text: p.title,
       });
     }
+    appendPaperIndex(items, config.papers);
     return items;
   }, [config]);
+  const fullIndex = searchIndex.length ? searchIndex : attachmentIndex;
 
-  const searchLinkTo = (item: SearchIndexItem) =>
-    item.unit
-      ? `${config.base}/chapter/${item.unit}?s=${item.sectionId}`
-      : config.singlePaperDirect
-        ? `${config.base}/practice`
-        : `${config.base}/practice/${item.sectionId}`;
+  const searchLinkTo = (item: SearchIndexItem) => {
+    if (item.questionId) return `${config.base}/practice/${item.sectionId}?s=${item.questionId}`;
+    if (item.unit) return `${config.base}/chapter/${item.unit}?s=${item.sectionId}`;
+    if (item.kind === '附件') return `${config.base}/attachments?f=${encodeURIComponent(item.sectionId)}`;
+    return config.singlePaperDirect ? `${config.base}/practice` : `${config.base}/practice/${item.sectionId}`;
+  };
 
   return (
     <div className="shell">
@@ -276,7 +281,7 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
         courseBase={config.base}
         courseTip={config.tip}
         tabs={tabs}
-        searchIndex={searchIndex}
+        searchIndex={fullIndex}
         searchLinkTo={searchLinkTo}
         onOpenSidebar={() => setDrawerOpen(true)}
       />

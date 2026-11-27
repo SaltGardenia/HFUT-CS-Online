@@ -8,7 +8,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import { type SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import DbHomePage from '../pages/DbHomePage';
 import DbChapterPage from '../pages/DbChapterPage';
 import DbPracticeIndex from '../pages/DbPracticeIndex';
@@ -18,7 +18,7 @@ import QuestionBookPage, { buildBookEntries } from '../components/practice/books
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
-/** 数据库系统课程搜索索引：章节目录 + 试卷 */
+/** 数据库系统课程搜索索引：章节目录 + 试卷 + 全部试题 */
 function buildDbIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of dbChapters) {
@@ -31,6 +31,7 @@ function buildDbIndex(): SearchIndexItem[] {
   for (const p of dbPapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习 · 历年试卷', sectionId: p.id, text: p.title });
   }
+  appendPaperIndex(items, dbPapers);
   return items;
 }
 
@@ -188,7 +189,7 @@ export default function DbCourse() {
   const searchLinkTo = (item: SearchIndexItem) =>
     item.unit
       ? `${DB_BASE}/chapter/${item.unit}?s=${item.sectionId}`
-      : `${DB_BASE}/practice/${item.sectionId}`;
+      : `${DB_BASE}/practice/${item.sectionId}${item.questionId ? `?s=${item.questionId}` : ''}`;
 
   return (
     <div className="shell">

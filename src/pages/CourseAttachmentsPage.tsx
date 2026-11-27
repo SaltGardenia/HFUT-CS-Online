@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { courses } from '../courses/registry';
 import { useToc } from '../lib/toc';
 
@@ -102,6 +102,10 @@ export default function CourseAttachmentsPage() {
   /** 已展开的目录路径集合（默认全收起，保持层级紧凑） */
   const [openDirs, setOpenDirs] = useState<Set<string>>(new Set());
 
+  // ?f=<路径> 深链（搜索附件命中跳转）：展开祖先目录，滚动定位并短暂高亮
+  const [params] = useSearchParams();
+  const focusPath = params.get('f');
+
   useEffect(() => {
     toc.report([], () => {});
     return () => toc.report([], () => {});
@@ -136,6 +140,26 @@ export default function CourseAttachmentsPage() {
       else next.add(p);
       return next;
     });
+
+  // 清单到位后执行 ?f= 定位；路径变化（在同页再次搜索）时重新定位
+  useEffect(() => {
+    if (!manifest || !focusPath) return;
+    const segs = focusPath.split('/');
+    setOpenDirs((s) => {
+      const next = new Set(s);
+      for (let i = 1; i < segs.length; i++) next.add(segs.slice(0, i).join('/'));
+      return next;
+    });
+    const t = window.setTimeout(() => {
+      const el = document.querySelector(`[data-att-path="${window.CSS?.escape?.(focusPath) ?? focusPath}"]`);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      el.classList.add('att-flash');
+      window.setTimeout(() => el.classList.remove('att-flash'), 1900);
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [manifest, focusPath]);
 
   /** 仓库 raw 直链（路径逐段编码，保留 /） */
   const rawUrl = (node: AttNode) => {
@@ -187,7 +211,7 @@ export default function CourseAttachmentsPage() {
       {nodes.map((node) => {
         if (!node.c) {
           return (
-            <div key={node.p} className="att-row att-row-file">
+            <div key={node.p} className="att-row att-row-file" data-att-path={node.p}>
               <div className="att-row-main">
                 <span className="att-row-name" title={node.n}>
                   {node.n}
@@ -212,7 +236,7 @@ export default function CourseAttachmentsPage() {
         const open = openDirs.has(node.p);
         return (
           <Fragment key={node.p}>
-            <div className={`att-row att-row-dir${open ? ' open' : ''}`}>
+            <div className={`att-row att-row-dir${open ? ' open' : ''}`} data-att-path={node.p}>
               <button type="button" className="att-dir-btn" aria-expanded={open} onClick={() => toggleDir(node.p)}>
                 <span className="att-caret" aria-hidden>
                   ▸

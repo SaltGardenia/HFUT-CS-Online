@@ -5,7 +5,7 @@ import { useScrollMemory } from '../lib/scrollMemory';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
-import type { SearchIndexItem } from '../components/SearchBox';
+import { useAttachmentSearchIndex } from '../lib/attachmentSearch';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
 import { IP_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
@@ -91,8 +91,8 @@ export default function IpCourse() {
     [],
   );
 
-  // 附件课无可检索内容：空索引（TopBar 对空索引不渲染搜索胶囊）
-  const searchIndex = useMemo<SearchIndexItem[]>(() => [], []);
+  // 纯附件课：课程内容即附件清单，异步拉取后按目录/文件名检索
+  const searchIndex = useAttachmentSearchIndex(IP_BASE);
 
   return (
     <div className="shell">
@@ -102,7 +102,7 @@ export default function IpCourse() {
         courseTip="创新实践 · 创新实践报告"
         tabs={tabs}
         searchIndex={searchIndex}
-        searchLinkTo={() => ''}
+        searchLinkTo={(item) => `${IP_BASE}/attachments?f=${encodeURIComponent(item.sectionId)}`}
         onOpenSidebar={() => setDrawerOpen(true)}
       />
 

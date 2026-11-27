@@ -7,7 +7,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import PatHome from '../pages/pat/Home';
 import PatDeck from '../pages/pat/Deck';
 import PatPractice from '../pages/pat/Practice';
@@ -28,17 +28,8 @@ export function buildPatIndex(): SearchIndexItem[] {
       items.push({ kind: '章节', unit: deck.id, unitTitle: decodeEntities(deck.title), sectionId: t.id, text: decodeEntities(t.text) });
     }
   }
-  for (const paper of papers) {
-    for (const q of paper.questions) {
-      items.push({
-        kind: '题目',
-        unit: null,
-        unitTitle: '在线练习',
-        sectionId: q.id,
-        text: `${q.no}. ${q.title}`,
-      });
-    }
-  }
+  // 赛题整段入索引（题面 + 参考思路 + 解析），命中后深链定位到题
+  appendPaperIndex(items, papers);
   appendOutlineIndex(items, patHome, '总目录', null);
   for (const t of patHome.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '课程主页', sectionId: t.id, text: decodeEntities(t.text) });
@@ -212,8 +203,8 @@ export default function PatCourse() {
   const searchLinkTo = (item: SearchIndexItem) => {
     if (item.unit) return `${PAT_BASE}/deck/${item.unit}?s=${item.sectionId}`;
     // 赛题条目跳在线练习并定位到题；其余为课程主页目录
-    return item.unitTitle === '在线练习'
-      ? `${PAT_BASE}/practice?s=${item.sectionId}`
+    return item.questionId
+      ? `${PAT_BASE}/practice?s=${item.questionId}`
       : `${PAT_BASE}/?s=${item.sectionId}`;
   };
 

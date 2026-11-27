@@ -8,7 +8,7 @@ import TopBar, { type CourseTab, type CourseTabMenuItem } from '../components/To
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import { type SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import CaHomePage from '../pages/CaHomePage';
 import CaChapterPage from '../pages/CaChapterPage';
 import CaPracticeIndex from '../pages/CaPracticeIndex';
@@ -27,7 +27,7 @@ const CA_UNITS: { name: string; tip: string; chapters: string[] }[] = [
   { name: '多核与一致性', tip: '第 13～14 讲 · 多核处理器、缓存一致性', chapters: ['ch13', 'ch14'] },
 ];
 
-/** 计算机体系结构搜索索引：讲次目录 + 试卷 */
+/** 计算机体系结构搜索索引：讲次目录 + 试卷 + 全部试题 */
 function buildCaIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of caChapters) {
@@ -40,6 +40,7 @@ function buildCaIndex(): SearchIndexItem[] {
   for (const p of caPapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习 · 试题', sectionId: p.id, text: p.title });
   }
+  appendPaperIndex(items, caPapers);
   return items;
 }
 
@@ -187,7 +188,9 @@ export default function CaCourse() {
 
   const searchIndex = useMemo(buildCaIndex, []);
   const searchLinkTo = (item: SearchIndexItem) =>
-    item.unit ? `${CA_BASE}/chapter/${item.unit}?s=${item.sectionId}` : `${CA_BASE}/practice/${item.sectionId}`;
+    item.unit
+      ? `${CA_BASE}/chapter/${item.unit}?s=${item.sectionId}`
+      : `${CA_BASE}/practice/${item.sectionId}${item.questionId ? `?s=${item.questionId}` : ''}`;
 
   return (
     <div className="shell">

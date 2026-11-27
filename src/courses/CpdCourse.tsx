@@ -5,7 +5,7 @@ import { useScrollMemory } from '../lib/scrollMemory';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
-import type { SearchIndexItem } from '../components/SearchBox';
+import { useAttachmentSearchIndex } from '../lib/attachmentSearch';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
 import { CPD_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
@@ -91,8 +91,8 @@ export default function CpdCourse() {
     [],
   );
 
-  // 附件课无可检索内容：空索引（TopBar 对空索引不渲染搜索胶囊）
-  const searchIndex = useMemo<SearchIndexItem[]>(() => [], []);
+  // 纯附件课：课程内容即附件清单，异步拉取后按目录/文件名检索
+  const searchIndex = useAttachmentSearchIndex(CPD_BASE);
 
   return (
     <div className="shell">
@@ -102,7 +102,7 @@ export default function CpdCourse() {
         courseTip="编译原理课程设计 · 课程设计报告与指导书"
         tabs={tabs}
         searchIndex={searchIndex}
-        searchLinkTo={() => ''}
+        searchLinkTo={(item) => `${CPD_BASE}/attachments?f=${encodeURIComponent(item.sectionId)}`}
         onOpenSidebar={() => setDrawerOpen(true)}
       />
 

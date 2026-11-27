@@ -9,7 +9,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import NetHomePage from '../pages/NetHomePage';
 import NetUnitPage from '../pages/NetUnitPage';
 import NetPracticeListPage from '../pages/net/NetPracticeListPage';
@@ -21,7 +21,7 @@ import { NET_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
-/** 计网课搜索索引：各章目录 + 试卷入口 + 总目录 */
+/** 计网课搜索索引：各章目录 + 试卷 + 全部试题 + 总目录 */
 function buildNetIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of netChapters) {
@@ -39,6 +39,7 @@ function buildNetIndex(): SearchIndexItem[] {
   for (const p of netPapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习', sectionId: p.id, text: decodeEntities(p.title) });
   }
+  appendPaperIndex(items, netPapers);
   appendOutlineIndex(items, netHome, '总目录', null);
   for (const t of netHome.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '总目录', sectionId: t.id, text: decodeEntities(t.text) });
@@ -202,6 +203,7 @@ export default function NetworkCourse() {
   // 搜索：章节/试卷索引 + 跳转路由
   const searchIndex = useMemo(buildNetIndex, []);
   const searchLinkTo = (item: SearchIndexItem) => {
+    if (item.questionId) return `${NET_BASE}/practice/${item.sectionId}?s=${item.questionId}`;
     if (item.kind === '试卷') return `${NET_BASE}/practice/${item.sectionId}`;
     return item.unit
       ? `${NET_BASE}/deck/${item.unit}?s=${item.sectionId}`

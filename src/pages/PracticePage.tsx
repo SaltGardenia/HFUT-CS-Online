@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
+import { useSearchParams } from 'react-router-dom';
 import { practiceQuestions, KIND_META, type PracticeKind } from '../content/practice';
 import PracticeCard from '../components/practice/PracticeCard';
 import PracticeReport from '../components/practice/report/PracticeReport';
@@ -127,6 +128,17 @@ export default function PracticePage() {
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  // ?s=<题目id> 深链（搜索试题命中跳转）：跨题型先切题型，滚动交给 pendingJump
+  const [params] = useSearchParams();
+  const deepLink = params.get('s');
+  useEffect(() => {
+    if (!deepLink) return;
+    const q = practiceQuestions.find((x) => x.id === deepLink);
+    if (!q) return;
+    jumpToQuestion(q.id, q.kind);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLink]);
 
   const { idx, showTop } = useScrollProbe(visible.length, kind);
 

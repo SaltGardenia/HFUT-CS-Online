@@ -8,7 +8,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import { type SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import OsHomePage from '../pages/OsHomePage';
 import OsChapterPage from '../pages/OsChapterPage';
 import OsPracticeIndex from '../pages/OsPracticeIndex';
@@ -18,7 +18,7 @@ import QuestionBookPage, { buildBookEntries } from '../components/practice/books
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
-/** OS 课程搜索索引：章节目录 + 试卷 */
+/** OS 课程搜索索引：章节目录 + 试卷 + 全部试题 */
 function buildOsIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of osChapters) {
@@ -31,6 +31,7 @@ function buildOsIndex(): SearchIndexItem[] {
   for (const p of osPapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习 · 历年试卷', sectionId: p.id, text: p.title });
   }
+  appendPaperIndex(items, osPapers);
   return items;
 }
 
@@ -188,7 +189,7 @@ export default function OsCourse() {
   const searchLinkTo = (item: SearchIndexItem) =>
     item.unit
       ? `${OS_BASE}/chapter/${item.unit}?s=${item.sectionId}`
-      : `${OS_BASE}/practice/${item.sectionId}`;
+      : `${OS_BASE}/practice/${item.sectionId}${item.questionId ? `?s=${item.questionId}` : ''}`;
 
   return (
     <div className="shell">

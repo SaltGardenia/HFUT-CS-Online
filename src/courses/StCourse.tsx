@@ -8,7 +8,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import { type SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import StHomePage from '../pages/StHomePage';
 import StChapterPage from '../pages/StChapterPage';
 import StPracticeIndex from '../pages/StPracticeIndex';
@@ -18,7 +18,7 @@ import QuestionBookPage, { buildBookEntries } from '../components/practice/books
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
-/** 软件测试课程搜索索引：章节目录 + 试卷 */
+/** 软件测试课程搜索索引：章节目录 + 试卷 + 全部试题 */
 function buildStIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of stChapters) {
@@ -31,6 +31,7 @@ function buildStIndex(): SearchIndexItem[] {
   for (const p of stPapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习 · 试卷', sectionId: p.id, text: p.title });
   }
+  appendPaperIndex(items, stPapers);
   return items;
 }
 
@@ -184,7 +185,7 @@ export default function StCourse() {
   const searchLinkTo = (item: SearchIndexItem) =>
     item.unit
       ? `${ST_BASE}/deck/${item.unit}?s=${item.sectionId}`
-      : `${ST_BASE}/practice/${item.sectionId}`;
+      : `${ST_BASE}/practice/${item.sectionId}${item.questionId ? `?s=${item.questionId}` : ''}`;
 
   return (
     <div className="shell">

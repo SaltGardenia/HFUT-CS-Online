@@ -7,7 +7,8 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
+import { useAttachmentSearchIndex } from '../lib/attachmentSearch';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
 import GenHomePage from '../pages/courses/GenHomePage';
 import GenChapterPage from '../pages/courses/GenChapterPage';
@@ -185,6 +186,8 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
     [base, currentChapter, onAtt, onPractice, spec.chapters, spec.papers.length],
   );
 
+  // 纯附件课（无章节与试卷）：课程内容即附件清单，按文件名检索
+  const attachmentIndex = useAttachmentSearchIndex(base, !spec.chapters.length && !spec.papers.length);
   const searchIndex = useMemo<SearchIndexItem[]>(() => {
     const items: SearchIndexItem[] = [];
     for (const ch of spec.chapters) {
@@ -196,23 +199,17 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
     }
     for (const p of spec.papers) {
       items.push({ kind: '试卷', unit: null, unitTitle: '在线练习 · 试卷', sectionId: p.id, text: p.title });
-      for (const q of p.questions) {
-        for (const t of q.tags) {
-          items.push({
-            kind: '题目',
-            unit: null,
-            unitTitle: p.title,
-            sectionId: p.id,
-            text: t.text,
-          });
-        }
-      }
     }
+    appendPaperIndex(items, spec.papers);
     return items;
   }, [spec.chapters, spec.papers]);
+  const fullIndex = searchIndex.length ? searchIndex : attachmentIndex;
 
-  const searchLinkTo = (item: SearchIndexItem) =>
-    item.unit ? `${base}/deck/${item.unit}?s=${item.sectionId}` : `${base}/practice/${item.sectionId}`;
+  const searchLinkTo = (item: SearchIndexItem) => {
+    if (item.questionId) return `${base}/practice/${item.sectionId}?s=${item.questionId}`;
+    if (!item.unit) return item.kind === '附件' ? `${base}/attachments?f=${encodeURIComponent(item.sectionId)}` : `${base}/practice/${item.sectionId}`;
+    return `${base}/deck/${item.unit}?s=${item.sectionId}`;
+  };
 
   const fullBleed = onPractice || onAtt;
 
@@ -223,7 +220,7 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
         courseBase={base}
         courseTip={spec.tip}
         tabs={tabs}
-        searchIndex={searchIndex}
+        searchIndex={fullIndex}
         searchLinkTo={searchLinkTo}
         onOpenSidebar={() => setDrawerOpen(true)}
       />

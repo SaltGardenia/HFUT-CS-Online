@@ -4042,6 +4042,19 @@ pre.code .cl-code:empty + .cl-com {
   padding: 10px 16px;
   border-top: 1px solid var(--hairline-soft);
 }
+/* ?f= 深链定位后的短暂闪显（搜索附件命中跳转） */
+.att-row.att-flash {
+  animation: att-flash-bg 1.9s ease;
+}
+@keyframes att-flash-bg {
+  0%,
+  55% {
+    background: color-mix(in srgb, var(--deck-accent) 14%, transparent);
+  }
+  100% {
+    background: transparent;
+  }
+}
 /* 目录行与子级块都占满整行，是「展开不换栏」的前提 */
 .att-row-dir,
 .att-children {

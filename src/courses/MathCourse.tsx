@@ -5,7 +5,7 @@ import { useScrollMemory } from '../lib/scrollMemory';
 import { MATH_BASE, courses, findCourseByBase } from './registry';
 import { mathChapters, mathPapers, MATH_KIND_LABEL, MATH_SECTIONS } from '../content/math';
 import { type SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -18,7 +18,7 @@ import QuestionBookPage, { buildBookEntries } from '../components/practice/books
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
-/** 高等数学搜索索引：章节目录 + 试卷 */
+/** 高等数学搜索索引：章节目录 + 试卷 + 全部试题 */
 function buildMathIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of mathChapters) {
@@ -31,6 +31,7 @@ function buildMathIndex(): SearchIndexItem[] {
   for (const p of mathPapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习 · 试卷', sectionId: p.id, text: p.title });
   }
+  appendPaperIndex(items, mathPapers);
   return items;
 }
 
@@ -169,7 +170,9 @@ export default function MathCourse() {
 
   const searchIndex = useMemo(buildMathIndex, []);
   const searchLinkTo = (item: SearchIndexItem) =>
-    item.unit ? `${MATH_BASE}/chapter/${item.unit}?s=${item.sectionId}` : `${MATH_BASE}/practice/${item.sectionId}`;
+    item.unit
+      ? `${MATH_BASE}/chapter/${item.unit}?s=${item.sectionId}`
+      : `${MATH_BASE}/practice/${item.sectionId}${item.questionId ? `?s=${item.questionId}` : ''}`;
 
   return (
     <div className="shell">

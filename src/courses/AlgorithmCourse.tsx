@@ -6,7 +6,7 @@ import { decks } from '../content';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
-import { buildAlgoIndex } from '../components/SearchBox';
+import { buildAlgoIndex, type SearchIndexItem } from '../components/SearchBox';
 import HomePage from '../pages/HomePage';
 import DeckPage from '../pages/DeckPage';
 import PracticePage from '../pages/PracticePage';
@@ -142,12 +142,14 @@ export default function AlgorithmCourse() {
     [currentDeck, onPractice],
   );
 
-  // 搜索：讲次/动画/自测题索引 + 跳转路由
+  // 搜索：讲次/动画/自测题/题库索引 + 跳转路由（题库命中深链到具体题）
   const searchIndex = useMemo(buildAlgoIndex, []);
-  const searchLinkTo = (item: { unit: string | null; sectionId: string }) =>
+  const searchLinkTo = (item: SearchIndexItem) =>
     item.unit
       ? `${ALGO_BASE}/deck/${item.unit}?s=${item.sectionId}`
-      : `${ALGO_BASE}/?s=${item.sectionId}`;
+      : item.questionId
+        ? `${ALGO_BASE}/practice?s=${item.questionId}`
+        : `${ALGO_BASE}/?s=${item.sectionId}`;
 
   return (
     <div className="shell">

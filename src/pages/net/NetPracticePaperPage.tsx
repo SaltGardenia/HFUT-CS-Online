@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { NET_BASE } from '../../courses/registry';
 import { findNetPaper, type NetPaper } from '../../content/net';
@@ -99,6 +99,16 @@ function NetPaperInner({ paper }: { paper: NetPaper }) {
     const top = el.getBoundingClientRect().top + window.scrollY - 108;
     window.scrollTo({ top: Math.max(0, top), behavior: reduced ? 'auto' : 'smooth' });
   };
+
+  // ?s=<题目id> 深链：定位到具体题目（搜索试题命中跳转）
+  const [params] = useSearchParams();
+  const deepLink = params.get('s');
+  useEffect(() => {
+    if (!deepLink) return;
+    const t = window.setTimeout(() => jumpToQuestion(deepLink), 120);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLink, paper.id]);
 
   // 知识点标签跳转：章号 → /net/deck/chN?s=sec
   const tagNav = (t: { deck: number; sec: string; text: string }) => ({

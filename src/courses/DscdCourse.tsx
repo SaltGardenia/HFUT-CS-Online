@@ -5,7 +5,7 @@ import { useScrollMemory } from '../lib/scrollMemory';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
-import type { SearchIndexItem } from '../components/SearchBox';
+import { useAttachmentSearchIndex } from '../lib/attachmentSearch';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
 import { DSCD_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
@@ -84,7 +84,8 @@ export default function DscdCourse() {
     [],
   );
 
-  const searchIndex = useMemo<SearchIndexItem[]>(() => [], []);
+  // 纯附件课：课程内容即附件清单，异步拉取后按目录/文件名检索
+  const searchIndex = useAttachmentSearchIndex(DSCD_BASE);
 
   return (
     <div className="shell">
@@ -94,7 +95,7 @@ export default function DscdCourse() {
         courseTip="数据结构课程设计 · 报告与代码"
         tabs={tabs}
         searchIndex={searchIndex}
-        searchLinkTo={() => ''}
+        searchLinkTo={(item) => `${DSCD_BASE}/attachments?f=${encodeURIComponent(item.sectionId)}`}
         onOpenSidebar={() => setDrawerOpen(true)}
       />
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DeckData } from '../content/types';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit, chapterReadingStatus } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit, chapterReadingStatus } from '../lib/outlineSearch';
 
 describe('讲义正文搜索', () => {
   const deck: DeckData = {
@@ -82,5 +82,72 @@ describe('讲义正文搜索', () => {
     expect(snippet).toContain('CRC');
     expect(snippet.indexOf('CRC')).toBeLessThanOrEqual(13);
     expect(snippet.length).toBeLessThanOrEqual(55);
+  });
+});
+
+describe('试题检索', () => {
+  const papers = [
+    {
+      id: 'ac2022',
+      title: '2022 年 A 卷',
+      sections: [
+        { questionIds: ['p1-s1'], short: '单选' },
+        { questionIds: ['p1-s2'], short: '判断' },
+        { questionIds: ['p1-f14'] },
+      ],
+      questions: [
+        { id: 'p1-s1', kind: 'single', question: '<p>银行家算法用于<strong>避免死锁</strong></p>', options: ['<p>预防死锁</p>', '<p>避免死锁</p>'], answer: 'B', explanation: '<p>银行家算法属于死锁<b>避免</b>策略</p>' },
+        { id: 'p1-s2', kind: 'judge', question: '<p>进程一直等待输入</p>', options: ['对', '错'], answer: '错', explanation: '' },
+        { id: 'p1-f14', kind: 'fill', question: '<p>虚存页面置换算法？</p>', answer: 'LRU' },
+      ],
+    },
+  ];
+  const items: SearchIndexItem[] = [];
+  appendPaperIndex(items, papers);
+
+  it('题干、选项、解析整段可检索，判断题不含选项与答案', () => {
+    expect(findSearchResults(items, '银行家算法')).toHaveLength(1);
+    expect(findSearchResults(items, '避免死锁')).toHaveLength(1);
+    expect(findSearchResults(items, '预防死锁')).toHaveLength(1);
+    expect(findSearchResults(items, 'LRU')).toHaveLength(1);
+    // 判断题的选项/答案不入索引；题干其它内容仍可命中
+    expect(findSearchResults(items, '一直等待')).toHaveLength(1);
+    expect(findSearchResults(items, '错')).toEqual([]);
+  });
+
+  it('条目带试卷名、题目 id 与题号标签，题号尽量与练习页一致', () => {
+    const [single, judge, fill] = items;
+    expect(single).toMatchObject({ kind: '题目', unit: null, unitTitle: '2022 年 A 卷', sectionId: 'ac2022', questionId: 'p1-s1', sectionTitle: '单选 1' });
+    expect(judge.sectionTitle).toBe('判断 2');
+    expect(fill.sectionTitle).toBe('填空 14');
+  });
+
+  it('无大题结构时按全卷顺序编号', () => {
+    const flat: SearchIndexItem[] = [];
+    appendPaperIndex(flat, [{ id: 'pat', title: '省赛卷', questions: [
+      { id: 'q1', title: ' STL ', question: '<p>sort 排序</p>' },
+      { id: 'q2', title: '搜索', question: '<p>BFS 剪枝</p>' },
+    ] }]);
+    expect(flat.map((i) => i.sectionTitle)).toEqual(['第 1 题', '第 2 题']);
+    expect(flat[0].text).toContain('STL');
+    expect(flat[0].text).toContain('sort');
+  });
+
+  it('标题优先于试题；同卷不同题互不去重', () => {
+    const title: SearchIndexItem = { kind: '章节', unit: 'ch1', unitTitle: '操作系统', sectionId: 'deadlock', text: '银行家算法' };
+    const results = findSearchResults([title, ...items], '银行家算法');
+    expect(results[0]).toBe(title);
+    expect(results.filter((r) => r.questionId === 'p1-s1')).toHaveLength(1);
+    // 大题短名参与题号：与练习页「单选 3」文案对齐
+    const seq: SearchIndexItem[] = [];
+    appendPaperIndex(seq, [{ id: 'net', title: '2024 卷', sections: [{ questionIds: ['p3-s1', 'p3-s2'], short: '单选' }], questions: [
+      { id: 'p3-s1', kind: 'single', question: '<p>集线器工作在</p>' },
+      { id: 'p3-s2', kind: 'single', question: '<p>交换机工作在</p>' },
+    ] }]);
+    expect(seq[1].sectionTitle).toBe('单选 2');
+  });
+
+  it('试题命中按试卷名 + 题号两行渲染', () => {
+    expect(outlineResultPath(items[0])).toEqual({ chapter: '2022 年 A 卷', heading: '单选 1', subheading: null });
   });
 });

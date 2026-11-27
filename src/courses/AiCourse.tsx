@@ -7,6 +7,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
+import { appendPaperIndex } from '../lib/outlineSearch';
 import AiPracticePage from '../pages/ai/AiPracticePage';
 import { AI_PRACTICE_STORE_KEY } from '../pages/ai/AiPracticePage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
@@ -15,16 +16,13 @@ import { AI_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
-/** 人工智能课搜索索引：5 个方向 + 15 个设计题目 */
+/** 人工智能课搜索索引：5 个方向 + 15 个设计题目（题干/要求整段可检索） */
 function buildAiIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const sec of aiPaper.sections) {
     items.push({ kind: '方向', unit: null, unitTitle: '设计报告题库', sectionId: sec.id, text: decodeEntities(sec.title) });
   }
-  for (const q of aiPaper.questions) {
-    const plain = decodeEntities(q.question.replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
-    items.push({ kind: '题目', unit: null, unitTitle: '设计报告题库', sectionId: q.id, text: plain.slice(0, 30) });
-  }
+  appendPaperIndex(items, [aiPaper]);
   return items;
 }
 
@@ -145,9 +143,9 @@ export default function AiCourse() {
     [onAtt],
   );
 
-  // 搜索：方向/题目索引 + 跳转（同页 ?s= 定位）
+  // 搜索：方向/题目索引 + 跳转（同页 ?s= 定位；试题命中定位到具体题）
   const searchIndex = useMemo(buildAiIndex, []);
-  const searchLinkTo = (item: SearchIndexItem) => `${practicePath}?s=${item.sectionId}`;
+  const searchLinkTo = (item: SearchIndexItem) => `${practicePath}?s=${item.questionId ?? item.sectionId}`;
 
   return (
     <div className="shell">

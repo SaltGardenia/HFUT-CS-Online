@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { MATH_BASE } from '../courses/registry';
 import { mathPapers, MATH_KIND_LABEL, MATH_SECTIONS } from '../content/math';
 import type { MathPaper, MathQuizKind, MathTag } from '../content/math';
@@ -133,6 +133,17 @@ function PaperInner({ paper }: { paper: MathPaper }) {
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  // ?s=<题目id> 深链（搜索试题命中跳转）：跨题型先切题型，滚动交给 pendingJump
+  const [params] = useSearchParams();
+  const deepLink = params.get('s');
+  useEffect(() => {
+    if (!deepLink) return;
+    const q = paper.questions.find((x) => x.id === deepLink);
+    if (!q) return;
+    jumpToQuestion(q.id, q.kind);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLink, paper.id]);
 
   const [probe, setProbe] = useState({ idx: 0, showTop: false });
   useEffect(() => {

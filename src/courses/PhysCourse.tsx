@@ -7,7 +7,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex } from '../lib/outlineSearch';
 import PhysHome from '../pages/phys/Home';
 import PhysDeck from '../pages/phys/Deck';
 import PhysPracticeList from '../pages/phys/PracticeList';
@@ -29,17 +29,18 @@ export function buildPhysIndex(): SearchIndexItem[] {
       items.push({ kind: '章节', unit: deck.id, unitTitle: decodeEntities(deck.title), sectionId: t.id, text: decodeEntities(t.text) });
     }
   }
-  for (const paper of physPapers) {
-    for (const q of paper.questions) {
-      items.push({
-        kind: '题目',
-        unit: null,
-        unitTitle: '在线练习',
-        sectionId: q.id,
-        text: `${q.no} ${q.title}`,
-      });
-    }
-  }
+  // 试题整段入索引（题面 + 参考解答 + 解析）；按练习页的大题分组规则合成 sections，题号文案一致
+  const paperIndex = physPapers.map((p) => ({
+    ...p,
+    sections: p.questions.reduce<{ short: string; questionIds: string[] }[]>((runs, q) => {
+      const short = q.kind === 'essay' ? '简答题' : '计算题';
+      const last = runs[runs.length - 1];
+      if (last && last.short === short) last.questionIds.push(q.id);
+      else runs.push({ short, questionIds: [q.id] });
+      return runs;
+    }, []),
+  }));
+  appendPaperIndex(items, paperIndex);
   appendOutlineIndex(items, physHome, '总目录', null);
   for (const t of physHome.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '课程主页', sectionId: t.id, text: decodeEntities(t.text) });
@@ -208,9 +209,9 @@ export default function PhysCourse() {
   const searchIndex = useMemo(buildPhysIndex, []);
   const searchLinkTo = (item: SearchIndexItem) => {
     if (item.unit) return `${PHYS_BASE}/deck/${item.unit}?s=${item.sectionId}`;
-    // 题目条目跳在线练习并定位到题；其余为课程主页目录
-    return item.unitTitle === '在线练习'
-      ? `${PHYS_BASE}/practice?s=${item.sectionId}`
+    // 试题条目跳对应试卷并定位到题；其余为课程主页目录
+    return item.questionId
+      ? `${PHYS_BASE}/practice/${item.sectionId}?s=${item.questionId}`
       : `${PHYS_BASE}/?s=${item.sectionId}`;
   };
 

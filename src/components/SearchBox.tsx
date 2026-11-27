@@ -2,22 +2,25 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboa
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { decks, homeData } from '../content';
+import { practiceQuestions } from '../content/practice';
 import { decodeEntities } from '../lib/text';
-import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit, chapterReadingStatus } from '../lib/outlineSearch';
+import { appendOutlineIndex, appendPaperIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit, chapterReadingStatus } from '../lib/outlineSearch';
 import { IconSearch, IconX } from './icons';
 import { READING_KEY } from '../lib/sync/keys';
 import { readReading, subscribeStore } from '../lib/sync/local';
 
 export interface SearchIndexItem {
-  kind: '章节' | '动画' | '题目' | '试卷' | '方向' | '正文';
+  kind: '章节' | '动画' | '题目' | '试卷' | '方向' | '正文' | '附件';
   /** 所属讲次/章节 id；null = 课程首页 */
   unit: string | null;
   unitTitle: string;
   sectionId: string;
-  /** 正文命中的知识点标题，与实际跳转锚点对应 */
+  /** 正文命中的知识点标题，与实际跳转锚点对应；试题命中是「第 N 题 · 题型」标签 */
   sectionTitle?: string;
   /** 正文所在的二级标题（H2），即使实际命中在 H3 下也保留。 */
   parentSectionTitle?: string;
+  /** 试题命中的题目 id：练习页 ?s= 深链，本条按长文本渲染（试卷名 + 题号 + 摘要） */
+  questionId?: string;
   text: string;
 }
 
@@ -37,7 +40,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
   );
 }
 
-/** 算法课的搜索索引：各讲目录 / 动画 / 自测题 + 总目录 */
+/** 算法课的搜索索引：各讲目录 / 动画 / 自测题 / 在线练习题库 + 总目录 */
 export function buildAlgoIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const deck of decks) {
@@ -76,6 +79,8 @@ export function buildAlgoIndex(): SearchIndexItem[] {
   for (const t of homeData.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '总目录', sectionId: t.id, text: decodeEntities(t.text) });
   }
+  // 在线练习题库（420 题）：题干/选项/解析整段可检索，命中后深链到具体题
+  appendPaperIndex(items, [{ id: 'bank', title: '在线练习 · 题库', questions: practiceQuestions }]);
   return items;
 }
 
@@ -205,11 +210,12 @@ export default function SearchBox({ index, linkTo }: Props) {
             <ul className="search-list">
               {results.length === 0 && query.trim() && <li className="palette-empty">没有匹配的内容</li>}
               {results.map((item, i) => {
-                const path = item.kind === '正文' ? outlineResultPath(item) : null;
+                // 正文与试题按「标题 + 摘要」两行渲染；试题的第二行右侧是试卷名
+                const path = item.kind === '正文' || item.questionId ? outlineResultPath(item) : null;
                 const status = chapterReadingStatus(item, linkTo(item), reading);
                 const chapterLabel = (
                   <span className="pi-path pi-reading-path">
-                    <span>{path?.chapter ?? (item.unit ? item.unitTitle : '首页')}</span>
+                    <span>{path?.chapter ?? (item.unit || item.questionId || item.kind === '附件' ? item.unitTitle : '首页')}</span>
                     {status && (
                       <span className={`pi-read-state${status.read ? ' is-read' : ''}`} title={status.read ? '本章有阅读记录；百分比为上次阅读位置' : '本章暂无阅读记录'}>
                         {status.read ? `已读 · ${status.percent}%` : '未读'}
@@ -220,7 +226,7 @@ export default function SearchBox({ index, linkTo }: Props) {
                 return (
                 <li
                   key={`${item.unit}-${item.sectionId}-${i}`}
-                  className={`palette-item${item.kind === '正文' ? ' palette-body' : ''}${i === active ? ' active' : ''}`}
+                  className={`palette-item${path ? ' palette-body' : ''}${i === active ? ' active' : ''}`}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => select(item)}
                 >
