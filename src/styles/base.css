@@ -2576,6 +2576,25 @@ pre.code .cl-code:empty + .cl-com {
   font-size: 0.7188rem;
   color: var(--ink-3);
 }
+.search-drop .pi-reading-path {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  gap: 2px;
+  min-width: 0;
+}
+.search-drop .pi-read-state {
+  font-size: 0.6563rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.search-drop .pi-read-state.is-read {
+  color: var(--ok);
+  font-weight: 600;
+}
 /* 正文结果独立显示知识点与命中摘要：不沿用单行省略，避免关键词被截掉。 */
 .search-drop .palette-item.palette-body {
   align-items: flex-start;

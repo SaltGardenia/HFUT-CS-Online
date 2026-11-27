@@ -1,6 +1,7 @@
 import type { DeckData } from '../content/types';
 import type { SearchIndexItem } from '../components/SearchBox';
 import { decodeEntities } from './text';
+import type { ReadingMap } from './sync/types';
 
 const normalize = (text: string) => text.replace(/\s+/g, ' ').trim();
 const boundary = /^(P|DIV|LI|UL|OL|TABLE|TR|TH|TD|PRE|BLOCKQUOTE|FIGCAPTION|BR|H[1-6]|HR|DL|DT|DD)$/;
@@ -95,4 +96,14 @@ export function outlineResultPath(item: SearchIndexItem): { chapter: string; hea
   const subheading = item.parentSectionTitle && item.sectionTitle && item.sectionTitle !== section
     ? item.sectionTitle : null;
   return { chapter, heading, subheading };
+}
+
+/** 阅读记录按页面保存，不能据此断定单个知识点已经读完。 */
+export function chapterReadingStatus(item: SearchIndexItem, href: string, reading: ReadingMap): { read: boolean; percent: number } | null {
+  if (!item.unit || (item.kind !== '章节' && item.kind !== '正文')) return null;
+  const page = href.split(/[?#]/, 1)[0].replace(/\/$/, '');
+  if (currentSearchUnit(page) !== item.unit) return null;
+  const entry = reading[page];
+  if (!entry || !Number.isFinite(entry.p)) return { read: false, percent: 0 };
+  return { read: true, percent: Math.round(Math.min(1, Math.max(0, entry.p)) * 100) };
 }

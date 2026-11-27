@@ -3,8 +3,10 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { decks, homeData } from '../content';
 import { decodeEntities } from '../lib/text';
-import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit } from '../lib/outlineSearch';
+import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit, chapterReadingStatus } from '../lib/outlineSearch';
 import { IconSearch, IconX } from './icons';
+import { READING_KEY } from '../lib/sync/keys';
+import { readReading, subscribeStore } from '../lib/sync/local';
 
 export interface SearchIndexItem {
   kind: '章节' | '动画' | '题目' | '试卷' | '方向' | '正文';
@@ -96,11 +98,21 @@ export default function SearchBox({ index, linkTo }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
+  const [reading, setReading] = useState(readReading);
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const currentUnit = currentSearchUnit(pathname);
   const results = useMemo(() => findSearchResults(index, query, 12, currentUnit), [query, index, currentUnit]);
+
+  // 仅复用既有章级阅读进度；本机、跨标签页及云端更新同步刷新。
+  useEffect(() => {
+    if (!open) return;
+    const refresh = () => setReading(readReading());
+    const unsubscribe = subscribeStore(READING_KEY, refresh);
+    refresh();
+    return unsubscribe;
+  }, [open]);
 
   // 点击容器外部收起：输入框回到圆形图标胶囊
   useEffect(() => {
@@ -194,6 +206,17 @@ export default function SearchBox({ index, linkTo }: Props) {
               {results.length === 0 && query.trim() && <li className="palette-empty">没有匹配的内容</li>}
               {results.map((item, i) => {
                 const path = item.kind === '正文' ? outlineResultPath(item) : null;
+                const status = chapterReadingStatus(item, linkTo(item), reading);
+                const chapterLabel = (
+                  <span className="pi-path pi-reading-path">
+                    <span>{path?.chapter ?? (item.unit ? item.unitTitle : '首页')}</span>
+                    {status && (
+                      <span className={`pi-read-state${status.read ? ' is-read' : ''}`} title={status.read ? '本章有阅读记录；百分比为上次阅读位置' : '本章暂无阅读记录'}>
+                        {status.read ? `已读 · ${status.percent}%` : '未读'}
+                      </span>
+                    )}
+                  </span>
+                );
                 return (
                 <li
                   key={`${item.unit}-${item.sectionId}-${i}`}
@@ -206,7 +229,7 @@ export default function SearchBox({ index, linkTo }: Props) {
                     <span className="pi-body">
                       <span className="pi-body-head">
                         <span className="pi-section">{path.heading}</span>
-                        <span className="pi-path">{path.chapter}</span>
+                        {chapterLabel}
                       </span>
                       {path.subheading && <span className="pi-subsection">{path.subheading}</span>}
                       <span className="pi-snippet">
@@ -216,7 +239,7 @@ export default function SearchBox({ index, linkTo }: Props) {
                   ) : (
                     <>
                       <span className="pi-text"><Highlight text={item.text} query={query} /></span>
-                      <span className="pi-path">{item.unit ? item.unitTitle : '首页'}</span>
+                      {chapterLabel}
                     </>
                   )}
                 </li>

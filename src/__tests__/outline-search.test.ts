@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DeckData } from '../content/types';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit } from '../lib/outlineSearch';
+import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit, chapterReadingStatus } from '../lib/outlineSearch';
 
 describe('讲义正文搜索', () => {
   const deck: DeckData = {
@@ -60,6 +60,16 @@ describe('讲义正文搜索', () => {
     expect(currentSearchUnit('/net')).toBeUndefined();
     expect(currentSearchUnit('/net/practice/ch3')).toBeUndefined();
     expect(currentSearchUnit('/net/attachments')).toBeUndefined();
+  });
+
+  it('按实际章节路由复用阅读进度，不把首页或试卷标为未读', () => {
+    const item = findSearchResults(items, '滑动窗口')[0];
+    const reading = { '/net/deck/ch1': { c: 'net', y: 300, p: 0.35, t: 1 } };
+    expect(chapterReadingStatus(item, '/net/deck/ch1?s=protocol', reading)).toEqual({ read: true, percent: 35 });
+    expect(chapterReadingStatus(item, '/os/chapter/ch1?s=protocol', reading)).toEqual({ read: false, percent: 0 });
+    expect(chapterReadingStatus({ ...item, kind: '章节' }, '/net/deck/ch1?view=supplement&s=other', reading)).toEqual({ read: true, percent: 35 });
+    expect(chapterReadingStatus({ ...item, unit: null }, '/net/?s=home', reading)).toBeNull();
+    expect(chapterReadingStatus({ ...item, kind: '试卷' }, '/net/practice/ch1', reading)).toBeNull();
   });
 
   it('正文路径分别提供章名、二级标题和可选的三级标题', () => {
