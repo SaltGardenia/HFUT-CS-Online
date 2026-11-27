@@ -5,6 +5,8 @@ import { SE_BASE } from '../courses/registry';
 import { seChapters, sePapers, SE_KIND_LABEL } from '../content/se';
 import type { SePaper, SeQuizKind, SeTag } from '../content/se';
 import PracticeCard from '../components/practice/PracticeCard';
+import PracticeReport from '../components/practice/report/PracticeReport';
+import { shellDeckMeta } from '../components/practice/report/aggregates';
 import ClearProgress from '../components/practice/ClearProgress';
 import { IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
@@ -302,6 +304,15 @@ function PaperInner({ paper }: { paper: SePaper }) {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions}
+        results={results}
+        deckMeta={shellDeckMeta({ deckKey: 'se', chapters: seChapters })}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

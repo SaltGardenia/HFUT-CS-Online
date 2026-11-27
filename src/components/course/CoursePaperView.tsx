@@ -8,6 +8,8 @@ import type {
   PracticeTag,
 } from '../../content/course-types';
 import PracticeCard from '../practice/PracticeCard';
+import PracticeReport from '../practice/report/PracticeReport';
+import { shellDeckMeta } from '../practice/report/aggregates';
 import ClearProgress from '../practice/ClearProgress';
 import { IconChevronUp } from '../icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
@@ -189,6 +191,8 @@ export default function CoursePaperView({
     };
   };
 
+  const deckMeta = useMemo(() => shellDeckMeta(config), [config]);
+
   return (
     <div className="page practice-page">
       <h1>{paper.title}</h1>
@@ -296,6 +300,15 @@ export default function CoursePaperView({
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions}
+        results={results}
+        deckMeta={deckMeta}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

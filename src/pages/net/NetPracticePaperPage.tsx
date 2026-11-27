@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { NET_BASE } from '../../courses/registry';
 import { findNetPaper, type NetPaper } from '../../content/net';
 import PracticeCard from '../../components/practice/PracticeCard';
+import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
@@ -220,6 +221,15 @@ function NetPaperInner({ paper }: { paper: NetPaper }) {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染）；本课进度键带卷前缀，这里同步改写 */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions.map((q) => ({ ...q, id: `${paper.id}:${q.id}` }))}
+        results={results}
+        deckMeta={(deck) => ({ name: `第 ${deck} 章`, color: `var(--net${deck}, var(--deck-accent))` })}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

@@ -1,15 +1,17 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import type { CourseConfig, CourseQuizKind } from '../../content/course-types';
+import type { CourseConfig, CourseQuizKind, PracticeTag } from '../../content/course-types';
 import { useToc } from '../../lib/toc';
 import { useStoredRecord } from '../../lib/sync';
 import { chapterNamesFrom } from '../../lib/exam-insights';
 import ExamInsights from '../practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../icons';
+import PracticeReport from '../practice/report/PracticeReport';
+import { shellDeckMeta } from '../practice/report/aggregates';
 
 const KINDS: CourseQuizKind[] = ['single', 'multi', 'judge', 'fill', 'essay'];
 
-/** 试卷列表页：多份试卷先列于此，点击进入答题页（热力图 + 答题区） */
+/** 试卷列表页：多份试卷先列于此，点击进入答题页（热力图 + 答题区）；末尾附全部习题报告 */
 export default function CoursePracticeIndex({ config }: { config: CourseConfig }) {
   const toc = useToc();
   const progress = useStoredRecord<string>(config.storeKey);
@@ -32,6 +34,15 @@ export default function CoursePracticeIndex({ config }: { config: CourseConfig }
     return () => toc.report([], () => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 知识点行跳转：与答题页的标签跳转同一套口径
+  const tagNav = (t: PracticeTag) => {
+    const target = config.chapters[t.deck - 1];
+    return {
+      href: `${config.base}/chapter/${target?.id ?? config.chapters[0].id}?s=${t.sec}`,
+      tip: `跳转到 ${target?.no ?? `第 ${t.deck} 章`} · ${config.tagSections[t.deck]?.[t.sec] ?? t.text}`,
+    };
+  };
 
   return (
     <div className="page">
@@ -65,6 +76,15 @@ export default function CoursePracticeIndex({ config }: { config: CourseConfig }
           </Link>
         ))}
       </nav>
+
+      {/* 全部习题报告：本课程所有试卷合并口径，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={config.papers.flatMap((p) => p.questions)}
+        results={progress as Record<string, 'right' | 'wrong' | 'revealed'>}
+        deckMeta={shellDeckMeta(config)}
+        tagNav={tagNav}
+      />
     </div>
   );
 }
