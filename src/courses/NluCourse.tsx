@@ -7,6 +7,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
+import { appendOutlineIndex } from '../lib/outlineSearch';
 import NluDeckPage from '../pages/NluDeckPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
 import { NLU_BASE, findCourseByBase } from './registry';
@@ -17,6 +18,7 @@ import { decodeEntities } from '../lib/text';
 function buildNluIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const d of nluDecks) {
+    appendOutlineIndex(items, d);
     for (const t of d.toc) {
       items.push({ kind: '章节', unit: d.id, unitTitle: decodeEntities(d.title), sectionId: t.id, text: decodeEntities(t.text) });
     }

@@ -8,6 +8,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import { type SearchIndexItem } from '../components/SearchBox';
+import { appendOutlineIndex } from '../lib/outlineSearch';
 import StHomePage from '../pages/StHomePage';
 import StChapterPage from '../pages/StChapterPage';
 import StPracticeIndex from '../pages/StPracticeIndex';
@@ -21,6 +22,7 @@ function buildStIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of stChapters) {
     const title = `${ch.no} ${decodeEntities(ch.title)}`;
+    appendOutlineIndex(items, ch, title);
     for (const t of ch.toc) {
       items.push({ kind: '章节', unit: ch.id, unitTitle: title, sectionId: t.id, text: decodeEntities(t.text) });
     }

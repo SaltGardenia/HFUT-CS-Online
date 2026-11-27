@@ -3,10 +3,11 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { decks, homeData } from '../content';
 import { decodeEntities } from '../lib/text';
+import { appendOutlineIndex, findSearchResults, searchSnippet } from '../lib/outlineSearch';
 import { IconSearch, IconX } from './icons';
 
 export interface SearchIndexItem {
-  kind: '章节' | '动画' | '题目' | '试卷' | '方向';
+  kind: '章节' | '动画' | '题目' | '试卷' | '方向' | '正文';
   /** 所属讲次/章节 id；null = 课程首页 */
   unit: string | null;
   unitTitle: string;
@@ -18,7 +19,7 @@ const stripTags = (s: string) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').
 
 /** 结果文本里的命中片段：主题色加重标出（不铺底色），扫读时直接定位 */
 function Highlight({ text, query }: { text: string; query: string }) {
-  const q = query.trim().toLowerCase();
+  const q = query.trim().replace(/\s+/g, ' ').toLowerCase();
   const i = q ? text.toLowerCase().indexOf(q) : -1;
   if (i < 0) return <>{text}</>;
   return (
@@ -34,6 +35,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
 export function buildAlgoIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const deck of decks) {
+    appendOutlineIndex(items, deck);
     const demoSection = new Map<string, string>();
     const quizSectionIds = new Set<string>();
     for (const sec of deck.sections) {
@@ -64,6 +66,7 @@ export function buildAlgoIndex(): SearchIndexItem[] {
       }
     }
   }
+  appendOutlineIndex(items, homeData, '总目录', null);
   for (const t of homeData.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '总目录', sectionId: t.id, text: decodeEntities(t.text) });
   }
@@ -91,19 +94,7 @@ export default function SearchBox({ index, linkTo }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    const hits: { item: SearchIndexItem; score: number }[] = [];
-    for (const item of index) {
-      const hay = item.text.toLowerCase();
-      const idx = hay.indexOf(q);
-      if (idx < 0) continue;
-      hits.push({ item, score: idx === 0 ? 0 : idx < 6 ? 1 : 2 });
-      if (hits.length > 400) break;
-    }
-    return hits.sort((a, b) => a.score - b.score).slice(0, 12).map((h) => h.item);
-  }, [query, index]);
+  const results = useMemo(() => findSearchResults(index, query), [query, index]);
 
   // 点击容器外部收起：输入框回到圆形图标胶囊
   useEffect(() => {
@@ -131,7 +122,7 @@ export default function SearchBox({ index, linkTo }: Props) {
   const onKeyDown = (e: ReactKeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActive((a) => Math.min(a + 1, results.length - 1));
+      setActive((a) => Math.max(0, Math.min(a + 1, results.length - 1)));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setActive((a) => Math.max(a - 1, 0));
@@ -204,7 +195,7 @@ export default function SearchBox({ index, linkTo }: Props) {
                 >
                   <span className="pi-kind">{item.kind}</span>
                   <span className="pi-text">
-                    <Highlight text={item.text} query={query} />
+                    <Highlight text={item.kind === '正文' ? searchSnippet(item.text, query) : item.text} query={query} />
                   </span>
                   <span className="pi-path">{item.unit ? item.unitTitle : '首页'}</span>
                 </li>

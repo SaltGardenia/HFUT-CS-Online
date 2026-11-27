@@ -9,6 +9,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
+import { appendOutlineIndex } from '../lib/outlineSearch';
 import NetHomePage from '../pages/NetHomePage';
 import NetUnitPage from '../pages/NetUnitPage';
 import NetPracticeListPage from '../pages/net/NetPracticeListPage';
@@ -22,16 +23,21 @@ import { decodeEntities } from '../lib/text';
 function buildNetIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of netChapters) {
-    for (const t of buildNetSupplement(ch).toc) {
+    const supplement = buildNetSupplement(ch);
+    const review = buildSlideReview(ch).chapter;
+    appendOutlineIndex(items, supplement, decodeEntities(ch.title) + ' · 补充');
+    appendOutlineIndex(items, review);
+    for (const t of supplement.toc) {
       items.push({kind:'章节',unit:ch.id,unitTitle:decodeEntities(ch.title)+' · 补充',sectionId:t.id,text:decodeEntities(t.text)});
     }
-    for (const t of buildSlideReview(ch).chapter.toc) {
+    for (const t of review.toc) {
       items.push({ kind: '章节', unit: ch.id, unitTitle: decodeEntities(ch.title), sectionId: t.id, text: decodeEntities(t.text) });
     }
   }
   for (const p of netPapers) {
     items.push({ kind: '试卷', unit: null, unitTitle: '在线练习', sectionId: p.id, text: decodeEntities(p.title) });
   }
+  appendOutlineIndex(items, netHome, '总目录', null);
   for (const t of netHome.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '总目录', sectionId: t.id, text: decodeEntities(t.text) });
   }

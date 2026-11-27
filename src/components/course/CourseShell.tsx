@@ -8,6 +8,7 @@ import TopBar, { type CourseTab, type CourseTabMenuItem } from '../TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../Sidebar';
 import MobileDrawer from '../MobileDrawer';
 import type { SearchIndexItem } from '../SearchBox';
+import { appendOutlineIndex } from '../../lib/outlineSearch';
 import CourseHomeView from './CourseHomeView';
 import CourseChapterView from './CourseChapterView';
 import CoursePracticeIndex from './CoursePracticeIndex';
@@ -233,6 +234,7 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
     const items: SearchIndexItem[] = [];
     for (const ch of config.chapters) {
       const title = `${ch.no} ${decodeEntities(ch.title)}`;
+      appendOutlineIndex(items, ch, title);
       for (const t of ch.toc) {
         items.push({
           kind: '章节',

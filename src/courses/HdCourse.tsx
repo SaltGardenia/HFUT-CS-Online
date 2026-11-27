@@ -7,6 +7,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
+import { appendOutlineIndex } from '../lib/outlineSearch';
 import HdHomePage from '../pages/HdHomePage';
 import HdUnitPage from '../pages/HdUnitPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
@@ -18,10 +19,12 @@ import { decodeEntities } from '../lib/text';
 function buildHdIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const u of hdUnits) {
+    appendOutlineIndex(items, u);
     for (const t of u.toc) {
       items.push({ kind: '章节', unit: u.id, unitTitle: decodeEntities(u.title), sectionId: t.id, text: decodeEntities(t.text) });
     }
   }
+  appendOutlineIndex(items, hdHome, '总目录', null);
   for (const t of hdHome.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '总目录', sectionId: t.id, text: decodeEntities(t.text) });
   }

@@ -7,6 +7,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
+import { appendOutlineIndex } from '../lib/outlineSearch';
 import PhysHome from '../pages/phys/Home';
 import PhysDeck from '../pages/phys/Deck';
 import PhysPracticeList from '../pages/phys/PracticeList';
@@ -20,6 +21,7 @@ import { decodeEntities } from '../lib/text';
 export function buildPhysIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const deck of physDecks) {
+    appendOutlineIndex(items, deck);
     for (const t of deck.toc) {
       if (t.level !== 2) continue;
       items.push({ kind: '章节', unit: deck.id, unitTitle: decodeEntities(deck.title), sectionId: t.id, text: decodeEntities(t.text) });
@@ -36,6 +38,7 @@ export function buildPhysIndex(): SearchIndexItem[] {
       });
     }
   }
+  appendOutlineIndex(items, physHome, '总目录', null);
   for (const t of physHome.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '课程主页', sectionId: t.id, text: decodeEntities(t.text) });
   }

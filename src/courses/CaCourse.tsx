@@ -8,6 +8,7 @@ import TopBar, { type CourseTab, type CourseTabMenuItem } from '../components/To
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import { type SearchIndexItem } from '../components/SearchBox';
+import { appendOutlineIndex } from '../lib/outlineSearch';
 import CaHomePage from '../pages/CaHomePage';
 import CaChapterPage from '../pages/CaChapterPage';
 import CaPracticeIndex from '../pages/CaPracticeIndex';
@@ -30,6 +31,7 @@ function buildCaIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of caChapters) {
     const title = `${ch.no} ${decodeEntities(ch.title)}`;
+    appendOutlineIndex(items, ch, title);
     for (const t of ch.toc) {
       items.push({ kind: '章节', unit: ch.id, unitTitle: title, sectionId: t.id, text: decodeEntities(t.text) });
     }

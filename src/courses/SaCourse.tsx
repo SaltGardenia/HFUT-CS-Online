@@ -7,6 +7,7 @@ import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
+import { appendOutlineIndex } from '../lib/outlineSearch';
 import SaHomePage from '../pages/SaHomePage';
 import SaUnitPage from '../pages/SaUnitPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
@@ -18,10 +19,12 @@ import { decodeEntities } from '../lib/text';
 function buildSaIndex(): SearchIndexItem[] {
   const items: SearchIndexItem[] = [];
   for (const ch of saChapters) {
+    appendOutlineIndex(items, ch);
     for (const t of ch.toc) {
       items.push({ kind: '章节', unit: ch.id, unitTitle: decodeEntities(ch.title), sectionId: t.id, text: decodeEntities(t.text) });
     }
   }
+  appendOutlineIndex(items, saHome, '总目录', null);
   for (const t of saHome.toc) {
     items.push({ kind: '章节', unit: null, unitTitle: '总目录', sectionId: t.id, text: decodeEntities(t.text) });
   }
