@@ -5041,8 +5041,6 @@ pre.code .cl-code:empty + .cl-com {
 .mq-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 6px; }
 .mq-legend .mq-seg-todo { background: var(--panel-2); border: 1px solid var(--hairline-soft); }
 
-.mq-foot { display: flex; justify-content: flex-end; margin-top: 6px; }
-
 /* 答题页 */
 .mq-top { display: flex; justify-content: flex-end; margin: 0 0 8px; }
 .mq-top-n { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
@@ -5050,6 +5048,7 @@ pre.code .cl-code:empty + .cl-com {
 .mq-top-bar i { display: block; height: 100%; background: var(--deck-accent); transition: width 300ms var(--press-ease); }
 
 .mq-qcard {
+  position: relative;
   margin: 0;
   padding: 20px 22px;
   border-radius: var(--r-l);
@@ -5057,6 +5056,8 @@ pre.code .cl-code:empty + .cl-com {
   border: 1px solid var(--hairline-soft);
   box-shadow: var(--shadow-1);
 }
+/* 有角标的题卡：题干首行给右上角让位（与 .practice-q 同款） */
+.mq-qcard.pq-has-corner .quiz-q { padding-right: 60px; }
 .mq-chip {
   display: inline-block;
   margin: 0 0 10px;
@@ -5078,6 +5079,10 @@ pre.code .cl-code:empty + .cl-com {
 .mq-center .mq-modes { width: 100%; max-width: 520px; }
 .mq-center .mq-mode { width: 100%; }
 .mq-empty { margin: 0; font-size: 14px; color: var(--ink-3); }
+.mq-empty-page { min-height: 40vh; }
+
+/* 错题本 / 收藏本 */
+.mq-book-list { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
 
 @media (max-width: 640px) {
   .mq-main { width: calc(100% - 32px); padding: 28px 0 40px; }

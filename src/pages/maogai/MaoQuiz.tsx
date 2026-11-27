@@ -6,6 +6,7 @@ import AccountButton from '../../components/AccountButton';
 
 const MaoQuizHome = lazy(() => import('./MaoQuizHome'));
 const MaoQuizSession = lazy(() => import('./MaoQuizSession'));
+const MaoQuizBook = lazy(() => import('./MaoQuizBook'));
 
 /**
  * 学习通题库 · 毛概 —— 背题应用，不走课程外壳（无导航栏）。
@@ -50,6 +51,7 @@ export default function MaoQuiz() {
         <Routes>
           <Route index element={<MaoQuizHome />} />
           <Route path="quiz/:mode" element={<MaoQuizSession />} />
+          <Route path="book/:kind" element={<MaoQuizBook />} />
           <Route path="*" element={<Navigate to="/maogai" replace />} />
         </Routes>
       </Suspense>

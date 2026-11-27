@@ -1,20 +1,14 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { maoBank, MAO_CHAPTERS, MAO_KINDS, type MaoKind } from '../../content/maogai';
-import {
-  NEW_PER_DAY,
-  GRADUATED,
-  useMaoState,
-  learnQueue,
-  reviewQueue,
-  remainingNew,
-  resetMaoState,
-} from '../../lib/maoquiz';
+import { GRADUATED, useMaoState, countsOf, resetMaoState } from '../../lib/maoquiz';
+import { useCourseQMarks } from '../../lib/sync';
 import ClearProgress from '../../components/practice/ClearProgress';
 
 const DAY = 86_400_000;
 /** 到期曲线展示的天数（含今天） */
 const FORECAST_DAYS = 14;
+const MAO_COURSE = 'maogai';
 
 /** 大数字统计块 */
 function Stat({ label, value }: { label: string; value: number }) {
@@ -29,28 +23,15 @@ function Stat({ label, value }: { label: string; value: number }) {
 export default function MaoQuizHome() {
   const navigate = useNavigate();
   const state = useMaoState();
+  const marks = useCourseQMarks(MAO_COURSE);
 
   const now = Date.now();
+  const stats = useMemo(() => countsOf(maoBank, state, now), [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const stats = useMemo(() => {
-    let learned = 0;
-    let graduated = 0;
-    for (const q of maoBank) {
-      const rec = state.cards[q.id];
-      if (!rec) continue;
-      learned += 1;
-      if (rec.s >= GRADUATED) graduated += 1;
-    }
-    return {
-      total: maoBank.length,
-      learned,
-      graduated,
-      due: reviewQueue(maoBank, state, now).length,
-      fresh: remainingNew(state, now),
-      learnable: learnQueue(maoBank, state, now).length,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  const bookCount = (kind: 'fav' | 'wrong') =>
+    Object.values(marks[kind]).filter((m) => m.on).length;
+  const wrongCount = bookCount('wrong');
+  const favCount = bookCount('fav');
 
   // 未来 14 天到期曲线：第 0 天是今天
   const forecast = useMemo(() => {
@@ -62,7 +43,7 @@ export default function MaoQuizHome() {
     }));
     for (const id of Object.keys(state.cards)) {
       const rec = state.cards[id];
-      if (rec.s >= GRADUATED) continue;
+      if (rec.s >= GRADUATED || rec.s === 0) continue;
       for (const d of days) {
         if (rec.due >= d.t && rec.due < d.t + DAY) {
           d.n += 1;
@@ -83,7 +64,7 @@ export default function MaoQuizHome() {
       if (!row) continue;
       row.total += 1;
       const rec = state.cards[q.id];
-      if (rec) {
+      if (rec && rec.s >= 1) {
         row.learned += 1;
         if (rec.s >= GRADUATED) row.graduated += 1;
       }
@@ -92,17 +73,18 @@ export default function MaoQuizHome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
-  // 题型进度
+  // 题型进度（已学会 = 至少进入复习阶段）
   const kinds = useMemo(() => {
     return MAO_KINDS.map(({ kind, label }) => {
       const bank = maoBank.filter((q) => q.kind === (kind as MaoKind));
-      const done = bank.filter((q) => state.cards[q.id]).length;
+      const done = bank.filter((q) => (state.cards[q.id]?.s ?? 0) >= 1).length;
       return { kind, label, total: bank.length, done };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
   const peak = Math.max(1, ...forecast.map((d) => d.n));
+  const learnable = stats.fresh + stats.learning;
   const dayLabel = (t: number, i: number) => {
     if (i === 0) return '今天';
     if (i === 1) return '明天';
@@ -117,6 +99,24 @@ export default function MaoQuizHome() {
         <p>毛泽东思想和中国特色社会主义理论体系概论 · 学习通题库 {maoBank.length} 题</p>
       </div>
 
+      {/* 总进度 + 一键清空（与其他课程练习页同款） */}
+      <div className="pq-progress">
+        <div className="pq-progress-text">
+          <span>
+            总进度：已学 <b>{stats.learned}</b> / {stats.total} ·{' '}
+            <span className="pq-frag">已掌握 <b>{stats.graduated}</b> 题</span>
+          </span>
+          <ClearProgress
+            done={stats.learned}
+            onClear={resetMaoState}
+            tip="清空毛概全部背题进度、复习排期与两本账？"
+          />
+        </div>
+        <div className="pq-progress-bar" role="progressbar" aria-valuenow={stats.learned} aria-valuemax={stats.total}>
+          <span style={{ width: `${(stats.learned / stats.total) * 100}%` }} />
+        </div>
+      </div>
+
       {/* 总览数字 */}
       <div className="mq-stats">
         <Stat label="总题量" value={stats.total} />
@@ -125,22 +125,16 @@ export default function MaoQuizHome() {
         <Stat label="已掌握" value={stats.graduated} />
       </div>
 
-      {/* 两个模式入口 */}
+      {/* 四个入口：学习 / 复习 / 错题本 / 收藏本 */}
       <div className="mq-modes">
         <button
           type="button"
           className="mq-mode"
-          disabled={stats.learnable === 0}
+          disabled={learnable === 0}
           onClick={() => navigate('/maogai/quiz/learn')}
         >
           <b>学习模式</b>
-          <span>
-            {stats.learnable > 0
-              ? `背新题 ${stats.learnable} · 每日配额 ${NEW_PER_DAY}`
-              : stats.fresh === 0
-                ? '今日新学已完成'
-                : '新题已背完'}
-          </span>
+          <span>{learnable > 0 ? `背新题 ${stats.fresh} · 学习中 ${stats.learning}` : '全部学会'}</span>
         </button>
         <button
           type="button"
@@ -150,6 +144,14 @@ export default function MaoQuizHome() {
         >
           <b>复习模式</b>
           <span>{stats.due > 0 ? `到期 ${stats.due} 题` : '暂无到期卡'}</span>
+        </button>
+        <button type="button" className="mq-mode" onClick={() => navigate('/maogai/book/wrong')}>
+          <b>错题本</b>
+          <span>{wrongCount > 0 ? `${wrongCount} 题待重做` : '还没有错题'}</span>
+        </button>
+        <button type="button" className="mq-mode" onClick={() => navigate('/maogai/book/fav')}>
+          <b>收藏本</b>
+          <span>{favCount > 0 ? `${favCount} 题` : '答题时点星标收藏'}</span>
         </button>
       </div>
 
@@ -204,10 +206,6 @@ export default function MaoQuizHome() {
           ))}
         </div>
       </section>
-
-      <div className="mq-foot">
-        <ClearProgress done={stats.learned} onClear={resetMaoState} tip="清空毛概全部背题进度与复习排期？" />
-      </div>
     </main>
   );
 }

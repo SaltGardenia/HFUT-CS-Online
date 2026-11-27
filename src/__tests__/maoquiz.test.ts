@@ -1,20 +1,20 @@
 /**
  * 毛概背题（lib/maoquiz + content/maogai）：
  * 1) 题库契约：题型/答案/选项/章节字段合法、ID 唯一、题量 1151；
- * 2) 艾宾浩斯调度：新卡首记进第 1 阶、记住进阶按间隔排期、毕业不再排期、遗忘回第 1 阶；
- * 3) 每日新学配额：只对首次作答计配额，跨天重置；
- * 4) 队列：学习只取未学新卡（按题库顺序），复习只取到期卡（最久未见在前）。
+ * 2) 百词斩式调度：学习中连对 LEARN_STREAK 次才算学会、按答错次数定首次复习间隔、
+ *    答错/看答案回炉（回学习中、当天可再学）、复习阶段记住进阶、毕业不再排期；
+ * 3) 队列：学习 = 未学新卡 + 学习中的卡（不限量），复习 = 已学会且到期（最久未见在前）。
  */
 import { describe, expect, it } from 'vitest';
 import { maoBank, MAO_CHAPTERS } from '../content/maogai';
 import {
   GRADUATED,
-  NEW_PER_DAY,
+  LEARN_STREAK,
   STAGE_INTERVALS,
   applyGrade,
+  countsOf,
   emptyState,
   learnQueue,
-  remainingNew,
   reviewQueue,
 } from '../lib/maoquiz';
 
@@ -25,8 +25,8 @@ const startOfDay = (t: number) => {
   d.setHours(0, 0, 0, 0);
   return d.getTime();
 };
-/** 队列测试用的截断题库（27 题） */
-const someBank = maoBank.slice(0, NEW_PER_DAY + 5);
+/** 队列测试用的截断题库（30 题） */
+const someBank = maoBank.slice(0, 30);
 
 describe('毛概题库契约', () => {
   it('题量为清洗库的 1151 题且 ID 唯一', () => {
@@ -69,75 +69,97 @@ describe('毛概题库契约', () => {
   });
 });
 
-describe('艾宾浩斯调度', () => {
-  it('新卡首记进第 1 阶、明天复查；没记住计一次遗忘', () => {
-    const s1 = applyGrade(emptyState(), 'MG-1', true, NOW, true);
-    expect(s1.cards['MG-1']).toEqual({ s: 1, due: startOfDay(NOW) + 1 * DAY, lp: 0 });
-    const s2 = applyGrade(emptyState(), 'MG-2', false, NOW, true);
-    expect(s2.cards['MG-2']).toEqual({ s: 1, due: startOfDay(NOW) + 1 * DAY, lp: 1 });
-  });
-
-  it('连续记住按 1/2/4/7/15/30/60 天排期，第 8 次毕业不再排期', () => {
+describe('百词斩式调度', () => {
+  it('新卡连续答对 3 次才算学会；零错学会从第 2 阶起步（2 天后首复习）', () => {
     let s = emptyState();
-    let now = NOW;
-    s = applyGrade(s, 'MG-1', true, now, true);
-    for (let stage = 1; stage < GRADUATED; stage++) {
-      now = startOfDay(NOW) + (stage - 1) * STAGE_INTERVALS[stage - 1] * DAY + DAY / 2;
-      const rec = s.cards['MG-1'];
-      expect(rec.s).toBe(stage);
-      if (stage < GRADUATED) {
-        // 到期前不出现在复习队列
-        expect(reviewQueue(maoBank, s, rec.due - 1).map((q) => q.id)).not.toContain('MG-1');
-        expect(reviewQueue(maoBank, s, rec.due).map((q) => q.id)).toContain('MG-1');
-      }
-      s = applyGrade(s, 'MG-1', true, now, false);
-    }
-    expect(s.cards['MG-1'].s).toBe(GRADUATED);
-    expect(s.cards['MG-1'].due).toBe(Number.MAX_SAFE_INTEGER);
-    expect(reviewQueue(maoBank, s, Number.MAX_SAFE_INTEGER - 1).map((q) => q.id)).not.toContain('MG-1');
+    s = applyGrade(s, 'MG-1', true, NOW, );
+    expect(s.cards['MG-1']).toEqual({ s: 0, k: 1, w: 0, due: startOfDay(NOW) });
+    s = applyGrade(s, 'MG-1', true, NOW + 3600_000);
+    expect(s.cards['MG-1'].k).toBe(2);
+    s = applyGrade(s, 'MG-1', true, NOW + 7200_000);
+    expect(s.cards['MG-1']).toEqual({ s: 2, k: 0, w: 0, due: startOfDay(NOW) + STAGE_INTERVALS[1] * DAY });
   });
 
-  it('任一阶段没记住都回第 1 阶并累计遗忘', () => {
-    let s = applyGrade(emptyState(), 'MG-3', true, NOW, true);
-    s = applyGrade(s, 'MG-3', true, NOW + DAY, false);
+  it('答错回炉：回学习中、连续清零、计错；再学会时错过的从第 1 阶起步（明天复习）', () => {
+    let s = emptyState();
+    s = applyGrade(s, 'MG-2', false, NOW);
+    expect(s.cards['MG-2']).toEqual({ s: 0, k: 0, w: 1, due: startOfDay(NOW) });
+    s = applyGrade(s, 'MG-2', true, NOW + DAY / 2);
+    s = applyGrade(s, 'MG-2', true, NOW + DAY);
+    s = applyGrade(s, 'MG-2', true, NOW + DAY + 3600_000);
+    // 学会那天（NOW+DAY）的次日复习
+    expect(s.cards['MG-2']).toEqual({ s: 1, k: 0, w: 1, due: startOfDay(NOW + DAY) + STAGE_INTERVALS[0] * DAY });
+  });
+
+  it('复习阶段记住进阶（1/2/4/7/15/30/60 天），第 7 阶后再记住毕业；答错回炉', () => {
+    let s = emptyState();
+    // 零错学会 → 第 2 阶起步
+    for (let i = 0; i < LEARN_STREAK; i++) s = applyGrade(s, 'MG-3', true, NOW + i * 3600_000);
     expect(s.cards['MG-3'].s).toBe(2);
-    s = applyGrade(s, 'MG-3', false, NOW + 3 * DAY, false);
-    expect(s.cards['MG-3']).toEqual({ s: 1, due: startOfDay(NOW + 3 * DAY) + DAY, lp: 1 });
-  });
-});
-
-describe('每日新学配额', () => {
-  it('只对首次作答计配额，旧卡复习不消耗', () => {
-    // 账面日期对齐测试时间（否则配额按跨天处理）
-    let s = { ...emptyState(), day: '2026-06-01', nw: 0 };
-    const first = learnQueue(someBank, s, NOW);
-    expect(first.length).toBe(NEW_PER_DAY);
-    for (const q of first) s = applyGrade(s, q.id, true, NOW, true);
-    expect(remainingNew(s, NOW)).toBe(0);
-    // 复习旧卡：配额不动
-    s = applyGrade(s, first[0].id, true, NOW, false);
-    expect(remainingNew(s, NOW)).toBe(0);
-    // 跨天：配额回满
-    expect(remainingNew(s, NOW + DAY)).toBe(NEW_PER_DAY);
-    expect(learnQueue(someBank, { ...s, day: '', nw: 0 }, NOW + DAY).length).toBe(5);
+    // 依次记住走到毕业
+    let now = NOW;
+    for (let stage = 3; stage <= GRADUATED; stage++) {
+      const prev = s.cards['MG-3'];
+      now = prev.due + DAY / 2;
+      s = applyGrade(s, 'MG-3', true, now);
+      expect(s.cards['MG-3'].s).toBe(stage);
+      if (stage < GRADUATED) {
+        expect(reviewQueue(maoBank, s, s.cards['MG-3'].due - 1).map((q) => q.id)).not.toContain('MG-3');
+        expect(reviewQueue(maoBank, s, s.cards['MG-3'].due).map((q) => q.id)).toContain('MG-3');
+      }
+    }
+    expect(s.cards['MG-3']).toEqual({ s: GRADUATED, k: 0, w: 0, due: Number.MAX_SAFE_INTEGER });
+    expect(reviewQueue(maoBank, s, Number.MAX_SAFE_INTEGER - 1).map((q) => q.id)).not.toContain('MG-3');
+    // 毕业后答错也回炉
+    s = applyGrade(s, 'MG-3', false, now + DAY);
+    expect(s.cards['MG-3'].s).toBe(0);
+    expect(s.cards['MG-3'].w).toBe(1);
   });
 });
 
 describe('队列', () => {
-  it('学习队列只取未学新卡、按题库顺序；复习队列按到期先后', () => {
-    const s = emptyState();
-    const learn = learnQueue(someBank, s, NOW);
-    expect(learn.map((q) => q.id)).toEqual(someBank.slice(0, NEW_PER_DAY).map((q) => q.id));
+  it('学习队列 = 未学新卡 + 学习中的卡（不限量），不含已学会的', () => {
+    let s = emptyState();
+    expect(learnQueue(someBank, s).length).toBe(someBank.length);
+    // 学会前两张、答错第三张（回学习中）
+    for (let i = 0; i < LEARN_STREAK; i++) s = applyGrade(s, someBank[0].id, true, NOW + i * 3600_000);
+    for (let i = 0; i < LEARN_STREAK; i++) s = applyGrade(s, someBank[1].id, true, NOW + i * 3600_000);
+    s = applyGrade(s, someBank[2].id, false, NOW);
+    const ids = learnQueue(someBank, s).map((q) => q.id);
+    expect(ids).not.toContain(someBank[0].id);
+    expect(ids).not.toContain(someBank[1].id);
+    expect(ids).toContain(someBank[2].id);
+    expect(ids.length).toBe(someBank.length - 2);
+  });
 
-    let s2 = emptyState();
-    // 前一天各记一次（第 1 阶，今天到期）
-    s2 = applyGrade(s2, maoBank[0].id, true, NOW - DAY, true);
-    s2 = applyGrade(s2, maoBank[1].id, true, NOW - DAY, true);
-    // MG-1 记住 → 第 2 阶两天后到期；MG-2 没记住 → 回第 1 阶明天到期
-    s2 = applyGrade(s2, maoBank[0].id, true, NOW, false);
-    s2 = applyGrade(s2, maoBank[1].id, false, NOW, false);
-    const due = reviewQueue(someBank, s2, NOW + 2 * DAY);
-    // MG-2 明天到期在前，MG-1 后天到期在后
-    expect(due.map((q) => q.id).indexOf('MG-2')).toBeLessThan(due.map((q) => q.id).indexOf('MG-1'));
+  it('复习队列 = 已学会且到期的卡，最久未见的在前', () => {
+    let s = emptyState();
+    // MG-1 当天连对三次学会 → 第 2 阶，06-03 到期
+    for (let i = 0; i < LEARN_STREAK; i++) s = applyGrade(s, maoBank[0].id, true, NOW + i * 3600_000);
+    // 06-02 记住进阶（第 3 阶，06-06 到期）
+    s = applyGrade(s, maoBank[0].id, true, NOW + DAY);
+    // MG-2 06-02 学会 → 第 2 阶，06-04 到期
+    for (let i = 0; i < LEARN_STREAK; i++) s = applyGrade(s, maoBank[1].id, true, NOW + DAY + i * 3600_000);
+    // 06-03：都未到期
+    expect(reviewQueue(someBank, s, NOW + 2 * DAY).length).toBe(0);
+    // 06-04：MG-2 到期，MG-1 还没到
+    const due1 = reviewQueue(someBank, s, NOW + 3 * DAY);
+    expect(due1.map((q) => q.id)).toEqual([maoBank[1].id]);
+    // 06-06：两张都到期，MG-2（更早排期）在前
+    const due2 = reviewQueue(someBank, s, NOW + 5 * DAY);
+    expect(due2.map((q) => q.id).indexOf(maoBank[1].id)).toBeLessThan(due2.map((q) => q.id).indexOf(maoBank[0].id));
+  });
+
+  it('countsOf：已学/学习中/待复习/已掌握口径正确', () => {
+    let s = emptyState();
+    for (let i = 0; i < LEARN_STREAK; i++) s = applyGrade(s, someBank[0].id, true, NOW + i * 3600_000);
+    s = applyGrade(s, someBank[1].id, false, NOW); // 学习中（回炉）
+    const c = countsOf(someBank, s, NOW);
+    expect(c.total).toBe(someBank.length);
+    expect(c.learned).toBe(2);
+    expect(c.learning).toBe(1);
+    expect(c.graduated).toBe(0);
+    expect(c.due).toBe(0); // 学会的那张 2 天后到期
+    expect(c.due).toBe(reviewQueue(someBank, s, NOW).length);
   });
 });
