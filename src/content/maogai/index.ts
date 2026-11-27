@@ -18,8 +18,9 @@ export interface MaoQuestion {
   explanation: string;
 }
 
-/** 题库（1151 题，构建期整包导入，随课程路由懒加载） */
-export const maoBank = bankJson as unknown as MaoQuestion[];
+/** 题库（1151 题，构建期整包导入，随课程路由懒加载；清洗库字段为 type，对齐为 kind） */
+const rawBank = bankJson as unknown as (Omit<MaoQuestion, 'kind'> & { type: MaoQuestion['kind'] })[];
+export const maoBank: MaoQuestion[] = rawBank.map(({ type, ...rest }) => ({ ...rest, kind: type }));
 
 /** 章节顺序（与题库 chapter 取值一一对应） */
 export const MAO_CHAPTERS = ['导论', '第一章', '第二章', '第三章', '第四章', '第五章', '第六章', '第七章', '第八章'] as const;

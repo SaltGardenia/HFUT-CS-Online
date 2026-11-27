@@ -34,8 +34,9 @@ describe('毛概题库契约', () => {
     expect(new Set(maoBank.map((q) => q.id)).size).toBe(maoBank.length);
   });
 
-  it('题目字段合法：题干非空、答案与选项匹配、章节在册', () => {
+  it('题目字段合法：题型在册、题干非空、答案与选项匹配、章节在册', () => {
     for (const q of maoBank) {
+      expect(['single', 'multiple', 'judge', 'fill'], q.id).toContain(q.kind);
       expect(q.question.trim().length, q.id).toBeGreaterThan(0);
       expect(MAO_CHAPTERS.includes(q.chapter as never) || q.chapter === null, q.id).toBe(true);
       if (q.kind === 'single' || q.kind === 'multiple') {
