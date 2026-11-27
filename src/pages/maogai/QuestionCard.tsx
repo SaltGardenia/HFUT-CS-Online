@@ -15,8 +15,8 @@ export const answerTextOf = (q: MaoQuestion): string => {
 
 interface Props {
   q: MaoQuestion;
-  /** 判分上报：good = 答对；「看答案」按没答上处理（回炉） */
-  onGrade: (good: boolean) => void;
+/** 判分上报：good = 答对；elapsedMs = 本题反应时长（间隔增幅修正）；「看答案」按没答上处理（回炉） */
+  onGrade: (good: boolean, elapsedMs: number) => void;
   /** 会话模式：判分后由外层定时推进；书页模式：判分后出现「重做」 */
   autoAdvance: boolean;
   /** 收藏星标 */
@@ -40,6 +40,8 @@ export default function QuestionCard({ q, onGrade, autoAdvance, fav, cornerActio
   const [fillInput, setFillInput] = useState('');
   const [fillWrong, setFillWrong] = useState(false);
   const gradedRef = useRef(false);
+  // 反应时长修正的起点：卡片挂载（重做后重新计）
+  const shownAt = useRef(typeof performance !== 'undefined' ? performance.now() : Date.now());
 
   const locked = submitted !== null || revealed;
 
@@ -47,7 +49,7 @@ export default function QuestionCard({ q, onGrade, autoAdvance, fav, cornerActio
     if (gradedRef.current) return;
     gradedRef.current = true;
     setSubmitted(good ? 'right' : 'wrong');
-    onGrade(good);
+    onGrade(good, performance.now() - shownAt.current);
   };
 
   const pick = (letter: string) => {
@@ -91,6 +93,7 @@ export default function QuestionCard({ q, onGrade, autoAdvance, fav, cornerActio
     setFillInput('');
     setFillWrong(false);
     gradedRef.current = false;
+    shownAt.current = performance.now();
   };
 
   const optionState = (i: number): string => {

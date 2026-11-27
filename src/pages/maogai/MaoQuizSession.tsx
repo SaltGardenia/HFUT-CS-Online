@@ -2,7 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { maoBank, type MaoQuestion } from '../../content/maogai';
-import { LEARN_STREAK, gradeCard, learnQueue, reviewQueue, useMaoState } from '../../lib/maoquiz';
+import {
+  LEARN_STREAK,
+  deferOverflow,
+  gradeCard,
+  learnQueue,
+  reviewPool,
+  takeReviewQueue,
+  useMaoState,
+} from '../../lib/maoquiz';
 import { setQMark } from '../../lib/sync/local';
 import { useCourseQMarks } from '../../lib/sync';
 import QuestionCard from './QuestionCard';
@@ -19,10 +27,16 @@ export default function MaoQuizSession() {
 
   const kind = mode === 'review' ? 'review' : 'learn';
 
-  // 队列在进页面时定格；学习模式下未学会的卡会排到本轮队尾重现
-  const [queue, setQueue] = useState<MaoQuestion[]>(() =>
-    kind === 'review' ? reviewQueue(maoBank, live, Date.now()) : learnQueue(maoBank, live),
-  );
+  // 复习模式：候选池按优先级（薄弱 > 刚学不久 > 熟词）取当日配额，溢出的到期卡顺延一天
+  // 学习模式：未学新卡 + 学习中的卡，不限量。队列在进页面时定格。
+  const [queue, setQueue] = useState<MaoQuestion[]>(() => {
+    if (kind === 'review') {
+      const { queue: picked, state } = takeReviewQueue(maoBank, live, Date.now());
+      deferOverflow(state);
+      return picked;
+    }
+    return learnQueue(maoBank, live);
+  });
   const [idx, setIdx] = useState(0);
   const [tally, setTally] = useState({ good: 0, bad: 0 });
   const timerRef = useRef(0);
@@ -37,20 +51,30 @@ export default function MaoQuizSession() {
 
   useEffect(() => () => window.clearTimeout(timerRef.current), []);
 
-  const buildQueue = (m: 'learn' | 'review', now = Date.now()) =>
-    m === 'review' ? reviewQueue(maoBank, live, now) : learnQueue(maoBank, live);
+  /** 学习队列（不限量）；复习队列带溢出顺延 */
+  const buildQueue = (m: 'learn' | 'review', now = Date.now()) => {
+    if (m === 'review') {
+      const { queue: picked, state } = takeReviewQueue(maoBank, live, now);
+      deferOverflow(state);
+      return picked;
+    }
+    return learnQueue(maoBank, live);
+  };
 
-  /** 判分：写调度账；答错入错题本、答对自动移出（与其他课程两本账同款）；学习模式把未学会的卡排到本轮队尾 */
-  const onGrade = (item: MaoQuestion) => (good: boolean) => {
-    gradeCard(item.id, good);
+  /**
+   * 判分：作答即调度（反应时长/题型修正在内）。
+   * 答错入错题本、答对自动移出（与其他课程两本账同款）；
+   * 学习模式里未连满 LEARN_STREAK 的卡排到本轮队尾（百词斩式重现）。
+   */
+  const onGrade = (item: MaoQuestion) => (good: boolean, elapsedMs: number) => {
+    gradeCard(item.id, good, elapsedMs, item.kind);
     setTally((t) => ({ good: t.good + (good ? 1 : 0), bad: t.bad + (good ? 0 : 1) }));
     if (!good) setQMark(MAO_COURSE, 'wrong', item.id, true);
     else if (marks.wrong[item.id]?.on) setQMark(MAO_COURSE, 'wrong', item.id, false);
     if (kind === 'learn') {
-      // 学习中的卡：答对但还没连满 LEARN_STREAK 次，或答错——都会在本轮再次出现
       const rec = live.cards[item.id];
-      const streakAfter = good ? (rec?.k ?? 0) + 1 : 0;
-      const stillLearning = !good || streakAfter < LEARN_STREAK;
+      const streakAfter = good ? (rec?.streak ?? 0) + 1 : 0;
+      const stillLearning = !rec || rec.st === 0 ? !good || streakAfter < LEARN_STREAK : false;
       if (stillLearning) setQueue((qu) => [...qu, item]);
     }
     window.clearTimeout(timerRef.current);
@@ -61,7 +85,7 @@ export default function MaoQuizSession() {
     const now = Date.now();
     return {
       learnLeft: learnQueue(maoBank, live).length,
-      reviewLeft: reviewQueue(maoBank, live, now).length,
+      reviewLeft: reviewPool(maoBank, live, now).length,
     };
   }, [finished, live]);
 

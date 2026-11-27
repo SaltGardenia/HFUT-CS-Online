@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { maoBank, MAO_CHAPTERS, MAO_KINDS, type MaoKind } from '../../content/maogai';
-import { GRADUATED, useMaoState, countsOf, resetMaoState } from '../../lib/maoquiz';
+import { useMaoState, countsOf, resetMaoState } from '../../lib/maoquiz';
 import { useCourseQMarks } from '../../lib/sync';
 import ClearProgress from '../../components/practice/ClearProgress';
 
@@ -43,7 +43,7 @@ export default function MaoQuizHome() {
     }));
     for (const id of Object.keys(state.cards)) {
       const rec = state.cards[id];
-      if (rec.s >= GRADUATED || rec.s === 0) continue;
+      if (rec.st === 0 || rec.st === 3) continue;
       for (const d of days) {
         if (rec.due >= d.t && rec.due < d.t + DAY) {
           d.n += 1;
@@ -64,9 +64,9 @@ export default function MaoQuizHome() {
       if (!row) continue;
       row.total += 1;
       const rec = state.cards[q.id];
-      if (rec && rec.s >= 1) {
+      if (rec && rec.st >= 1) {
         row.learned += 1;
-        if (rec.s >= GRADUATED) row.graduated += 1;
+        if (rec.st === 3) row.graduated += 1;
       }
     }
     return rows.filter((r) => r.total > 0);
@@ -77,7 +77,7 @@ export default function MaoQuizHome() {
   const kinds = useMemo(() => {
     return MAO_KINDS.map(({ kind, label }) => {
       const bank = maoBank.filter((q) => q.kind === (kind as MaoKind));
-      const done = bank.filter((q) => (state.cards[q.id]?.s ?? 0) >= 1).length;
+      const done = bank.filter((q) => (state.cards[q.id]?.st ?? 0) >= 1).length;
       return { kind, label, total: bank.length, done };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

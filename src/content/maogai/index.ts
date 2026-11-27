@@ -38,6 +38,9 @@ export type MaoKind = MaoQuestion['kind'];
 export const maoKindLabel = (k: MaoKind): string =>
   MAO_KINDS.find((x) => x.kind === k)?.label ?? '题目';
 
+/** 题型权重（间隔增幅修正）：填空（拼写式作答）置信度最高拉得最长；判断题两选项易蒙最低 */
+export const MAO_KIND_WEIGHTS: Record<MaoKind, number> = { single: 1, multiple: 0.9, judge: 0.8, fill: 1.2 };
+
 /** 判断题的选项统一在展示层给出（题库 judge 题已归一为下标答案） */
 export const JUDGE_OPTIONS = ['正确', '错误'];
 
