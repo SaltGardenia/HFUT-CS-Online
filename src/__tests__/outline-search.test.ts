@@ -18,7 +18,7 @@ describe('讲义正文搜索', () => {
   it('搜索正文、跨行内标签的词、HTML 实体和表格，并定位最近的目录锚点', () => {
     expect(findSearchResults(items, '资源共享')[0]?.sectionId).toBe('intro');
     expect(findSearchResults(items, '&')[0]?.sectionId).toBe('intro');
-    expect(findSearchResults(items, '滑动窗口')[0]?.sectionId).toBe('protocol');
+    expect(findSearchResults(items, '滑动窗口')[0]).toMatchObject({ sectionId: 'protocol', sectionTitle: '协议' });
     expect(findSearchResults(items, '超时 重传')[0]?.sectionId).toBe('protocol');
     expect(findSearchResults(items, '后续正文')[0]?.sectionId).toBe('protocol');
     expect(findSearchResults(items, '不可搜索')).toEqual([]);
@@ -34,6 +34,9 @@ describe('讲义正文搜索', () => {
   });
 
   it('长正文摘要包含实际命中词', () => {
-    expect(searchSnippet('前文'.repeat(100) + 'CRC' + '后文'.repeat(100), 'crc')).toContain('CRC');
+    const snippet = searchSnippet('前文'.repeat(100) + 'CRC' + '后文'.repeat(100), 'crc');
+    expect(snippet).toContain('CRC');
+    expect(snippet.indexOf('CRC')).toBeLessThanOrEqual(13);
+    expect(snippet.length).toBeLessThanOrEqual(55);
   });
 });

@@ -12,6 +12,8 @@ export interface SearchIndexItem {
   unit: string | null;
   unitTitle: string;
   sectionId: string;
+  /** 正文命中的知识点标题，与实际跳转锚点对应 */
+  sectionTitle?: string;
   text: string;
 }
 
@@ -189,15 +191,27 @@ export default function SearchBox({ index, linkTo }: Props) {
               {results.map((item, i) => (
                 <li
                   key={`${item.unit}-${item.sectionId}-${i}`}
-                  className={`palette-item${i === active ? ' active' : ''}`}
+                  className={`palette-item${item.kind === '正文' ? ' palette-body' : ''}${i === active ? ' active' : ''}`}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => select(item)}
                 >
                   <span className="pi-kind">{item.kind}</span>
-                  <span className="pi-text">
-                    <Highlight text={item.kind === '正文' ? searchSnippet(item.text, query) : item.text} query={query} />
-                  </span>
-                  <span className="pi-path">{item.unit ? item.unitTitle : '首页'}</span>
+                  {item.kind === '正文' ? (
+                    <span className="pi-body">
+                      <span className="pi-body-head">
+                        <span className="pi-section">{item.sectionTitle || item.unitTitle}</span>
+                        <span className="pi-path">{item.unit ? item.unitTitle : '首页'}</span>
+                      </span>
+                      <span className="pi-snippet">
+                        <Highlight text={searchSnippet(item.text, query)} query={query} />
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className="pi-text"><Highlight text={item.text} query={query} /></span>
+                      <span className="pi-path">{item.unit ? item.unitTitle : '首页'}</span>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>

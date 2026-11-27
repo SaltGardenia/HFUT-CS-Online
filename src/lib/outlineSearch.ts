@@ -10,14 +10,14 @@ export function appendOutlineIndex(
   items: SearchIndexItem[], deck: DeckData,
   unitTitle = decodeEntities(deck.title), unit: string | null = deck.id,
 ): void {
-  const anchors = new Set(deck.toc.map(t => t.id));
+  const anchors = new Map(deck.toc.map(t => [t.id, decodeEntities(t.text)]));
   const template = document.createElement('template');
   for (const section of deck.sections) {
     let sectionId = section.id;
     let fragments: string[] = [];
     const flush = () => {
       const text = normalize(fragments.join(''));
-      if (text) items.push({ kind: '正文', unit, unitTitle, sectionId, text });
+      if (text) items.push({ kind: '正文', unit, unitTitle, sectionId, sectionTitle: anchors.get(sectionId) || decodeEntities(section.heading), text });
       fragments = [];
     };
     const walk = (node: Node) => {
@@ -75,8 +75,8 @@ export function findSearchResults(index: SearchIndexItem[], query: string, limit
 export function searchSnippet(text: string, query: string): string {
   const q = normalize(query).toLowerCase();
   const i = text.toLowerCase().indexOf(q);
-  if (!q || i < 0 || text.length <= 90) return text;
-  const start = Math.max(0, i - 24);
-  const end = Math.min(text.length, Math.max(i + q.length + 42, start + 90));
+  if (!q || i < 0 || text.length <= 54) return text;
+  const start = Math.max(0, i - 12);
+  const end = Math.min(text.length, i + q.length + 36);
   return (start ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
 }
