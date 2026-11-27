@@ -69,8 +69,11 @@ export default function ExamInsights({
   const topTags = useMemo(() => data.tags.slice(0, TOP_TAGS), [data]);
 
   const maxChapter = Math.max(1, ...chapters.map((c) => c.count));
-  const maxTag = Math.max(1, ...topTags.map((t) => t.count));
   const chapterTotal = chapterNames ? Object.keys(chapterNames).length : data.chapters.length;
+  // 高频考点条长 = 覆盖卷占比（与排序指标一致，AA 式「条长即所排之量」）；
+  // 单卷课程没有跨卷信号，退回按题数
+  const tagBar = (t: { count: number; papers: number }) =>
+    data.totalPapers > 1 ? (t.papers / data.totalPapers) * 100 : (t.count / Math.max(1, ...data.tags.map((x) => x.count))) * 100;
 
   if (data.totalQuestions === 0) return null;
 
@@ -156,7 +159,7 @@ export default function ExamInsights({
                   <span className="ei-track" aria-hidden="true">
                     <span
                       className="ei-fill ei-fill-accent"
-                      style={{ width: `${(t.count / maxTag) * 100}%`, animationDelay: `${Math.min(i * 24, 240)}ms` }}
+                      style={{ width: `${tagBar(t)}%`, animationDelay: `${Math.min(i * 24, 240)}ms` }}
                     />
                   </span>
                   <span className="ei-row-nums">
@@ -197,13 +200,15 @@ export default function ExamInsights({
                     </th>
                     {decks.map(({ deck, cellIdx }) => {
                       const n = row.cells[cellIdx] ?? 0;
+                      const ratio = n / data.maxCell;
                       return n > 0 ? (
                         <td
                           key={deck}
                           className="ei-m-cell"
                           title={`${row.title} · ${chapterNames?.[deck] ?? `第 ${deck} 章`} · ${n} 题`}
                           style={{
-                            background: `color-mix(in srgb, var(--deck-accent) ${Math.round(10 + 72 * (n / data.maxCell))}%, transparent)`,
+                            background: `color-mix(in srgb, var(--deck-accent) ${Math.round(10 + 72 * ratio)}%, transparent)`,
+                            ...(ratio > 0.5 ? { color: 'var(--panel-solid)' } : {}),
                           }}
                         >
                           {n}
