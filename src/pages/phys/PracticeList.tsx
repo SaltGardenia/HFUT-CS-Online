@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { PHYS_BASE } from '../../courses/registry';
 import { physPapers } from '../../content/phys';
 import { IconArrowRight } from '../../components/icons';
+import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { clearProgressStore, useProgressStore } from '../../lib/sync';
 
@@ -70,6 +71,18 @@ export default function PhysPracticeList() {
           );
         })}
       </div>
+
+      {/* 全部习题报告：四份试卷合并口径，随作答实时更新（全未作答时不渲染）；本课进度键带卷前缀，这里同步改写 */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={physPapers.flatMap((p) => p.questions.map((q) => ({ ...q, kind: 'essay' as const, id: `${p.id}:${q.id}` })))}
+        results={results}
+        deckMeta={(deck) => ({ name: `第 ${deck} 章`, color: `var(--phys${deck}, var(--deck-accent))` })}
+        tagNav={(t) => {
+          if (t.deck === 0) return { href: PHYS_BASE, tip: `本库课件未收录该专题 · ${t.text}` };
+          return { href: `${PHYS_BASE}/deck/deck${t.deck}?s=${t.sec}`, tip: `跳转到 第 ${t.deck} 章 · ${t.text}` };
+        }}
+      />
 
     </div>
   );

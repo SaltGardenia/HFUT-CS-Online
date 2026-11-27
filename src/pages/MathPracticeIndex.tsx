@@ -5,6 +5,7 @@ import { mathPapers, MATH_KIND_LABEL, type MathQuizKind } from '../content/math'
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
 import { IconArrowRight, IconFileText } from '../components/icons';
+import PracticeReport from '../components/practice/report/PracticeReport';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷完成度 */
 const STORE_KEY = 'math-practice-progress-v1';
@@ -65,6 +66,18 @@ export default function MathPracticeIndex() {
           </Link>
         ))}
       </nav>
+
+      {/* 全部习题报告：各份试卷合并口径，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={mathPapers.flatMap((p) => p.questions)}
+        results={progress as Record<string, 'right' | 'wrong' | 'revealed'>}
+        deckMeta={(deck) => ({ name: `第${deck}章`, color: `var(--math${deck - 7}, var(--deck-accent))` })}
+        tagNav={(t) => ({
+          href: `${MATH_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+          tip: `跳转到 第 ${t.deck} 章 · ${t.text}`,
+        })}
+      />
     </div>
   );
 }

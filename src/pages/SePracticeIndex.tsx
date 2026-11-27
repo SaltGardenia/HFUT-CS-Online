@@ -1,10 +1,12 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { SE_BASE } from '../courses/registry';
-import { sePapers, SE_KIND_LABEL } from '../content/se';
+import { seChapters, sePapers, SE_KIND_LABEL } from '../content/se';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
 import { IconArrowRight, IconFileText } from '../components/icons';
+import PracticeReport from '../components/practice/report/PracticeReport';
+import { shellDeckMeta } from '../components/practice/report/aggregates';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷的完成度 */
 const STORE_KEY = 'se-practice-progress-v1';
@@ -69,6 +71,18 @@ export default function SePracticeIndex() {
           </Link>
         ))}
       </nav>
+
+      {/* 全部习题报告：各份试卷合并口径，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={sePapers.flatMap((p) => p.questions)}
+        results={progress as Record<string, 'right' | 'wrong' | 'revealed'>}
+        deckMeta={shellDeckMeta({ deckKey: 'se', chapters: seChapters })}
+        tagNav={(t) => ({
+          href: `${SE_BASE}/deck/${t.deck === 14 ? 'cd' : `deck${t.deck}`}?s=${t.sec}`,
+          tip: `跳转到 ${seChapters.find((c) => c.id === (t.deck === 14 ? 'cd' : `deck${t.deck}`))?.no ?? ''} · ${t.text}`,
+        })}
+      />
     </div>
   );
 }

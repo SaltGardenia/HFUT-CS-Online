@@ -1,10 +1,12 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { CA_BASE } from '../courses/registry';
-import { caPapers, CA_KIND_LABEL } from '../content/ca';
+import { caChapters, caPapers, CA_KIND_LABEL } from '../content/ca';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
 import { IconArrowRight, IconFileText } from '../components/icons';
+import PracticeReport from '../components/practice/report/PracticeReport';
+import { numberedDeckMeta } from '../components/practice/report/aggregates';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷的完成度 */
 const STORE_KEY = 'ca-practice-progress-v1';
@@ -69,6 +71,18 @@ export default function CaPracticeIndex() {
           </Link>
         ))}
       </nav>
+
+      {/* 全部习题报告：三份试卷合并口径，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={caPapers.flatMap((p) => p.questions)}
+        results={progress as Record<string, 'right' | 'wrong' | 'revealed'>}
+        deckMeta={numberedDeckMeta({ deckKey: 'ca', chapters: caChapters })}
+        tagNav={(t) => ({
+          href: `${CA_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+          tip: `跳转到 ${caChapters.find((c) => c.id === `ch${t.deck}`)?.no ?? ''} · ${t.text}`,
+        })}
+      />
     </div>
   );
 }

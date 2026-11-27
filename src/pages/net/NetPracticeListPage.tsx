@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { NET_BASE } from '../../courses/registry';
 import { netPapers } from '../../content/net';
 import { IconArrowRight } from '../../components/icons';
+import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { clearProgressStore, useProgressStore } from '../../lib/sync';
 import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
@@ -59,6 +60,18 @@ export default function NetPracticeListPage() {
           );
         })}
       </div>
+
+      {/* 全部习题报告：三份试卷合并口径，随作答实时更新（全未作答时不渲染）；本课进度键带卷前缀，这里同步改写 */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={netPapers.flatMap((p) => p.questions.map((q) => ({ ...q, id: `${p.id}:${q.id}` })))}
+        results={results}
+        deckMeta={(deck) => ({ name: `第 ${deck} 章`, color: `var(--net${deck}, var(--deck-accent))` })}
+        tagNav={(t) => ({
+          href: `${NET_BASE}/deck/ch${t.deck}?s=${t.sec}`,
+          tip: `跳转到 第 ${t.deck} 章 · ${t.text}`,
+        })}
+      />
 
     </div>
   );

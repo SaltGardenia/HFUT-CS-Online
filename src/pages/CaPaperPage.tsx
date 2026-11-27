@@ -5,6 +5,8 @@ import { CA_BASE } from '../courses/registry';
 import { caChapters, caPapers, CA_KIND_LABEL } from '../content/ca';
 import type { CaPaper, CaQuizKind, CaTag } from '../content/ca';
 import PracticeCard from '../components/practice/PracticeCard';
+import PracticeReport from '../components/practice/report/PracticeReport';
+import { numberedDeckMeta } from '../components/practice/report/aggregates';
 import ClearProgress from '../components/practice/ClearProgress';
 import { IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
@@ -304,6 +306,15 @@ function PaperInner({ paper }: { paper: CaPaper }) {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions}
+        results={results}
+        deckMeta={numberedDeckMeta({ deckKey: 'ca', chapters: caChapters })}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

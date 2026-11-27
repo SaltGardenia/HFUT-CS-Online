@@ -5,6 +5,7 @@ import { MATH_BASE } from '../courses/registry';
 import { mathPapers, MATH_KIND_LABEL, MATH_SECTIONS } from '../content/math';
 import type { MathPaper, MathQuizKind, MathTag } from '../content/math';
 import PracticeCard from '../components/practice/PracticeCard';
+import PracticeReport from '../components/practice/report/PracticeReport';
 import ClearProgress from '../components/practice/ClearProgress';
 import { IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
@@ -293,6 +294,15 @@ function PaperInner({ paper }: { paper: MathPaper }) {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions}
+        results={results}
+        deckMeta={(deck) => ({ name: `第${deck}章`, color: `var(--math${deck - 7}, var(--deck-accent))` })}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>
