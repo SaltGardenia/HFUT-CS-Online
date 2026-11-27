@@ -13,6 +13,8 @@ import GenHomePage from '../pages/courses/GenHomePage';
 import GenChapterPage from '../pages/courses/GenChapterPage';
 import GenPracticeIndex from '../pages/courses/GenPracticeIndex';
 import GenPaperPage from '../pages/courses/GenPaperPage';
+import QuestionBookPage, { buildBookEntries } from '../components/practice/books';
+import { GEN_KIND_LABEL } from '../content/courses/labels';
 import { findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
@@ -26,6 +28,9 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
   const location = useLocation();
   const { base, key } = spec;
   const storeKey = `${key}-practice-progress-v1`;
+
+  // 错题本/收藏本：一门课一份账，覆盖本课全部试卷题集
+  const bookEntries = useMemo(() => buildBookEntries(spec.papers, GEN_KIND_LABEL), [spec.papers]);
 
   const course = findCourseByBase(base);
   useEffect(() => {
@@ -249,6 +254,38 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
               {spec.papers.length > 0 && (
                 <>
                   <Route path="practice" element={<GenPracticeIndex spec={spec} storeKey={storeKey} />} />
+                  <Route
+                    path="practice/wrongbook"
+                    element={
+                      <QuestionBookPage
+                        kind="wrong"
+                        course={key}
+                        storeKey={storeKey}
+                        entries={bookEntries}
+                        tagNav={(t) => ({
+                          href: `${base}/deck/deck${t.deck}?s=${t.sec}`,
+                          tip: `跳转到 ${spec.chapters.find((c) => c.id === `deck${t.deck}`)?.no ?? `第 ${t.deck} 章`} · ${t.text}`,
+                        })}
+                        tagDeckKey={() => key}
+                      />
+                    }
+                  />
+                  <Route
+                    path="practice/favorites"
+                    element={
+                      <QuestionBookPage
+                        kind="fav"
+                        course={key}
+                        storeKey={storeKey}
+                        entries={bookEntries}
+                        tagNav={(t) => ({
+                          href: `${base}/deck/deck${t.deck}?s=${t.sec}`,
+                          tip: `跳转到 ${spec.chapters.find((c) => c.id === `deck${t.deck}`)?.no ?? `第 ${t.deck} 章`} · ${t.text}`,
+                        })}
+                        tagDeckKey={() => key}
+                      />
+                    }
+                  />
                   <Route
                     path="practice/:paperId"
                     element={<GenPaperPage spec={spec} storeKey={storeKey} />}

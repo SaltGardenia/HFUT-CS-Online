@@ -19,6 +19,23 @@ export interface FavoriteStamp {
 
 export type FavoriteMeta = Record<string, FavoriteStamp>;
 
+/** 题目级标记的两类账本：收藏本（fav）与错题本（wrong） */
+export type QMarkKind = 'fav' | 'wrong';
+
+/** 一道题的标记：on=false 为「移出」墓碑 */
+export interface QMarkStamp {
+  t: number;
+  on: boolean;
+}
+
+export type QMarkMeta = Record<string, QMarkStamp>;
+
+/** 一门课的两本账；键为课程 slug（localStorage：`hb-qmarks:<course>`） */
+export interface CourseQMarks {
+  fav: QMarkMeta;
+  wrong: QMarkMeta;
+}
+
 /** 最近查看：课程名 → 最近一次查看时间（毫秒） */
 export type RecentMeta = Record<string, number>;
 
@@ -54,6 +71,14 @@ export interface RemoteFavoriteRow {
   updated_at: string;
 }
 
+export interface RemoteQMarkRow {
+  course: string;
+  question_id: string;
+  kind: string;
+  marked: boolean;
+  updated_at: string;
+}
+
 export interface RemoteRecentRow {
   course: string;
   viewed_at: string;
@@ -86,6 +111,10 @@ export interface PushFavoriteRow {
   updated_at: string;
 }
 
+export interface PushQMarkRow extends RemoteQMarkRow {
+  device_id: string;
+}
+
 export interface PushRecentRow {
   course: string;
   viewed_at: string;
@@ -96,6 +125,7 @@ export interface PushPayload {
   favorites: PushFavoriteRow[];
   recent: PushRecentRow[];
   reading: PushReadingRow[];
+  qmarks: PushQMarkRow[];
 }
 
 export interface SyncUser {

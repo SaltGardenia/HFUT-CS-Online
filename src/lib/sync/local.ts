@@ -9,18 +9,23 @@ import {
   FAVORITE_META_KEY,
   FAVORITES_KEY,
   PROGRESS_STORES,
+  QMARKS_PREFIX,
   READING_KEY,
   RECENT_KEY,
   RECENT_META_KEY,
   progressMetaKey,
+  qmarksKey,
 } from './keys';
 import type {
+  CourseQMarks,
   FavoriteMeta,
   FavoriteStamp,
   ProgressMap,
   ProgressMeta,
   ProgressStamp,
   ProgressValue,
+  QMarkKind,
+  QMarkMeta,
   ReadingEntry,
   ReadingMap,
   RecentMeta,
@@ -94,13 +99,15 @@ function sameJSON(a: unknown, b: unknown): boolean {
 /* ------------------------------------------------------------------ 进度 */
 
 export interface DirtyEvent {
-  kind: 'progress' | 'favorite' | 'recent' | 'reading';
+  kind: 'progress' | 'favorite' | 'recent' | 'reading' | 'qmarks';
   /** progress：发生变化的进度存储键 */
   key?: string;
   /** progress：发生变化的题目 id */
   qids?: string[];
   /** reading：发生变化的页面路径 */
   page?: string;
+  /** qmarks：发生变化的课程 slug */
+  course?: string;
 }
 
 let dirtyListener: ((e: DirtyEvent) => void) | null = null;
@@ -251,6 +258,65 @@ export function setFavorite(name: string, on: boolean) {
   emitDirty({ kind: 'favorite' });
 }
 
+/* ------------------------------------------------- 题目标记（收藏本/错题本） */
+
+/** 校验一本账：只接受 { qid: { t: number, on: boolean } } 形状的手工损坏防护 */
+function readQMarkMeta(raw: unknown): QMarkMeta {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const meta: QMarkMeta = {};
+  for (const [qid, stamp] of Object.entries(raw as Record<string, unknown>)) {
+    if (!stamp || typeof stamp !== 'object') continue;
+    const { t, on } = stamp as { t?: unknown; on?: unknown };
+    if (typeof t !== 'number' || !Number.isFinite(t) || typeof on !== 'boolean') continue;
+    meta[qid] = { t, on };
+  }
+  return meta;
+}
+
+/** 本机记过账的全部课程 slug（按 localStorage 键前缀发现，无需登记表） */
+export function qmarkCourses(): string[] {
+  const courses: string[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(QMARKS_PREFIX)) courses.push(key.slice(QMARKS_PREFIX.length));
+    }
+  } catch {
+    /* ignore */
+  }
+  return courses;
+}
+
+export function readQMarks(course: string): CourseQMarks {
+  const value = readJSON<unknown>(qmarksKey(course), {});
+  const record =
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  return { fav: readQMarkMeta(record.fav), wrong: readQMarkMeta(record.wrong) };
+}
+
+/** 写一道题的标记并上报脏数据；同态重写不落盘、不触发同步 */
+export function setQMark(course: string, kind: QMarkKind, qid: string, on: boolean) {
+  const marks = readQMarks(course);
+  const prev = marks[kind][qid];
+  if (prev && prev.on === on) return;
+  marks[kind][qid] = { t: Date.now(), on };
+  writeRaw(qmarksKey(course), JSON.stringify(marks));
+  emitDirty({ kind: 'qmarks', course });
+}
+
+/** 云端合并结果落盘（不产生脏标记，避免回声） */
+export function applyQMarks(course: string, marks: CourseQMarks) {
+  if (!sameJSON(readQMarks(course), marks)) writeRaw(qmarksKey(course), JSON.stringify(marks));
+}
+
+/** 一门课是否记过任何账（含墓碑）；登录时用它决定哪些课要参与上传 */
+export function hasAnyQMark(course: string): boolean {
+  const marks = readQMarks(course);
+  return Object.keys(marks.fav).length > 0 || Object.keys(marks.wrong).length > 0;
+}
+
 /* ------------------------------------------------------------ 最近查看 */
 
 const RECENT_MAX = 8;
@@ -351,7 +417,7 @@ export function writeOwner(userId: string) {
   writeRaw(OWNER_KEY, userId, false);
 }
 
-/** 清空本机用户数据（进度、收藏、最近查看及其时间戳），用于切换账号 */
+/** 清空本机用户数据（进度、收藏、最近查看、题目两本账及其时间戳），用于切换账号 */
 export function clearUserData() {
   for (const store of PROGRESS_STORES) {
     writeRaw(store.key, '{}');
@@ -364,6 +430,13 @@ export function clearUserData() {
   writeRaw(FAVORITES_KEY, '[]');
   writeRaw(RECENT_KEY, '[]');
   writeRaw(READING_KEY, '{}');
+  for (const course of qmarkCourses()) {
+    try {
+      localStorage.removeItem(qmarksKey(course));
+    } catch {
+      /* ignore */
+    }
+  }
   try {
     localStorage.removeItem(FAVORITE_META_KEY);
     localStorage.removeItem(RECENT_META_KEY);

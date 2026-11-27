@@ -6,13 +6,16 @@
  * - 首次登录前的本地数据没有时间戳，调用方先补成「现在」再合并（本机进度上传）。
  */
 import type {
+  CourseQMarks,
   FavoriteMeta,
   ProgressMap,
   ProgressMeta,
+  QMarkKind,
   ReadingEntry,
   ReadingMap,
   RemoteFavoriteRow,
   RemoteProgressRow,
+  RemoteQMarkRow,
   RemoteReadingRow,
   RemoteRecentRow,
   RecentMeta,
@@ -200,6 +203,75 @@ export function mergeRecent(
 export interface ReadingPushDraft {
   page: string;
   entry: ReadingEntry;
+}
+
+export interface QMarkPushDraft {
+  course: string;
+  question_id: string;
+  kind: string;
+  marked: boolean;
+  /** 毫秒时间戳 */
+  t: number;
+}
+
+export interface MergeQMarksResult {
+  marks: CourseQMarks;
+  push: QMarkPushDraft[];
+}
+
+/**
+ * 一门课的题目两本账合并：按 (kind, qid) 逐条取时间较新的一份，
+ * on=false 是移出墓碑，参与比较以避免「本机移出后被云端旧数据复活」。
+ */
+export function mergeQMarks(
+  course: string,
+  local: CourseQMarks,
+  remote: RemoteQMarkRow[],
+): MergeQMarksResult {
+  const marks: CourseQMarks = { fav: {}, wrong: {} };
+  const push: QMarkPushDraft[] = [];
+
+  for (const kind of ['fav', 'wrong'] as QMarkKind[]) {
+    const remoteBy = new Map(
+      remote.filter((r) => r.kind === kind).map((r) => [r.question_id, r]),
+    );
+    const localMeta = local[kind];
+    const ids = new Set([...Object.keys(localMeta), ...remoteBy.keys()]);
+
+    for (const qid of ids) {
+      const stamp = localMeta[qid];
+      const remoteRow = remoteBy.get(qid);
+      const localT = stamp ? stamp.t : -Infinity;
+      const remoteT = remoteRow ? ts(remoteRow.updated_at) : -Infinity;
+
+      if (!stamp && !remoteRow) continue;
+
+      let on: boolean;
+      let t: number;
+      let localWins = false;
+
+      if (stamp && (!remoteRow || localT >= remoteT)) {
+        on = stamp.on;
+        t = localT;
+        localWins = true;
+      } else if (remoteRow) {
+        on = remoteRow.marked;
+        t = remoteT;
+      } else {
+        continue;
+      }
+
+      marks[kind][qid] = { t, on };
+      if (localWins && (!remoteRow || remoteRow.marked !== on)) {
+        // 本机从未收藏/记错且云端没有该行时无需上传（空墓碑不上云）
+        if (!(on === false && !remoteRow)) {
+          push.push({ course, question_id: qid, kind, marked: on, t });
+        }
+      }
+    }
+  }
+
+  return { marks, push };
 }
 
 export interface MergeReadingResult {

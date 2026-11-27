@@ -3,6 +3,7 @@ import type {
   PushPayload,
   RemoteFavoriteRow,
   RemoteProgressRow,
+  RemoteQMarkRow,
   RemoteReadingRow,
   RemoteRecentRow,
   SyncUser,
@@ -14,6 +15,7 @@ export interface PullResult {
   favorites: RemoteFavoriteRow[];
   recent: RemoteRecentRow[];
   reading: RemoteReadingRow[];
+  qmarks: RemoteQMarkRow[];
 }
 
 export interface SyncBackend {
@@ -34,7 +36,7 @@ function ensure(error: { message: string } | null): void {
   if (error) throw new Error(error.message);
 }
 
-/** 云端还没执行新版 schema（缺 user_reading 表 / sync_push_reading 函数） */
+/** 云端还没执行新版 schema（缺 user_reading / user_qmarks 表或对应函数） */
 function isMissingReading(err: { code?: string }): boolean {
   return (
     err.code === 'PGRST202' ||
@@ -45,8 +47,9 @@ function isMissingReading(err: { code?: string }): boolean {
 }
 
 export function createSupabaseBackend(): SyncBackend {
-  /** 探测结果：新表/新函数是否可用。不可用时阅读进度只留本机，其余同步照常 */
+  /** 探测结果：新表/新函数是否可用。不可用时阅读进度与题目两本账只留本机，其余同步照常 */
   let readingAvailable: boolean | null = null;
+  let qmarksAvailable: boolean | null = null;
 
   return {
     async getSession() {
@@ -95,7 +98,7 @@ export function createSupabaseBackend(): SyncBackend {
 
     async pull() {
       const supabase = await getSupabase();
-      const [progress, favorites, recent, reading] = await Promise.all([
+      const [progress, favorites, recent, reading, qmarks] = await Promise.all([
         supabase.from('user_progress').select('course,question_id,result,updated_at'),
         supabase.from('user_favorites').select('course,favorited,updated_at'),
         supabase.from('user_recent').select('course,viewed_at'),
@@ -104,16 +107,21 @@ export function createSupabaseBackend(): SyncBackend {
           : supabase
               .from('user_reading')
               .select('course,page,scroll_y,percent,section,updated_at'),
+        qmarksAvailable === false
+          ? null
+          : supabase.from('user_qmarks').select('course,question_id,kind,marked,updated_at'),
       ]);
       ensure(progress.error);
       ensure(favorites.error);
       ensure(recent.error);
       if (reading) readingAvailable = !reading.error;
+      if (qmarks) qmarksAvailable = !qmarks.error;
       return {
         progress: (progress.data ?? []) as RemoteProgressRow[],
         favorites: (favorites.data ?? []) as RemoteFavoriteRow[],
         recent: (recent.data ?? []) as RemoteRecentRow[],
         reading: (reading?.data ?? []) as RemoteReadingRow[],
+        qmarks: (qmarks?.data ?? []) as RemoteQMarkRow[],
       };
     },
 
@@ -127,19 +135,24 @@ export function createSupabaseBackend(): SyncBackend {
       ensure(error);
 
       // 阅读进度单独走一个 RPC：老库没有这个函数时静默跳过，不拖垮其它数据
-      if (payload.reading.length === 0 || readingAvailable === false) return;
-      const { error: readingError } = await supabase.rpc('sync_push_reading', {
-        p_reading: payload.reading,
-      });
-      if (!readingError) {
-        readingAvailable = true;
-        return;
+      if (payload.reading.length > 0 && readingAvailable !== false) {
+        const { error: readingError } = await supabase.rpc('sync_push_reading', {
+          p_reading: payload.reading,
+        });
+        if (!readingError) readingAvailable = true;
+        else if (isMissingReading(readingError)) readingAvailable = false;
+        else ensure(readingError);
       }
-      if (isMissingReading(readingError)) {
-        readingAvailable = false;
-        return;
+
+      // 题目两本账（收藏本/错题本）同阅读进度的降级策略
+      if (payload.qmarks.length > 0 && qmarksAvailable !== false) {
+        const { error: qmarksError } = await supabase.rpc('sync_push_qmarks', {
+          p_qmarks: payload.qmarks,
+        });
+        if (!qmarksError) qmarksAvailable = true;
+        else if (isMissingReading(qmarksError)) qmarksAvailable = false;
+        else ensure(qmarksError);
       }
-      ensure(readingError);
     },
   };
 }

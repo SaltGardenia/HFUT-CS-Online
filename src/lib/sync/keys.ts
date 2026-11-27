@@ -47,6 +47,10 @@ export const RECENT_KEY = 'hb-recent-courses';
 export const READING_KEY = 'hb-reading-v1';
 export const DEVICE_KEY = 'hb-device-id';
 
+/** 题目收藏/错题本：一门课一份账（收藏本 + 错题本），键里带课程 slug 划数据边界 */
+export const QMARKS_PREFIX = 'hb-qmarks:';
+export const qmarksKey = (course: string) => `${QMARKS_PREFIX}${course}`;
+
 /** 进度时间戳（与数据分开存，不改动页面已有的数据格式） */
 export const progressMetaKey = (storeKey: string) => `hb-progress-meta:${storeKey}`;
 export const FAVORITE_META_KEY = 'hb-favorite-meta';

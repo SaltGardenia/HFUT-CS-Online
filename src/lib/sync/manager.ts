@@ -13,6 +13,7 @@ import * as local from './local';
 import {
   mergeFavorites,
   mergeProgress,
+  mergeQMarks,
   mergeReading,
   mergeRecent,
   type FavoritePushDraft,
@@ -44,6 +45,8 @@ interface PreparedPush {
   sentReading: { page: string; t: number }[];
   favoritesSeq: number;
   recentSeq: number;
+  /** 发送时各课程的 qmarks 序号快照（发送期间又写入的课程保留脏标记） */
+  qmarksSeq: Map<string, number>;
 }
 
 const initialState = (): SyncState => ({
@@ -74,6 +77,9 @@ class SyncManager {
   private dirtyReading = new Set<string>();
   private favoritesDirty = false;
   private recentDirty = false;
+  /** 题目两本账：发生过写入的课程 → 写入序号（清脏时按快照比对） */
+  private dirtyQMarks = new Set<string>();
+  private qmarksSeq = new Map<string, number>();
 
   /* -------------------------------------------------------------- 对外 */
 
@@ -101,6 +107,8 @@ class SyncManager {
       } else if (e.kind === 'recent') {
         this.recentDirty = true;
         this.recentSeq += 1;
+      } else if (e.kind === 'qmarks' && e.course) {
+        this.markQMarks(e.course);
       }
       this.schedulePush();
     });
@@ -213,6 +221,11 @@ class SyncManager {
     set.add(qid);
   }
 
+  private markQMarks(course: string) {
+    this.dirtyQMarks.add(course);
+    this.qmarksSeq.set(course, (this.qmarksSeq.get(course) ?? 0) + 1);
+  }
+
   private async attach(user: SyncUser): Promise<void> {
     if (!this.backend) return;
     if (this.attachUserId === user.id && this.state.ready) return;
@@ -229,6 +242,8 @@ class SyncManager {
       this.dirtyReading.clear();
       this.favoritesDirty = false;
       this.recentDirty = false;
+      this.dirtyQMarks.clear();
+      this.qmarksSeq.clear();
     }
     local.writeOwner(user.id);
 
@@ -248,6 +263,10 @@ class SyncManager {
         this.recentDirty = true;
         this.recentSeq += 1;
       }
+      // 题目两本账：写入时自带时间戳，登录时把已有账目的课程全部标脏上传
+      for (const course of local.qmarkCourses()) {
+        if (local.hasAnyQMark(course)) this.markQMarks(course);
+      }
 
       await this.pullAndMerge(gen);
       if (gen !== this.sessionGen) return;
@@ -264,6 +283,8 @@ class SyncManager {
     this.dirtyReading.clear();
     this.favoritesDirty = false;
     this.recentDirty = false;
+    this.dirtyQMarks.clear();
+    this.qmarksSeq.clear();
     this.retryIndex = 0;
     if (this.pushTimer !== null) {
       window.clearTimeout(this.pushTimer);
@@ -354,6 +375,29 @@ class SyncManager {
         for (const draft of merged.push) this.dirtyReading.add(draft.page);
       }
     }
+
+    // 题目两本账（收藏本/错题本）：一门课一本，逐条取新，本地较新的回传
+    {
+      const remoteQMarks = remote.qmarks ?? [];
+      const byCourse = new Map<string, typeof remoteQMarks>();
+      for (const row of remoteQMarks) {
+        let rows = byCourse.get(row.course);
+        if (!rows) {
+          rows = [];
+          byCourse.set(row.course, rows);
+        }
+        rows.push(row);
+      }
+      const courses = new Set([...byCourse.keys(), ...local.qmarkCourses()]);
+      for (const course of courses) {
+        const localMarks = local.readQMarks(course);
+        const rows = byCourse.get(course) ?? [];
+        if (rows.length === 0 && !local.hasAnyQMark(course)) continue;
+        const merged = mergeQMarks(course, localMarks, rows);
+        local.applyQMarks(course, merged.marks);
+        if (merged.push.length > 0) this.markQMarks(course);
+      }
+    }
   }
 
   private schedulePush(delay = PUSH_DEBOUNCE_MS) {
@@ -366,11 +410,12 @@ class SyncManager {
   }
 
   private preparePush(): PreparedPush | null {
-    const payload: PushPayload = { progress: [], favorites: [], recent: [], reading: [] };
+    const payload: PushPayload = { progress: [], favorites: [], recent: [], reading: [], qmarks: [] };
     const sentProgress: SentProgress[] = [];
     const sentReading: { page: string; t: number }[] = [];
     const deviceId = local.getDeviceId();
     const progressMetaCache = new Map<string, ProgressMeta>();
+    const qmarksSeqSnapshot = new Map(this.qmarksSeq);
 
     for (const [key, qids] of this.dirtyProgress) {
       const store = progressStoreOf(key);
@@ -437,11 +482,31 @@ class SyncManager {
       }
     }
 
+    if (this.dirtyQMarks.size > 0) {
+      for (const course of this.dirtyQMarks) {
+        const marks = local.readQMarks(course);
+        for (const kind of ['fav', 'wrong'] as const) {
+          for (const [qid, stamp] of Object.entries(marks[kind])) {
+            if (!stamp || !Number.isFinite(stamp.t)) continue;
+            payload.qmarks.push({
+              course,
+              question_id: qid,
+              kind,
+              marked: stamp.on,
+              updated_at: new Date(stamp.t).toISOString(),
+              device_id: deviceId,
+            });
+          }
+        }
+      }
+    }
+
     if (
       payload.progress.length === 0 &&
       payload.favorites.length === 0 &&
       payload.recent.length === 0 &&
-      payload.reading.length === 0
+      payload.reading.length === 0 &&
+      payload.qmarks.length === 0
     ) {
       return null;
     }
@@ -451,6 +516,7 @@ class SyncManager {
       sentReading,
       favoritesSeq: this.favoritesSeq,
       recentSeq: this.recentSeq,
+      qmarksSeq: qmarksSeqSnapshot,
     };
   }
 
@@ -501,6 +567,11 @@ class SyncManager {
     }
     if (prepared.favoritesSeq === this.favoritesSeq) this.favoritesDirty = false;
     if (prepared.recentSeq === this.recentSeq) this.recentDirty = false;
+
+    // 发送期间又写入的课程（序号变了）保留脏标记等下一轮
+    for (const [course, seq] of prepared.qmarksSeq) {
+      if (this.qmarksSeq.get(course) === seq) this.dirtyQMarks.delete(course);
+    }
 
     if (prepared.sentReading.length > 0) {
       const reading = local.readReading();

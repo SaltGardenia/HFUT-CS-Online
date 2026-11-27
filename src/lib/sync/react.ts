@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { getFavoriteCourses } from '../favoriteCourses';
 import { getRecentCourses } from '../recentCourses';
 import * as local from './local';
-import { FAVORITES_KEY, RECENT_KEY } from './keys';
+import { FAVORITES_KEY, RECENT_KEY, qmarksKey } from './keys';
 import { syncManager } from './manager';
-import type { SyncState } from './types';
+import type { CourseQMarks, SyncState } from './types';
 
 /** 订阅同步状态（账号、同步进度、错误） */
 export function useSync(): SyncState {
@@ -80,4 +80,25 @@ export function useRecentCourses(): string[] {
     return local.subscribeStore(RECENT_KEY, () => setList(getRecentCourses()));
   }, []);
   return list;
+}
+
+/** 只读订阅一门课的题目两本账（收藏本/错题本）；本机写入与云端合并都会刷新 */
+export function useCourseQMarks(course: string): CourseQMarks {
+  const key = qmarksKey(course);
+  const [marks, setMarks] = useState<CourseQMarks>(() => local.readQMarks(course));
+  const rawRef = useRef<string | null>(local.readRaw(key));
+
+  useEffect(() => {
+    const raw = local.readRaw(key);
+    rawRef.current = raw;
+    setMarks(local.readQMarks(course));
+    return local.subscribeStore(key, () => {
+      const nextRaw = local.readRaw(key);
+      if (nextRaw === rawRef.current) return;
+      rawRef.current = nextRaw;
+      setMarks(local.readQMarks(course));
+    });
+  }, [key, course]);
+
+  return marks;
 }

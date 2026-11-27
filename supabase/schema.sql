@@ -8,6 +8,7 @@
 --   user_favorites  课程收藏（按课程一行，favorited=false 为取消收藏墓碑）
 --   user_recent     最近查看（按课程一行，取最大 viewed_at）
 --   user_reading    阅读进度（按页面一行，记录滚动位置与百分比）
+--   user_qmarks     题目收藏本/错题本（course + question_id + kind 唯一；marked=false 为移出墓碑）
 --   site_visits     首页访问计数（按访客 + 会话 + 日期去重，匿名可上报、不可直接读写）
 --
 -- 安全
@@ -205,6 +206,45 @@ create policy "reading delete own"
   on public.user_reading for delete to authenticated
   using (auth.uid() = user_id);
 
+-- ---------------------------------------------------------------- qmarks
+-- 每门课两本账：收藏本（kind='fav'）与错题本（kind='wrong'），一行一道题；
+-- qid 与该课作答进度的 question_id 同一空间（net/phys 为 `${paperId}:${qid}`）。
+create table if not exists public.user_qmarks (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  course text not null,
+  question_id text not null,
+  kind text not null,
+  marked boolean not null default true,
+  updated_at timestamptz not null default now(),
+  device_id text,
+  primary key (user_id, course, question_id, kind)
+);
+
+create index if not exists user_qmarks_user_idx on public.user_qmarks (user_id);
+
+alter table public.user_qmarks enable row level security;
+
+drop policy if exists "qmarks select own" on public.user_qmarks;
+create policy "qmarks select own"
+  on public.user_qmarks for select to authenticated
+  using (auth.uid() = user_id);
+
+drop policy if exists "qmarks insert own" on public.user_qmarks;
+create policy "qmarks insert own"
+  on public.user_qmarks for insert to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "qmarks update own" on public.user_qmarks;
+create policy "qmarks update own"
+  on public.user_qmarks for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "qmarks delete own" on public.user_qmarks;
+create policy "qmarks delete own"
+  on public.user_qmarks for delete to authenticated
+  using (auth.uid() = user_id);
+
 -- -------------------------------------------------------------- 访问统计
 -- 每行 = 一个访客的一次会话（同一天内同一会话只记一次），用于首页「累计/今日访问量」。
 -- 匿名访客不能直接读写本表，只能调用 record_site_visit() 上报并取回计数。
@@ -372,18 +412,64 @@ begin
 end;
 $$;
 
+-- ------------------------------------------------- 题目两本账批量上传
+-- 与 sync_push_reading 同款：老库没执行这段时前端会静默跳过，其它数据同步不受影响。
+create or replace function public.sync_push_qmarks(
+  p_qmarks jsonb default '[]'::jsonb
+)
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    raise exception 'not authenticated';
+  end if;
+
+  insert into public.user_qmarks (user_id, course, question_id, kind, marked, updated_at, device_id)
+  select
+    v_uid,
+    x.course,
+    x.question_id,
+    x.kind,
+    coalesce(x.marked, true),
+    coalesce(x.updated_at, now()),
+    x.device_id
+  from jsonb_to_recordset(coalesce(p_qmarks, '[]'::jsonb)) as x(
+    course text,
+    question_id text,
+    kind text,
+    marked boolean,
+    updated_at timestamptz,
+    device_id text
+  )
+  where x.course is not null and x.question_id is not null
+    and x.kind in ('fav', 'wrong')
+  on conflict (user_id, course, question_id, kind) do update
+    set marked = excluded.marked,
+        updated_at = excluded.updated_at,
+        device_id = excluded.device_id
+    where excluded.updated_at > user_qmarks.updated_at;
+end;
+$$;
+
 -- ----------------------------------------------------------------- grants
 -- 只授予登录用户；匿名访客不接触任何用户表。
 grant select, insert, update, delete on public.user_progress to authenticated;
 grant select, insert, update, delete on public.user_favorites to authenticated;
 grant select, insert, update, delete on public.user_recent to authenticated;
 grant select, insert, update, delete on public.user_reading to authenticated;
+grant select, insert, update, delete on public.user_qmarks to authenticated;
 grant select, insert, update on public.profiles to authenticated;
 
 revoke all on public.user_progress from anon;
 revoke all on public.user_favorites from anon;
 revoke all on public.user_recent from anon;
 revoke all on public.user_reading from anon;
+revoke all on public.user_qmarks from anon;
 revoke all on public.profiles from anon;
 
 revoke all on function public.sync_push(jsonb, jsonb, jsonb) from public;
@@ -393,6 +479,10 @@ grant execute on function public.sync_push(jsonb, jsonb, jsonb) to authenticated
 revoke all on function public.sync_push_reading(jsonb) from public;
 revoke all on function public.sync_push_reading(jsonb) from anon;
 grant execute on function public.sync_push_reading(jsonb) to authenticated;
+
+revoke all on function public.sync_push_qmarks(jsonb) from public;
+revoke all on function public.sync_push_qmarks(jsonb) from anon;
+grant execute on function public.sync_push_qmarks(jsonb) to authenticated;
 
 -- 访问统计：游客也要能上报，所以匿名角色可执行；表本身仍不开放直接访问。
 revoke all on function public.record_site_visit(text, text) from public;

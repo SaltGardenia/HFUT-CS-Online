@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ALGO_BASE } from '../../courses/registry';
 import type { PracticeQuestion, PracticeTag } from '../../content/practice';
 import { decodeEntities } from '../../lib/text';
-import { IconArrowRight, IconCheck, IconChevronDown, IconReset, IconX } from '../icons';
+import { IconArrowRight, IconCheck, IconChevronDown, IconReset, IconStar, IconX } from '../icons';
 
 interface EssayOptions {
   /** 章节页标题锚点；使用 h3 以保留目录高亮和滚动定位。 */
@@ -35,6 +35,10 @@ interface Props {
   tagDeckKey?: (deck: number) => string;
   /** 仅主观题的来源、锚点及自评扩展；其他课程默认行为不变。 */
   essayOptions?: EssayOptions;
+  /** 收藏本交互：传入才渲染右上角收藏按钮（qid 用各课进度键的题目 id） */
+  favorite?: { on: boolean; onToggle: () => void };
+  /** 书页的角标动作（错题本页：移出错题本），与收藏按钮同排 */
+  cornerAction?: { label: string; onClick: () => void };
 }
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -49,7 +53,17 @@ function prettyMath(html: string): string {
 }
 
 /** 在线练习题卡：与 QuizCard 同一套交互语言，外加可跳转的知识点标签与简答题支持 */
-export default function PracticeCard({ quiz, label, result, onResult, tagNav, tagDeckKey, essayOptions }: Props) {
+export default function PracticeCard({
+  quiz,
+  label,
+  result,
+  onResult,
+  tagNav,
+  tagDeckKey,
+  essayOptions,
+  favorite,
+  cornerAction,
+}: Props) {
   const navigate = useNavigate();
   const [pulse, setPulse] = useState(false);
 
@@ -175,16 +189,37 @@ export default function PracticeCard({ quiz, label, result, onResult, tagNav, ta
 
   return (
     <div
-      className={`quiz practice-q${cls}${pulse ? ' pq-pulse' : ''}`}
+      className={`quiz practice-q${cls}${pulse ? ' pq-pulse' : ''}${favorite || cornerAction ? ' pq-has-corner' : ''}`}
       data-qid={quiz.id}
       data-result={result}
     >
-      {/* 已作答状态点（列表扫读用） */}
-      {result && (
-        <span className="pq-status" data-result={result} aria-label={statusText} title={statusText}>
-          {result === 'right' && <IconCheck size={11} />}
-          {result === 'wrong' && <IconX size={11} />}
-        </span>
+      {/* 右上角：已作答状态点（列表扫读用）+ 收藏 / 书页角标动作 */}
+      {(result || favorite || cornerAction) && (
+        <div className="pq-corner">
+          {result && (
+            <span className="pq-status" data-result={result} aria-label={statusText} title={statusText}>
+              {result === 'right' && <IconCheck size={11} />}
+              {result === 'wrong' && <IconX size={11} />}
+            </span>
+          )}
+          {cornerAction && (
+            <button type="button" className="pq-corner-btn" onClick={cornerAction.onClick}>
+              {cornerAction.label}
+            </button>
+          )}
+          {favorite && (
+            <button
+              type="button"
+              className={`pq-fav${favorite.on ? ' on' : ''}`}
+              aria-pressed={favorite.on}
+              aria-label={favorite.on ? '取消收藏' : '收藏本题'}
+              title={favorite.on ? '取消收藏' : '收藏本题'}
+              onClick={favorite.onToggle}
+            >
+              <IconStar size={15} />
+            </button>
+          )}
+        </div>
       )}
 
       <QuestionTag className={`quiz-q${essayOptions?.anchorId ? ' pq-question-heading' : ''}`} id={essayOptions?.anchorId}>
