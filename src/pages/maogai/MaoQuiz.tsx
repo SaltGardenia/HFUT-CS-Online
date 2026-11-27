@@ -1,15 +1,21 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import SiteHeader from '../../components/SiteHeader';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { IconArrowLeft } from '../../components/icons';
+import ThemeToggle from '../../components/ThemeToggle';
+import AccountButton from '../../components/AccountButton';
 
 const MaoQuizHome = lazy(() => import('./MaoQuizHome'));
 const MaoQuizSession = lazy(() => import('./MaoQuizSession'));
 
 /**
  * 学习通题库 · 毛概 —— 背题应用，不走课程外壳（无导航栏）。
- * 顶栏只保留站点品牌与全局控件；课程主题色走 html[data-deck='maogai']。
+ * 顶栏同占位页：返回胶囊 + 课程名，右侧全局控件；课程主题色走 html[data-deck='maogai']。
  */
 export default function MaoQuiz() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const onHome = pathname === '/maogai';
+
   useEffect(() => {
     document.documentElement.dataset.deck = 'maogai';
     return () => {
@@ -19,7 +25,27 @@ export default function MaoQuiz() {
 
   return (
     <div className="hub-shell mq-shell">
-      <SiteHeader />
+      <header className="hub-topbar">
+        <div className="hub-nav-left">
+          <button
+            className="topbar-ctl nav-pill"
+            onClick={() => navigate(onHome ? '/' : '/maogai')}
+            aria-label={onHome ? '返回站点首页' : '退出答题，返回毛概总览'}
+            title={onHome ? '返回站点首页' : '退出答题'}
+          >
+            <span className="icon-btn">
+              <IconArrowLeft size={18} />
+            </span>
+          </button>
+          <span className="hub-brand">毛概</span>
+        </div>
+        <div className="hub-topbar-right">
+          <div className="topbar-ctl nav-pill">
+            <ThemeToggle />
+          </div>
+          <AccountButton />
+        </div>
+      </header>
       <Suspense fallback={null}>
         <Routes>
           <Route index element={<MaoQuizHome />} />

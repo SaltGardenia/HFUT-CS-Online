@@ -257,11 +257,10 @@ export default function MaoQuizSession() {
   return (
     <main className="mq-main">
       <div className="mq-top">
-        <Link to="/maogai" className="mq-exit">退出</Link>
         <span className="mq-top-n">第 {idx + 1} / {queue.length} 题</span>
-        <div className="mq-top-bar">
-          <i style={{ width: `${(idx / queue.length) * 100}%` }} />
-        </div>
+      </div>
+      <div className="mq-top-bar">
+        <i style={{ width: `${(idx / queue.length) * 100}%` }} />
       </div>
       <motion.div
         key={q.id}

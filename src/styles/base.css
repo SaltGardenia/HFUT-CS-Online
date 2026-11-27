@@ -5044,12 +5044,10 @@ pre.code .cl-code:empty + .cl-com {
 .mq-foot { display: flex; justify-content: flex-end; margin-top: 6px; }
 
 /* 答题页 */
-.mq-top { display: flex; align-items: baseline; gap: 14px; margin: 0 0 10px; }
-.mq-top-n { margin-left: auto; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.mq-top { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.mq-top-n { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .mq-top-bar { height: 4px; border-radius: 2px; background: var(--panel-2); overflow: hidden; margin: 0 0 16px; }
 .mq-top-bar i { display: block; height: 100%; background: var(--deck-accent); transition: width 300ms var(--press-ease); }
-.mq-exit { font-size: 13px; color: var(--ink-2); text-decoration: none; transition: color 160ms ease; }
-.mq-exit:hover { color: var(--deck-accent); }
 
 .mq-qcard {
   margin: 0;
