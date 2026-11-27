@@ -34,8 +34,8 @@ describe('讲义正文搜索', () => {
   });
 
   it('正文路径包含章名、二级标题及命中的三级标题，且二级标题不重复', () => {
-    expect(outlineResultPath(findSearchResults(items, '滑动窗口')[0])).toBe('网络 · 概述 · 协议');
-    expect(outlineResultPath(findSearchResults(items, '资源共享')[0])).toBe('网络 · 概述');
+    expect(outlineResultPath(findSearchResults(items, '滑动窗口')[0])).toEqual({ heading: '网络 · 概述', subheading: '协议' });
+    expect(outlineResultPath(findSearchResults(items, '资源共享')[0])).toEqual({ heading: '网络 · 概述', subheading: null });
   });
 
   it('长正文摘要包含实际命中词', () => {

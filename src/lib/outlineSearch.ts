@@ -81,8 +81,12 @@ export function searchSnippet(text: string, query: string): string {
   return (start ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
 }
 
-/** 路径按课程章名 → 二级标题 → 具体小节显示，避免重复标题。 */
-export function outlineResultPath(item: SearchIndexItem): string {
-  const parts = [item.unit ? item.unitTitle : '首页', item.parentSectionTitle, item.sectionTitle];
-  return Array.from(new Set(parts.filter((part): part is string => !!part))).join(' · ');
+/** 第一行显示章名与 H2，独立的小字号第二行显示 H3；无 H3 时省略。 */
+export function outlineResultPath(item: SearchIndexItem): { heading: string; subheading: string | null } {
+  const chapter = item.unit ? item.unitTitle : '首页';
+  const section = item.parentSectionTitle || item.sectionTitle;
+  const heading = section && section !== chapter ? chapter + ' · ' + section : chapter;
+  const subheading = item.parentSectionTitle && item.sectionTitle && item.sectionTitle !== section
+    ? item.sectionTitle : null;
+  return { heading, subheading };
 }

@@ -190,7 +190,9 @@ export default function SearchBox({ index, linkTo }: Props) {
           >
             <ul className="search-list">
               {results.length === 0 && query.trim() && <li className="palette-empty">没有匹配的内容</li>}
-              {results.map((item, i) => (
+              {results.map((item, i) => {
+                const path = item.kind === '正文' ? outlineResultPath(item) : null;
+                return (
                 <li
                   key={`${item.unit}-${item.sectionId}-${i}`}
                   className={`palette-item${item.kind === '正文' ? ' palette-body' : ''}${i === active ? ' active' : ''}`}
@@ -198,11 +200,10 @@ export default function SearchBox({ index, linkTo }: Props) {
                   onClick={() => select(item)}
                 >
                   <span className="pi-kind">{item.kind}</span>
-                  {item.kind === '正文' ? (
+                  {path ? (
                     <span className="pi-body">
-                      <span className="pi-body-head">
-                        <span className="pi-section">{outlineResultPath(item)}</span>
-                      </span>
+                      <span className="pi-section">{path.heading}</span>
+                      {path.subheading && <span className="pi-subsection">{path.subheading}</span>}
                       <span className="pi-snippet">
                         <Highlight text={searchSnippet(item.text, query)} query={query} />
                       </span>
@@ -214,7 +215,8 @@ export default function SearchBox({ index, linkTo }: Props) {
                     </>
                   )}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </motion.div>
         )}
