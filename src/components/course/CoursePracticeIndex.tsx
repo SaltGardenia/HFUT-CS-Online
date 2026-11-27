@@ -4,6 +4,7 @@ import type { CourseConfig, CourseQuizKind } from '../../content/course-types';
 import { useToc } from '../../lib/toc';
 import { useStoredRecord } from '../../lib/sync';
 import { IconArrowRight, IconFileText } from '../icons';
+import { BookCards } from '../practice/books';
 
 const KINDS: CourseQuizKind[] = ['single', 'multi', 'judge', 'fill', 'essay'];
 
@@ -40,6 +41,7 @@ export default function CoursePracticeIndex({ config }: { config: CourseConfig }
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的章节位置。
         </p>
       </div>
+      <BookCards base={config.base} course={config.base.replace(/^\/+/, '')} />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${config.base}/practice/${p.id}`}>

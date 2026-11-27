@@ -8,6 +8,7 @@ import type {
   PracticeTag,
 } from '../../content/course-types';
 import PracticeCard from '../practice/PracticeCard';
+import { BookCards } from '../practice/books';
 import ClearProgress from '../practice/ClearProgress';
 import { IconChevronUp } from '../icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
@@ -197,6 +198,7 @@ export default function CoursePaperView({
   return (
     <div className="page practice-page">
       <h1>{paper.title}</h1>
+      {config.singlePaperDirect && <BookCards base={config.base} course={config.base.replace(/^\/+/, '')} />}
       <div className="lede">
         <p>
           {paper.source} · 共 {total} 题 · 参考答案：{paper.answerSource}。左侧热力图可切换题型、点击格子跳到具体题；

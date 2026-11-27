@@ -5,6 +5,7 @@ import { GEN_KIND_LABEL } from '../../content/courses/labels';
 import { useToc } from '../../lib/toc';
 import { useStoredRecord } from '../../lib/sync';
 import { IconArrowRight, IconFileText } from '../../components/icons';
+import { BookCards } from '../../components/practice/books';
 
 interface Props {
   spec: CourseSpec;
@@ -46,6 +47,7 @@ export default function GenPracticeIndex({ spec, storeKey }: Props) {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
         </p>
       </div>
+      <BookCards base={spec.base} course={spec.key} />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${base}/practice/${p.id}`}>

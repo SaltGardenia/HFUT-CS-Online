@@ -8,7 +8,6 @@ import SectionCapsule from '../../components/SectionCapsule';
 import { scrollToId } from '../../lib/scroll';
 import { useScrollSpy } from '../../lib/scrollspy';
 import { IconArrowRight, IconFileText } from '../../components/icons';
-import { BookCards } from '../../components/practice/books';
 
 /** 通用课程首页：课程与资料概况 / 章节目录 / 在线练习 / 附件资料（无该类资料则整节省略） */
 export default function GenHomePage({ spec }: { spec: CourseSpec }) {
@@ -111,7 +110,6 @@ export default function GenHomePage({ spec }: { spec: CourseSpec }) {
             </span>
             <span className="h2-title">在线练习 · 试卷</span>
           </h2>
-          <BookCards base={base} course={key} />
           <nav className="ext-cards" aria-label="试卷列表">
             {papers.map((p) => (
               <Link key={p.id} className="ext-card" to={`${base}/practice/${p.id}`}>

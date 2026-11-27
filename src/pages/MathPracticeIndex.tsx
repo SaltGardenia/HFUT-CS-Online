@@ -5,6 +5,7 @@ import { mathPapers, MATH_KIND_LABEL, type MathQuizKind } from '../content/math'
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
 import { IconArrowRight, IconFileText } from '../components/icons';
+import { BookCards } from '../components/practice/books';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷完成度 */
 const STORE_KEY = 'math-practice-progress-v1';
@@ -41,6 +42,7 @@ export default function MathPracticeIndex() {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的章节位置。
         </p>
       </div>
+      <BookCards base={MATH_BASE} course="math" />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${MATH_BASE}/practice/${p.id}`}>

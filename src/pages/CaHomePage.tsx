@@ -9,7 +9,6 @@ import SectionCapsule from '../components/SectionCapsule';
 import { scrollToId } from '../lib/scroll';
 import { useScrollSpy } from '../lib/scrollspy';
 import { IconArrowRight, IconFileText } from '../components/icons';
-import { BookCards } from '../components/practice/books';
 
 /** 总目录页的目录（自绘区块，非 Sections 数据驱动） */
 const HOME_TOC = [
@@ -125,7 +124,6 @@ export default function CaHomePage() {
           <span className="h2-no" aria-hidden="true">3</span>
           <span className="h2-title">在线练习 · 试题</span>
         </h2>
-        <BookCards base={CA_BASE} course="ca" />
         <nav className="ext-cards" aria-label="试卷列表">
           {caPapers.map((p) => (
             <Link key={p.id} className="ext-card" to={`${CA_BASE}/practice/${p.id}`}>

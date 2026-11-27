@@ -5,6 +5,7 @@ import { sePapers, SE_KIND_LABEL } from '../content/se';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
 import { IconArrowRight, IconFileText } from '../components/icons';
+import { BookCards } from '../components/practice/books';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷的完成度 */
 const STORE_KEY = 'se-practice-progress-v1';
@@ -45,6 +46,7 @@ export default function SePracticeIndex() {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
         </p>
       </div>
+      <BookCards base={SE_BASE} course="se" />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${SE_BASE}/practice/${p.id}`}>
