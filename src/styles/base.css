@@ -2601,19 +2601,23 @@ pre.code .cl-code:empty + .cl-com {
 }
 .search-drop .pi-subsection {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--ink-3);
+  font-size: 0.7188rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--deck-accent);
   overflow-wrap: anywhere;
 }
 .search-drop .pi-snippet {
   display: block;
   white-space: normal;
   overflow-wrap: anywhere;
-  font-size: 0.8125rem;
-  line-height: 1.6;
+  font-size: 0.8438rem;
+  font-weight: 400;
+  line-height: 1.65;
   color: var(--ink-2);
+}
+.search-drop .pi-subsection + .pi-snippet {
+  margin-top: 5px;
 }
 .search-drop .pi-snippet .pi-mark {
   font-weight: 700;
