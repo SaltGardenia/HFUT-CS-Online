@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { decks, homeData } from '../content';
 import { decodeEntities } from '../lib/text';
-import { appendOutlineIndex, findSearchResults, searchSnippet } from '../lib/outlineSearch';
+import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath } from '../lib/outlineSearch';
 import { IconSearch, IconX } from './icons';
 
 export interface SearchIndexItem {
@@ -14,6 +14,8 @@ export interface SearchIndexItem {
   sectionId: string;
   /** 正文命中的知识点标题，与实际跳转锚点对应 */
   sectionTitle?: string;
+  /** 正文所在的二级标题（H2），即使实际命中在 H3 下也保留。 */
+  parentSectionTitle?: string;
   text: string;
 }
 
@@ -199,8 +201,7 @@ export default function SearchBox({ index, linkTo }: Props) {
                   {item.kind === '正文' ? (
                     <span className="pi-body">
                       <span className="pi-body-head">
-                        <span className="pi-section">{item.sectionTitle || item.unitTitle}</span>
-                        <span className="pi-path">{item.unit ? item.unitTitle : '首页'}</span>
+                        <span className="pi-section">{outlineResultPath(item)}</span>
                       </span>
                       <span className="pi-snippet">
                         <Highlight text={searchSnippet(item.text, query)} query={query} />

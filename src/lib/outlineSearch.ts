@@ -17,7 +17,7 @@ export function appendOutlineIndex(
     let fragments: string[] = [];
     const flush = () => {
       const text = normalize(fragments.join(''));
-      if (text) items.push({ kind: '正文', unit, unitTitle, sectionId, sectionTitle: anchors.get(sectionId) || decodeEntities(section.heading), text });
+      if (text) items.push({ kind: '正文', unit, unitTitle, sectionId, sectionTitle: anchors.get(sectionId) || decodeEntities(section.heading), parentSectionTitle: anchors.get(section.id) || decodeEntities(section.heading), text });
       fragments = [];
     };
     const walk = (node: Node) => {
@@ -79,4 +79,10 @@ export function searchSnippet(text: string, query: string): string {
   const start = Math.max(0, i - 12);
   const end = Math.min(text.length, i + q.length + 36);
   return (start ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+}
+
+/** 路径按课程章名 → 二级标题 → 具体小节显示，避免重复标题。 */
+export function outlineResultPath(item: SearchIndexItem): string {
+  const parts = [item.unit ? item.unitTitle : '首页', item.parentSectionTitle, item.sectionTitle];
+  return Array.from(new Set(parts.filter((part): part is string => !!part))).join(' · ');
 }

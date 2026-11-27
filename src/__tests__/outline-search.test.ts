@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DeckData } from '../content/types';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex, findSearchResults, searchSnippet } from '../lib/outlineSearch';
+import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath } from '../lib/outlineSearch';
 
 describe('讲义正文搜索', () => {
   const deck: DeckData = {
@@ -18,7 +18,7 @@ describe('讲义正文搜索', () => {
   it('搜索正文、跨行内标签的词、HTML 实体和表格，并定位最近的目录锚点', () => {
     expect(findSearchResults(items, '资源共享')[0]?.sectionId).toBe('intro');
     expect(findSearchResults(items, '&')[0]?.sectionId).toBe('intro');
-    expect(findSearchResults(items, '滑动窗口')[0]).toMatchObject({ sectionId: 'protocol', sectionTitle: '协议' });
+    expect(findSearchResults(items, '滑动窗口')[0]).toMatchObject({ sectionId: 'protocol', sectionTitle: '协议', parentSectionTitle: '概述' });
     expect(findSearchResults(items, '超时 重传')[0]?.sectionId).toBe('protocol');
     expect(findSearchResults(items, '后续正文')[0]?.sectionId).toBe('protocol');
     expect(findSearchResults(items, '不可搜索')).toEqual([]);
@@ -31,6 +31,11 @@ describe('讲义正文搜索', () => {
     expect(results[0]).toBe(title);
     expect(results.filter(r => r.sectionId === '1')).toHaveLength(1);
     expect(results).toHaveLength(12);
+  });
+
+  it('正文路径包含章名、二级标题及命中的三级标题，且二级标题不重复', () => {
+    expect(outlineResultPath(findSearchResults(items, '滑动窗口')[0])).toBe('网络 · 概述 · 协议');
+    expect(outlineResultPath(findSearchResults(items, '资源共享')[0])).toBe('网络 · 概述');
   });
 
   it('长正文摘要包含实际命中词', () => {
