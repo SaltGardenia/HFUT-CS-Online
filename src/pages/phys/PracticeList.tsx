@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { PHYS_BASE } from '../../courses/registry';
@@ -6,8 +5,7 @@ import { physPapers, physDecks } from '../../content/phys';
 import { IconArrowRight } from '../../components/icons';
 import ExamInsights from '../../components/practice/ExamInsights';
 import PracticeReport from '../../components/practice/report/PracticeReport';
-import ClearProgress from '../../components/practice/ClearProgress';
-import { clearProgressStore, useProgressStore } from '../../lib/sync';
+import { useProgressStore } from '../../lib/sync';
 import { chapterNamesFrom } from '../../lib/exam-insights';
 
 /** 作答结果持久化 key（qid = `${paperId}:${questionId}`，与算法课的 practice-progress-v1 分开） */
@@ -36,23 +34,9 @@ export default function PhysPracticeList() {
   const reduced = useReducedMotion();
   const [results] = useProgressStore<PhysResult>(PHYS_PRACTICE_STORE_KEY);
 
-  // 清空按钮的可用性：任一卷有作答即可清
-  const totalDone = useMemo(
-    () => physPapers.reduce((n, p) => n + physPaperStats(p.id, results).done, 0),
-    [results],
-  );
-
   return (
     <div className="page phys-practice-page">
       <h1>在线练习</h1>
-
-      <div className="pq-clear-row">
-        <ClearProgress
-          done={totalDone}
-          onClear={() => clearProgressStore(PHYS_PRACTICE_STORE_KEY)}
-          tip="清空全部试卷的作答进度？"
-        />
-      </div>
 
       <ExamInsights
         papers={physPapers}
