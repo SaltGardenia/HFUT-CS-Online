@@ -4054,6 +4054,17 @@ pre.code .cl-code:empty + .cl-com {
 .ei-block {
   margin-top: 16px;
 }
+/* 块 1/2 两列并排：考点分布（左）+ 高频考点（右）；窄屏收单列 */
+.ei-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 4px 24px;
+  margin-top: 16px;
+  align-items: start;
+}
+.ei-top .ei-block {
+  margin-top: 0;
+}
 .ei-block-head {
   display: flex;
   align-items: center;
@@ -4318,6 +4329,11 @@ pre.code .cl-code:empty + .cl-com {
   background: var(--panel-2);
 }
 
+@media (max-width: 1080px) {
+  .ei-top {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 640px) {
   .exam-insights {
     padding: 14px 14px 12px;

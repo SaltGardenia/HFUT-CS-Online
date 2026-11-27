@@ -93,9 +93,11 @@ export default function ExamInsights({
         </p>
       </div>
 
-      {/* 块 1 · 章级考点分布：排行条形，条内按题型堆叠 */}
-      {chapters.length > 0 && (
-        <div className="ei-block">
+      {/* 块 1/2 两列并排：考点分布（左）+ 高频考点（右） */}
+      <div className="ei-top">
+        {/* 块 1 · 章级考点分布：排行条形，条内按题型堆叠 */}
+        {chapters.length > 0 && (
+          <div className="ei-block">
           <div className="ei-block-head">
             <h3>考点分布</h3>
             <div className="ei-sort" role="group" aria-label="排序方式">
@@ -172,6 +174,7 @@ export default function ExamInsights({
           </ul>
         </div>
       )}
+      </div>
 
       {/* 块 3 · 历年分布矩阵：行=试卷（按数据顺序即年代序），列=章，格深浅=题数 */}
       {data.matrix.length >= 2 && decks.length > 0 && (
