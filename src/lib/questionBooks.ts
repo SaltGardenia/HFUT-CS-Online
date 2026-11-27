@@ -21,9 +21,9 @@ export interface QuestionBooks {
   removeFromWrong(qid: string): void;
   /** 作答结果联动：答错进错题本，答对移出错题本，看答案不动账 */
   trackResult(qid: string, result: BookResult): void;
-  /** 当前在册的题目 id（保持账内时间序，错题本/收藏本页用它筛本课题集） */
-  wrongIds(): string[];
-  favoriteIds(): string[];
+  /** 当前在册的题目 id（按账内时间序，错题本/收藏本页用它筛本课题集） */
+  wrongIds: string[];
+  favoriteIds: string[];
 }
 
 /** 两本账的原始记录（qids 只暴露 id，便于调用方与课程题集求交集） */

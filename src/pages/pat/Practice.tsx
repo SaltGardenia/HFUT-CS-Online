@@ -6,11 +6,15 @@ import { papers } from '../../content/pat';
 import type { PatPaper } from '../../content/pat';
 import PracticeCard from '../../components/practice/PracticeCard';
 import ClearProgress from '../../components/practice/ClearProgress';
+import { BookCards } from '../../components/practice/books';
+import { useQuestionBooks } from '../../lib/questionBooks';
 import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 
 /** 作答结果的持久化 key（与算法课的 practice-progress-v1 分开） */
-const STORE_KEY = 'pat-practice-progress-v1';
+/** 书页路由复用同一进度键（导出给课程根） */
+export const PAT_PRACTICE_STORE_KEY = 'pat-practice-progress-v1';
+const STORE_KEY = PAT_PRACTICE_STORE_KEY;
 type Result = 'right' | 'wrong' | 'revealed';
 
 /** 热力图一格一题：绿=已看解析并理解，灰=已展开，浅灰=未作答 */
@@ -21,6 +25,7 @@ export default function PatPractice() {
   // 试卷选择：多份试卷先出列表；本课现只有一份省赛卷，直接进入答题
   const [paperId, setPaperId] = useState<string | null>(papers.length === 1 ? papers[0].id : null);
   const [results, setResults] = useProgressStore<Result>(STORE_KEY);
+  const books = useQuestionBooks('pat');
   const [showTop, setShowTop] = useState(false);
 
   const paper: PatPaper | undefined = papers.find((p) => p.id === paperId);
@@ -62,6 +67,8 @@ export default function PatPractice() {
     return (
       <div className="page practice-page">
         <h1>在线练习</h1>
+
+      <BookCards base={PAT_BASE} course="pat" />
         <div className="pq-progress material">
           <div className="pq-progress-text">
             <span>选择一份试卷开始作答</span>
@@ -90,7 +97,10 @@ export default function PatPractice() {
   const totalDone = paper.questions.filter((q) => results[q.id]).length;
   const seenAnswer = paper.questions.filter((q) => results[q.id] === 'revealed').length;
 
-  const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
+  const onResult = (qid: string, r: Result) => {
+    setResults((s) => ({ ...s, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const stateText = (r: Result | undefined) =>
     r === 'revealed' ? '已看解析' : r ? '已标记' : '未作答';
@@ -172,6 +182,7 @@ export default function PatPractice() {
                   label={`赛题 ${q.no} · ${q.title} · ${q.time}`}
                   result={results[q.id]}
                   onResult={onResult}
+                  favorite={{ on: books.favorited(q.id), onToggle: () => books.toggleFavorite(q.id) }}
                   tagNav={(t) => ({
                     href: `${PAT_BASE}/deck/deck${t.deck}?s=${t.sec}`,
                     tip: `跳转到 ${decodeDeckTitle(t.deck)} · ${t.text}`,

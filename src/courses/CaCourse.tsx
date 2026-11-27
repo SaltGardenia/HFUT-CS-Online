@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import { useScrollMemory } from '../lib/scrollMemory';
 import { CA_BASE, courses, findCourseByBase } from './registry';
-import { caChapters, caPapers } from '../content/ca';
+import { caChapters, caPapers, CA_KIND_LABEL } from '../content/ca';
 import TopBar, { type CourseTab, type CourseTabMenuItem } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -14,6 +14,7 @@ import CaChapterPage from '../pages/CaChapterPage';
 import CaPracticeIndex from '../pages/CaPracticeIndex';
 import CaPaperPage from '../pages/CaPaperPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { buildBookEntries } from '../components/practice/books';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
@@ -43,6 +44,20 @@ function buildCaIndex(): SearchIndexItem[] {
 }
 
 /** 计算机体系结构课程根组件 —— 挂在 /ca/* 下，布局与算法课同构（顶栏 + 侧栏 + 章节页/练习页） */
+const caBookLabel = (kind: string, qid: string) => {
+  const m = qid.match(/^q\d+-(\d+)$/);
+  return `${CA_KIND_LABEL[kind as keyof typeof CA_KIND_LABEL]} ${m ? m[1] : qid}`;
+};
+
+/** CA 试卷题目的书页条目：qid 与作答进度同一套 id，序号与答题页题卡一致 */
+const CA_BOOK_ENTRIES = buildBookEntries(
+  caPapers,
+  CA_KIND_LABEL,
+  {
+  labelOf: (q) => caBookLabel(q.kind, q.id),
+  },
+);
+
 export default function CaCourse() {
   const location = useLocation();
 
@@ -209,6 +224,25 @@ export default function CaCourse() {
               <Route index element={<CaHomePage />} />
               <Route path="chapter/:chapterId" element={<CaChapterPage />} />
               <Route path="practice" element={<CaPracticeIndex />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="ca"
+                      storeKey="ca-practice-progress-v1"
+                      entries={CA_BOOK_ENTRIES}
+                      tagNav={(t) => ({
+                        href: `${CA_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+                        tip: `跳转到 ${caChapters.find((c) => c.id === `ch${t.deck}`)?.no ?? ''} · ${t.text}`,
+                      })}
+                      tagDeckKey={() => 'ca'}
+                    />
+                  }
+                />
+              ))}
               <Route path="practice/:paperId" element={<CaPaperPage />} />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={CA_BASE} replace />} />

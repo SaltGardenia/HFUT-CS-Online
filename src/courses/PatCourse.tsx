@@ -11,7 +11,9 @@ import { appendOutlineIndex } from '../lib/outlineSearch';
 import PatHome from '../pages/pat/Home';
 import PatDeck from '../pages/pat/Deck';
 import PatPractice from '../pages/pat/Practice';
+import { PAT_PRACTICE_STORE_KEY } from '../pages/pat/Practice';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { type BookEntry } from '../components/practice/books';
 import { PAT_BASE } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
@@ -49,6 +51,28 @@ export function buildPatIndex(): SearchIndexItem[] {
  * 布局与交互完全复用上游组件（TopBar/Sidebar/抽屉/页面骨架），
  * 课程只注入自己的数据：三讲课件 + 讲义六章 + 省赛在线练习。
  */
+/** 省赛题的书页条目：开放大题，题卡序号沿用原卷（赛题号 · 题名 · 分值） */
+const PAT_BOOK_ENTRIES: BookEntry[] = papers.flatMap((paper) =>
+  paper.questions.map((q) => ({
+    qid: q.id,
+    quiz: { id: q.id, kind: 'essay' as const, question: q.question, answer: q.answer, explanation: q.explanation, tags: q.tags },
+    label: `赛题 ${q.no} · ${q.title} · ${q.time}`,
+    paper: paper.title,
+  })),
+);
+
+function patDeckTitle(deck: number): string {
+  const titles: Record<number, string> = {
+    1: '第一讲 · STL 简介',
+    2: '第二讲 · 搜索专题',
+    3: '第三讲 · 计算几何',
+    4: '讲义 · 动态规划',
+    5: '讲义 · 组合数学',
+    6: '讲义 · 专题解析',
+  };
+  return titles[deck] ?? `讲义 ${deck}`;
+}
+
 export default function PatCourse() {
   const location = useLocation();
 
@@ -225,6 +249,25 @@ export default function PatCourse() {
               <Route index element={<PatHome />} />
               <Route path="deck/:deckId" element={<PatDeck />} />
               <Route path="practice" element={<PatPractice />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="pat"
+                      storeKey={PAT_PRACTICE_STORE_KEY}
+                      entries={PAT_BOOK_ENTRIES}
+                      tagNav={(t) => ({
+                        href: `${PAT_BASE}/deck/deck${t.deck}?s=${t.sec}`,
+                        tip: `跳转到 ${patDeckTitle(t.deck)} · ${t.text}`,
+                      })}
+                      tagDeckKey={() => 'pat'}
+                    />
+                  }
+                />
+              ))}
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={PAT_BASE} replace />} />
             </Routes>

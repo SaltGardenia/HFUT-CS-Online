@@ -14,6 +14,7 @@ import CourseChapterView from './CourseChapterView';
 import CoursePracticeIndex from './CoursePracticeIndex';
 import CoursePaperView from './CoursePaperView';
 import CourseAttachmentsPage from '../../pages/CourseAttachmentsPage';
+import QuestionBookPage, { buildBookEntries } from '../practice/books';
 import { recordCourseView } from '../../lib/recentCourses';
 import { decodeEntities } from '../../lib/text';
 
@@ -46,6 +47,10 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
   const navType = useNavigationType();
   const reduced = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // 错题本/收藏本：一门课一份账（slug 取路由前缀），覆盖本课全部试卷题集
+  const courseSlug = config.base.replace(/^\//, '');
+  const bookEntries = useMemo(() => buildBookEntries(config.papers, config.kindLabel), [config]);
 
   useEffect(() => {
     const course = findCourseByBase(config.base);
@@ -313,6 +318,28 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
                       )
                     }
                   />
+                  {(['wrong', 'fav'] as const).map((kind) => (
+                    <Route
+                      key={kind}
+                      path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                      element={
+                        <QuestionBookPage
+                          kind={kind}
+                          course={courseSlug}
+                          storeKey={config.storeKey}
+                          entries={bookEntries}
+                          tagNav={(t) => {
+                            const target = config.chapters[t.deck - 1];
+                            return {
+                              href: `${config.base}/chapter/${target?.id ?? config.chapters[0].id}?s=${t.sec}`,
+                              tip: `跳转到 ${target?.no ?? `第 ${t.deck} 章`} · ${config.tagSections[t.deck]?.[t.sec] ?? t.text}`,
+                            };
+                          }}
+                          tagDeckKey={() => config.deckKey}
+                        />
+                      }
+                    />
+                  ))}
                   {!config.singlePaperDirect && (
                     <Route path="practice/:paperId" element={<PaperRoute config={config} />} />
                   )}

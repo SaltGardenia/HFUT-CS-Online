@@ -8,6 +8,7 @@ import PracticeCard from '../components/practice/PracticeCard';
 import ClearProgress from '../components/practice/ClearProgress';
 import { IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
+import { useQuestionBooks } from '../lib/questionBooks';
 
 /** 作答结果的持久化 key（OS 课程独立于算法课的进度存储） */
 const STORE_KEY = 'os-practice-progress-v1';
@@ -37,12 +38,16 @@ export default function OsPaperPage() {
 function PaperInner({ paper }: { paper: OsPaper }) {
   const reduced = useReducedMotion();
   const [results, setResults] = useProgressStore<Result>(STORE_KEY);
+  const books = useQuestionBooks('os');
   const [kind, setKind] = useState<OsQuizKind>('single');
   const firstKindRun = useRef(true);
   // 热力图点击 → 跨题型时先切题型再跳
   const pendingJump = useRef<string | null>(null);
 
-  const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
+  const onResult = (qid: string, r: Result) => {
+    setResults((s) => ({ ...s, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const bankOf = (k: OsQuizKind) => paper.questions.filter((q) => q.kind === k);
 
@@ -295,6 +300,7 @@ function PaperInner({ paper }: { paper: OsPaper }) {
                     result={results[q.id]}
                     onResult={onResult}
                     tagNav={tagNav}
+                    favorite={{ on: books.favorited(q.id), onToggle: () => books.toggleFavorite(q.id) }}
                   />
                 </Fragment>
               );

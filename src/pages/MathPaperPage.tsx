@@ -8,6 +8,7 @@ import PracticeCard from '../components/practice/PracticeCard';
 import ClearProgress from '../components/practice/ClearProgress';
 import { IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
+import { useQuestionBooks } from '../lib/questionBooks';
 
 /** 作答结果的持久化 key（高等数学课程独立于其它课程） */
 const STORE_KEY = 'math-practice-progress-v1';
@@ -29,13 +30,17 @@ export default function MathPaperPage() {
 function PaperInner({ paper }: { paper: MathPaper }) {
   const reduced = useReducedMotion();
   const [results, setResults] = useProgressStore<Result>(STORE_KEY);
+  const books = useQuestionBooks('math');
   const [kind, setKind] = useState<MathQuizKind>(
     () => KINDS.find((k) => paper.questions.some((q) => q.kind === k)) ?? 'fill',
   );
   const firstKindRun = useRef(true);
   const pendingJump = useRef<string | null>(null);
 
-  const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
+  const onResult = (qid: string, r: Result) => {
+    setResults((s) => ({ ...s, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const bankOf = (k: MathQuizKind) => paper.questions.filter((q) => q.kind === k);
 
@@ -284,6 +289,7 @@ function PaperInner({ paper }: { paper: MathPaper }) {
                     label={labelOf.get(q.id) ?? ''}
                     result={results[q.id]}
                     onResult={onResult}
+                    favorite={{ on: books.favorited(q.id), onToggle: () => books.toggleFavorite(q.id) }}
                     tagNav={tagNav}
                     tagDeckKey={() => 'math'}
                   />

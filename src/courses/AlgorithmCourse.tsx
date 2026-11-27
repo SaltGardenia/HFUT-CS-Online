@@ -10,8 +10,16 @@ import { buildAlgoIndex } from '../components/SearchBox';
 import HomePage from '../pages/HomePage';
 import DeckPage from '../pages/DeckPage';
 import PracticePage from '../pages/PracticePage';
+import QuestionBookPage, { buildBookEntries } from '../components/practice/books';
+import { practiceQuestions } from '../content/practice';
 import { ALGO_BASE, courses } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
+
+/** 算法课题库的书页条目：单题集、按题型顺序编号（与答题页题卡序号一致） */
+const ALGO_BOOK_ENTRIES = buildBookEntries(
+  [{ id: 'algo-bank', title: '在线练习题库', questions: practiceQuestions }],
+  { single: '单选', multi: '多选', judge: '判断', fill: '填空', essay: '简答' },
+);
 import { decodeEntities } from '../lib/text';
 
 /**
@@ -176,6 +184,18 @@ export default function AlgorithmCourse() {
               <Route index element={<HomePage />} />
               <Route path="deck/:deckId" element={<DeckPage />} />
               <Route path="practice" element={<PracticePage />} />
+              <Route
+                path="practice/wrongbook"
+                element={
+                  <QuestionBookPage kind="wrong" course="algo" storeKey="practice-progress-v1" entries={ALGO_BOOK_ENTRIES} />
+                }
+              />
+              <Route
+                path="practice/favorites"
+                element={
+                  <QuestionBookPage kind="fav" course="algo" storeKey="practice-progress-v1" entries={ALGO_BOOK_ENTRIES} />
+                }
+              />
               <Route path="*" element={<Navigate to={ALGO_BASE} replace />} />
             </Routes>
           </motion.div>

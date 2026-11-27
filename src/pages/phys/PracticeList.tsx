@@ -5,6 +5,7 @@ import { PHYS_BASE } from '../../courses/registry';
 import { physPapers } from '../../content/phys';
 import { IconArrowRight } from '../../components/icons';
 import ClearProgress from '../../components/practice/ClearProgress';
+import { BookCards } from '../../components/practice/books';
 import { clearProgressStore, useProgressStore } from '../../lib/sync';
 
 /** 作答结果持久化 key（qid = `${paperId}:${questionId}`，与算法课的 practice-progress-v1 分开） */
@@ -41,6 +42,8 @@ export default function PhysPracticeList() {
           tip="清空全部试卷的作答进度？"
         />
       </div>
+
+      <BookCards base={PHYS_BASE} course="phys" />
 
       <div className="net-paper-grid">
         {physPapers.map((p, i) => {

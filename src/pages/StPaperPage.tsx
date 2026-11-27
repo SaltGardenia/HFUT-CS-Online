@@ -8,6 +8,7 @@ import PracticeCard from '../components/practice/PracticeCard';
 import ClearProgress from '../components/practice/ClearProgress';
 import { IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
+import { useQuestionBooks } from '../lib/questionBooks';
 
 /** 作答结果的持久化 key（软件测试课程独立于算法课/OS/SE 等课程的进度存储） */
 const STORE_KEY = 'st-practice-progress-v1';
@@ -37,12 +38,16 @@ export default function StPaperPage() {
 function PaperInner({ paper }: { paper: StPaper }) {
   const reduced = useReducedMotion();
   const [results, setResults] = useProgressStore<Result>(STORE_KEY);
+  const books = useQuestionBooks('st');
   const [kind, setKind] = useState<StQuizKind>('fill');
   const firstKindRun = useRef(true);
   // 热力图点击 → 跨题型时先切题型再跳
   const pendingJump = useRef<string | null>(null);
 
-  const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
+  const onResult = (qid: string, r: Result) => {
+    setResults((s) => ({ ...s, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const bankOf = (k: StQuizKind) => paper.questions.filter((q) => q.kind === k);
 
@@ -294,6 +299,7 @@ function PaperInner({ paper }: { paper: StPaper }) {
                     label={questionLabel(q.id, q.kind)}
                     result={results[q.id]}
                     onResult={onResult}
+                    favorite={{ on: books.favorited(q.id), onToggle: () => books.toggleFavorite(q.id) }}
                     tagNav={tagNav}
                   />
                 </Fragment>

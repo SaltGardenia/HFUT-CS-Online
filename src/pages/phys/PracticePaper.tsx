@@ -7,13 +7,14 @@ import PracticeCard from '../../components/practice/PracticeCard';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
+import { useQuestionBooks } from '../../lib/questionBooks';
 import { PHYS_PRACTICE_STORE_KEY, physPaperStats, type PhysResult } from './PracticeList';
 
 /** 右侧进度轨的分段大小 */
 const SEGMENT = 10;
 
 /** 答题区的分组：大学物理试卷固定为简答/问答题 + 计算题两大题 */
-function paperGroups(paper: PhysPaper) {
+export function paperGroups(paper: PhysPaper) {
   const groups: { title: string; short: string; questionIds: string[] }[] = [];
   for (const q of paper.questions) {
     const last = groups[groups.length - 1];
@@ -72,8 +73,12 @@ export default function PhysPracticePaper() {
 function PhysPaperInner({ paper }: { paper: PhysPaper }) {
   const reduced = useReducedMotion();
   const [results, setResults] = useProgressStore<PhysResult>(PHYS_PRACTICE_STORE_KEY);
+  const books = useQuestionBooks('phys');
 
-  const onResult = (qid: string, r: PhysResult) => setResults((s) => ({ ...s, [`${paper.id}:${qid}`]: r }));
+  const onResult = (qid: string, r: PhysResult) => {
+    setResults((s) => ({ ...s, [`${paper.id}:${qid}`]: r }));
+    books.trackResult(`${paper.id}:${qid}`, r);
+  };
 
   const groups = useMemo(() => paperGroups(paper), [paper]);
 
@@ -248,6 +253,10 @@ function PhysPaperInner({ paper }: { paper: PhysPaper }) {
                       label={seqOf.get(qid) ?? kindLabel(q)}
                       result={results[`${paper.id}:${qid}`]}
                       onResult={onResult}
+                      favorite={{
+                        on: books.favorited(`${paper.id}:${qid}`),
+                        onToggle: () => books.toggleFavorite(`${paper.id}:${qid}`),
+                      }}
                       tagNav={tagNav}
                       tagDeckKey={() => 'phys'}
                     />

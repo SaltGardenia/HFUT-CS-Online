@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import { useScrollMemory } from '../lib/scrollMemory';
 import { SE_BASE, findCourseByBase } from './registry';
-import { seChapters, sePapers } from '../content/se';
+import { seChapters, sePapers, SE_KIND_LABEL } from '../content/se';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -14,6 +14,7 @@ import SeChapterPage from '../pages/SeChapterPage';
 import SePracticeIndex from '../pages/SePracticeIndex';
 import SePaperPage from '../pages/SePaperPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { buildBookEntries } from '../components/practice/books';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
@@ -34,6 +35,22 @@ function buildSeIndex(): SearchIndexItem[] {
 }
 
 /** 软件工程课程根组件 —— 挂在 /se/* 下，布局与 OS/DB 课同构（顶栏 + 侧栏 + 章节页/练习页/附件页） */
+const seBookLabel = (kind: string, qid: string) => {
+  const m = qid.match(/^[a-z]\d+-[a-z](\d+)(?:-(\d+))?$/);
+  const no = m ? m[1] : '';
+  const sub = m && m[2] ? `-${m[2]}` : '';
+  return `${SE_KIND_LABEL[kind as keyof typeof SE_KIND_LABEL]} ${no}${sub}`;
+};
+
+/** SE 试卷题目的书页条目：qid 与作答进度同一套 id，序号与答题页题卡一致 */
+const SE_BOOK_ENTRIES = buildBookEntries(
+  sePapers,
+  SE_KIND_LABEL,
+  {
+  labelOf: (q) => seBookLabel(q.kind, q.id),
+  },
+);
+
 export default function SeCourse() {
   const location = useLocation();
 
@@ -208,6 +225,25 @@ export default function SeCourse() {
               <Route index element={<SeHomePage />} />
               <Route path="deck/:deckId" element={<SeChapterPage />} />
               <Route path="practice" element={<SePracticeIndex />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="se"
+                      storeKey="se-practice-progress-v1"
+                      entries={SE_BOOK_ENTRIES}
+                      tagNav={(t) => ({
+                        href: `${SE_BASE}/deck/${t.deck === 14 ? 'cd' : `deck${t.deck}`}?s=${t.sec}`,
+                        tip: `跳转到 ${seChapters.find((c) => c.id === (t.deck === 14 ? 'cd' : `deck${t.deck}`))?.no ?? ''} · ${t.text}`,
+                      })}
+                      tagDeckKey={() => 'se'}
+                    />
+                  }
+                />
+              ))}
               <Route path="practice/:paperId" element={<SePaperPage />} />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={SE_BASE} replace />} />

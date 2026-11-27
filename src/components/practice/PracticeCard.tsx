@@ -189,7 +189,7 @@ export default function PracticeCard({
 
   return (
     <div
-      className={`quiz practice-q${cls}${pulse ? ' pq-pulse' : ''}${favorite || cornerAction ? ' pq-has-corner' : ''}`}
+      className={`quiz practice-q${cls}${pulse ? ' pq-pulse' : ''}${favorite || cornerAction ? ' pq-has-corner' : ''}${cornerAction ? ' pq-has-action' : ''}`}
       data-qid={quiz.id}
       data-result={result}
     >

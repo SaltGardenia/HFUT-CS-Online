@@ -8,6 +8,7 @@ import SectionCapsule from '../SectionCapsule';
 import { scrollToId } from '../../lib/scroll';
 import { useScrollSpy } from '../../lib/scrollspy';
 import { IconArrowRight, IconFileText } from '../icons';
+import { BookCards } from '../practice/books';
 
 /** 总目录页的课程概况：章节卡片 + 试卷列表（各课程共用同一套版式） */
 export default function CourseHomeView({ config }: { config: CourseConfig }) {
@@ -95,6 +96,7 @@ export default function CourseHomeView({ config }: { config: CourseConfig }) {
             <span className="h2-no" aria-hidden="true">3</span>
             <span className="h2-title">在线练习 · 试卷</span>
           </h2>
+          <BookCards base={config.base} course={prefix} />
           <nav className="ext-cards" aria-label="试卷列表">
             {config.papers.map((p) => (
               <Link

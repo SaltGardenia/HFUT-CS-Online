@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import type { PracticeQuestion, PracticeTag } from '../../content/practice';
 import { useProgressStore } from '../../lib/sync';
@@ -24,7 +24,8 @@ export interface BookEntry {
 export interface BookPaperInput {
   id: string;
   title: string;
-  questions: readonly (PracticeQuestion & { no?: number | string })[];
+  /** 题目可自带题卡序号（GenQuestion.label）与扩展字段；quiz 侧只消费 PracticeQuestion 形状 */
+  questions: readonly (PracticeQuestion & { no?: number | string; label?: string })[];
 }
 
 /** 把一门课的题集拼成书页条目：qid 与该课进度键一致，序号默认按卷内题型顺序编号 */
@@ -47,7 +48,7 @@ export function buildBookEntries(
       entries.push({
         qid: opts?.compositeId ? `${paper.id}:${q.id}` : q.id,
         quiz: q,
-        label: opts?.labelOf ? opts.labelOf(q, no) : `${kindLabel[q.kind] ?? q.kind} ${no}`,
+        label: opts?.labelOf ? opts.labelOf(q, no) : (q.label ?? `${kindLabel[q.kind] ?? q.kind} ${no}`),
         paper: paper.title,
       });
     }
@@ -58,8 +59,8 @@ export function buildBookEntries(
 /** 课程总目录「在线练习」区前的两张入口卡：错题本 / 收藏本（并排，试题卡片之前） */
 export function BookCards({ base, course }: { base: string; course: string }) {
   const books = useQuestionBooks(course);
-  const wrongCount = books.wrongIds().length;
-  const favCount = books.favoriteIds().length;
+  const wrongCount = books.wrongIds.length;
+  const favCount = books.favoriteIds.length;
   return (
     <nav className="ext-cards book-cards" aria-label="错题本与收藏本">
       <Link className="ext-card" to={`${base}/practice/wrongbook`}>

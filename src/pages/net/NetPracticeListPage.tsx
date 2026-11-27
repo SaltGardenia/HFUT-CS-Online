@@ -5,6 +5,7 @@ import { NET_BASE } from '../../courses/registry';
 import { netPapers } from '../../content/net';
 import { IconArrowRight } from '../../components/icons';
 import ClearProgress from '../../components/practice/ClearProgress';
+import { BookCards } from '../../components/practice/books';
 import { clearProgressStore, useProgressStore } from '../../lib/sync';
 import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
 
@@ -30,6 +31,8 @@ export default function NetPracticeListPage() {
           tip="清空全部试卷的作答进度？"
         />
       </div>
+
+      <BookCards base={NET_BASE} course="net" />
 
       <div className="net-paper-grid">
         {netPapers.map((p, i) => {

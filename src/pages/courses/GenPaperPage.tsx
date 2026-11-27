@@ -7,6 +7,7 @@ import PracticeCard from '../../components/practice/PracticeCard';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
+import { useQuestionBooks } from '../../lib/questionBooks';
 
 /** 作答结果的持久化 key（每门课独立，避免跨课串数据） */
 interface Props {
@@ -32,11 +33,15 @@ export default function GenPaperPage({ spec, storeKey }: Props) {
 function PaperInner({ paper, spec, storeKey }: { paper: GenPaper; spec: CourseSpec; storeKey: string }) {
   const reduced = useReducedMotion();
   const [results, setResults] = useProgressStore<Result>(storeKey);
+  const books = useQuestionBooks(spec.key);
   const [kind, setKind] = useState<GenQuizKind>('single');
   const firstKindRun = useRef(true);
   const pendingJump = useRef<string | null>(null);
 
-  const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
+  const onResult = (qid: string, r: Result) => {
+    setResults((s) => ({ ...s, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const bankOf = (k: GenQuizKind) => paper.questions.filter((q) => q.kind === k);
 
@@ -278,6 +283,7 @@ function PaperInner({ paper, spec, storeKey }: { paper: GenPaper; spec: CourseSp
                     label={q.label ?? `${GEN_KIND_LABEL[kind]} ${qi + 1}`}
                     result={results[q.id]}
                     onResult={onResult}
+                    favorite={{ on: books.favorited(q.id), onToggle: () => books.toggleFavorite(q.id) }}
                     tagNav={tagNav}
                     tagDeckKey={() => spec.key}
                   />

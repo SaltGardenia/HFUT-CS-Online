@@ -11,6 +11,7 @@ import PracticeCard from '../practice/PracticeCard';
 import ClearProgress from '../practice/ClearProgress';
 import { IconChevronUp } from '../icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
+import { useQuestionBooks } from '../../lib/questionBooks';
 
 type Result = 'right' | 'wrong' | 'revealed';
 
@@ -30,13 +31,17 @@ export default function CoursePaperView({
 }) {
   const reduced = useReducedMotion();
   const [results, setResults] = useProgressStore<Result>(config.storeKey);
+  const books = useQuestionBooks(config.base.replace(/^\//, ''));
   const [kind, setKind] = useState<CourseQuizKind>(
     () => KINDS.find((k) => paper.questions.some((q) => q.kind === k)) ?? 'fill',
   );
   const firstKindRun = useRef(true);
   const pendingJump = useRef<string | null>(null);
 
-  const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
+  const onResult = (qid: string, r: Result) => {
+    setResults((s) => ({ ...s, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const bankOf = (k: CourseQuizKind) => paper.questions.filter((q) => q.kind === k);
 
@@ -289,6 +294,7 @@ export default function CoursePaperView({
                     onResult={onResult}
                     tagNav={tagNav}
                     tagDeckKey={() => config.deckKey}
+                    favorite={{ on: books.favorited(q.id), onToggle: () => books.toggleFavorite(q.id) }}
                   />
                 </Fragment>
               );

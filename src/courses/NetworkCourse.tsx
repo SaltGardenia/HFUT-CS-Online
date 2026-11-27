@@ -14,7 +14,9 @@ import NetHomePage from '../pages/NetHomePage';
 import NetUnitPage from '../pages/NetUnitPage';
 import NetPracticeListPage from '../pages/net/NetPracticeListPage';
 import NetPracticePaperPage from '../pages/net/NetPracticePaperPage';
+import { NET_PRACTICE_STORE_KEY } from '../pages/net/netPracticeState';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { type BookEntry } from '../components/practice/books';
 import { NET_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
@@ -48,6 +50,21 @@ function buildNetIndex(): SearchIndexItem[] {
  * 「计算机网络」课程根组件 —— 挂在 /net/* 下。
  * 布局与算法课完全一致（同一套上游样式），数据为计网八章 + 三套试卷。
  */
+/** 计网试卷题目的书页条目：qid 与作答进度一致（`${paperId}:${qid}`），序号按大题重新编号 */
+const NET_BOOK_ENTRIES: BookEntry[] = netPapers.flatMap((paper) =>
+  paper.sections.flatMap((sec) =>
+    sec.questionIds
+      .map((id) => paper.questions.find((q) => q.id === id))
+      .filter((q): q is (typeof paper.questions)[number] => Boolean(q))
+      .map((q, i) => ({
+        qid: `${paper.id}:${q.id}`,
+        quiz: q,
+        label: `${sec.short} ${i + 1}`,
+        paper: paper.title,
+      })),
+  ),
+);
+
 export default function NetworkCourse() {
   const location = useLocation();
 
@@ -226,6 +243,25 @@ export default function NetworkCourse() {
               <Route index element={<NetHomePage />} />
               <Route path="deck/:deckId" element={<NetUnitPage />} />
               <Route path="practice" element={<NetPracticeListPage />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="net"
+                      storeKey={NET_PRACTICE_STORE_KEY}
+                      entries={NET_BOOK_ENTRIES}
+                      tagNav={(t) => ({
+                        href: `${NET_BASE}/deck/ch${t.deck}?s=${t.sec}`,
+                        tip: `跳转到 第 ${t.deck} 章 · ${t.text}`,
+                      })}
+                      tagDeckKey={() => 'net'}
+                    />
+                  }
+                />
+              ))}
               <Route path="practice/:paperId" element={<NetPracticePaperPage />} />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={NET_BASE} replace />} />

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import { useScrollMemory } from '../lib/scrollMemory';
-import { physDecks, physHome, physPapers } from '../content/phys';
+import { physDecks, physHome, physPapers, type PhysQuestion } from '../content/phys';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -11,8 +11,10 @@ import { appendOutlineIndex } from '../lib/outlineSearch';
 import PhysHome from '../pages/phys/Home';
 import PhysDeck from '../pages/phys/Deck';
 import PhysPracticeList from '../pages/phys/PracticeList';
-import PhysPracticePaper from '../pages/phys/PracticePaper';
+import PhysPracticePaper, { paperGroups } from '../pages/phys/PracticePaper';
+import { PHYS_PRACTICE_STORE_KEY } from '../pages/phys/PracticeList';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { type BookEntry } from '../components/practice/books';
 import { PHYS_BASE } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
@@ -52,6 +54,22 @@ const DECK_ID_RE = /^\/phys\/deck\/(deck(?:[1-9]|1[0-2]))$/;
  * 布局与交互完全复用上游组件（TopBar/Sidebar/抽屉/页面骨架），
  * 课程只注入自己的数据：12 章课件精讲 + 4 份期末试卷在线练习。
  */
+/** 大学物理试卷题目的书页条目：qid 与作答进度一致（`${paperId}:${qid}`），序号按大题重新编号；
+ *  calc 题与 essay 的答题区交互一致，统一按 essay 交给题卡渲染（与答题页相同） */
+const PHYS_BOOK_ENTRIES: BookEntry[] = physPapers.flatMap((paper) =>
+  paperGroups(paper).flatMap((sec) =>
+    sec.questionIds
+      .map((id) => paper.questions.find((q) => q.id === id))
+      .filter((q): q is PhysQuestion => Boolean(q))
+      .map((q, i) => ({
+        qid: `${paper.id}:${q.id}`,
+        quiz: { ...q, kind: 'essay' as const },
+        label: `${sec.short} ${i + 1}`,
+        paper: paper.title,
+      })),
+  ),
+);
+
 export default function PhysCourse() {
   const location = useLocation();
 
@@ -228,6 +246,30 @@ export default function PhysCourse() {
               <Route index element={<PhysHome />} />
               <Route path="deck/:deckId" element={<PhysDeck />} />
               <Route path="practice" element={<PhysPracticeList />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="phys"
+                      storeKey={PHYS_PRACTICE_STORE_KEY}
+                      entries={PHYS_BOOK_ENTRIES}
+                      tagNav={(t) => {
+                        if (t.deck === 0) {
+                          return { href: PHYS_BASE, tip: `本库课件未收录该专题 · ${t.text}` };
+                        }
+                        return {
+                          href: `${PHYS_BASE}/deck/deck${t.deck}?s=${t.sec}`,
+                          tip: `跳转到 第 ${t.deck} 章 · ${t.text}`,
+                        };
+                      }}
+                      tagDeckKey={() => 'phys'}
+                    />
+                  }
+                />
+              ))}
               <Route path="practice/:paperId" element={<PhysPracticePaper />} />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={PHYS_BASE} replace />} />

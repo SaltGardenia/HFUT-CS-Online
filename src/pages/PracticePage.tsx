@@ -3,8 +3,10 @@ import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
 import { practiceQuestions, KIND_META, type PracticeKind } from '../content/practice';
 import PracticeCard from '../components/practice/PracticeCard';
 import ClearProgress from '../components/practice/ClearProgress';
+import { BookCards } from '../components/practice/books';
 import { IconChevronUp } from '../components/icons';
 import { clearProgressStore, useProgressStore } from '../lib/sync';
+import { useQuestionBooks } from '../lib/questionBooks';
 
 /** 题型（固定顺序，与热力图分块一一对应） */
 const KINDS: PracticeKind[] = ['single', 'multi', 'judge', 'fill', 'essay'];
@@ -53,9 +55,13 @@ export default function PracticePage() {
   const reduced = useReducedMotion();
   const [kind, setKind] = useState<PracticeKind>('single');
   const [results, setResults] = useProgressStore<Result>(STORE_KEY);
+  const books = useQuestionBooks('algo');
   const firstKindRun = useRef(true);
 
-  const onResult = (qid: string, r: Result) => setResults((s) => ({ ...s, [qid]: r }));
+  const onResult = (qid: string, r: Result) => {
+    setResults((s) => ({ ...s, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const bankOf = (k: PracticeKind) => practiceQuestions.filter((q) => q.kind === k);
 
@@ -159,6 +165,8 @@ export default function PracticePage() {
     <div className="page practice-page">
       <h1>在线练习</h1>
 
+      <BookCards base="/algo" course="algo" />
+
       {/* 总进度条 */}
       <div className="pq-progress material">
         <div className="pq-progress-text">
@@ -255,6 +263,7 @@ export default function PracticePage() {
                     label={`${KIND_META[q.kind].label.replace('题', '')} ${Number(q.id.slice(1))}`}
                     result={results[q.id]}
                     onResult={onResult}
+                    favorite={{ on: books.favorited(q.id), onToggle: () => books.toggleFavorite(q.id) }}
                   />
                 </Fragment>
               );

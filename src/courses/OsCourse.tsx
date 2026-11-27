@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import { useScrollMemory } from '../lib/scrollMemory';
 import { OS_BASE, courses } from './registry';
-import { osChapters, osPapers } from '../content/os';
+import { osChapters, osPapers, OS_KIND_LABEL } from '../content/os';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -14,6 +14,7 @@ import OsChapterPage from '../pages/OsChapterPage';
 import OsPracticeIndex from '../pages/OsPracticeIndex';
 import OsPaperPage from '../pages/OsPaperPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { buildBookEntries } from '../components/practice/books';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
@@ -32,6 +33,19 @@ function buildOsIndex(): SearchIndexItem[] {
   }
   return items;
 }
+
+/** OS 试卷题目的书页序号：与答题页一致，从题目 id 解出原卷编号（p2-f14-1 → 填空 14-1） */
+const osBookLabel = (kind: string, qid: string) => {
+  const m = qid.match(/^[a-z]\d+-[a-z](\d+)(?:-(\d+))?$/);
+  const no = m ? m[1] : '';
+  const sub = m && m[2] ? `-${m[2]}` : '';
+  return `${OS_KIND_LABEL[kind as keyof typeof OS_KIND_LABEL]} ${no}${sub}`;
+};
+
+/** OS 错题本/收藏本的条目：qid 与作答进度同一套 id（试卷前缀已含在题目 id 里） */
+const OS_BOOK_ENTRIES = buildBookEntries(osPapers, OS_KIND_LABEL, {
+  labelOf: (q) => osBookLabel(q.kind, q.id),
+});
 
 /** 操作系统课程根组件 —— 挂在 /os/* 下，布局与算法课同构（顶栏 + 侧栏 + 章节页/练习页） */
 export default function OsCourse() {
@@ -211,6 +225,25 @@ export default function OsCourse() {
               <Route index element={<OsHomePage />} />
               <Route path="chapter/:chapterId" element={<OsChapterPage />} />
               <Route path="practice" element={<OsPracticeIndex />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="os"
+                      storeKey="os-practice-progress-v1"
+                      entries={OS_BOOK_ENTRIES}
+                      tagNav={(t) => ({
+                        href: `${OS_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+                        tip: `跳转到 ${osChapters.find((c) => c.id === `ch${t.deck}`)?.no ?? ''} · ${t.text}`,
+                      })}
+                      tagDeckKey={() => 'os'}
+                    />
+                  }
+                />
+              ))}
               <Route path="practice/:paperId" element={<OsPaperPage />} />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={OS_BASE} replace />} />

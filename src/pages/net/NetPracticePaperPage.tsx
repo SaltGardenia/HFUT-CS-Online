@@ -7,6 +7,7 @@ import PracticeCard from '../../components/practice/PracticeCard';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
+import { useQuestionBooks } from '../../lib/questionBooks';
 import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
 
 /** 右侧进度轨的分段大小 */
@@ -54,8 +55,12 @@ export default function NetPracticePaperPage() {
 function NetPaperInner({ paper }: { paper: NetPaper }) {
   const reduced = useReducedMotion();
   const [results, setResults] = useProgressStore<NetResult>(NET_PRACTICE_STORE_KEY);
+  const books = useQuestionBooks('net');
 
-  const onResult = (qid: string, r: NetResult) => setResults((s) => ({ ...s, [`${paper.id}:${qid}`]: r }));
+  const onResult = (qid: string, r: NetResult) => {
+    setResults((s) => ({ ...s, [`${paper.id}:${qid}`]: r }));
+    books.trackResult(`${paper.id}:${qid}`, r);
+  };
 
   const sectionStats = (questionIds: string[]) => {
     const done = questionIds.filter((id) => results[`${paper.id}:${id}`]).length;
@@ -212,6 +217,10 @@ function NetPaperInner({ paper }: { paper: NetPaper }) {
                       onResult={onResult}
                       tagNav={tagNav}
                       tagDeckKey={() => 'net'}
+                      favorite={{
+                        on: books.favorited(`${paper.id}:${qid}`),
+                        onToggle: () => books.toggleFavorite(`${paper.id}:${qid}`),
+                      }}
                     />
                   );
                 })}

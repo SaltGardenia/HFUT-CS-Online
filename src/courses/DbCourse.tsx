@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import { useScrollMemory } from '../lib/scrollMemory';
 import { DB_BASE, findCourseByBase } from './registry';
-import { dbChapters, dbPapers } from '../content/db';
+import { dbChapters, dbPapers, DB_KIND_LABEL } from '../content/db';
 import TopBar, { type CourseTab } from '../components/TopBar';
 import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
@@ -14,6 +14,7 @@ import DbChapterPage from '../pages/DbChapterPage';
 import DbPracticeIndex from '../pages/DbPracticeIndex';
 import DbPaperPage from '../pages/DbPaperPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { buildBookEntries } from '../components/practice/books';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
@@ -34,6 +35,22 @@ function buildDbIndex(): SearchIndexItem[] {
 }
 
 /** 数据库系统课程根组件 —— 挂在 /db/* 下，布局与 OS 课同构（顶栏 + 侧栏 + 章节页/练习页/附件页） */
+const dbBookLabel = (kind: string, qid: string) => {
+  const m = qid.match(/^[a-z]\d+-[a-z](\d+)(?:-(\d+))?$/);
+  const no = m ? m[1] : '';
+  const sub = m && m[2] ? `-${m[2]}` : '';
+  return `${DB_KIND_LABEL[kind as keyof typeof DB_KIND_LABEL]} ${no}${sub}`;
+};
+
+/** DB 试卷题目的书页条目：qid 与作答进度同一套 id，序号与答题页题卡一致 */
+const DB_BOOK_ENTRIES = buildBookEntries(
+  dbPapers,
+  DB_KIND_LABEL,
+  {
+  labelOf: (q) => dbBookLabel(q.kind, q.id),
+  },
+);
+
 export default function DbCourse() {
   const location = useLocation();
 
@@ -208,6 +225,25 @@ export default function DbCourse() {
               <Route index element={<DbHomePage />} />
               <Route path="chapter/:chapterId" element={<DbChapterPage />} />
               <Route path="practice" element={<DbPracticeIndex />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="db"
+                      storeKey="db-practice-progress-v1"
+                      entries={DB_BOOK_ENTRIES}
+                      tagNav={(t) => ({
+                        href: `${DB_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+                        tip: `跳转到 ${dbChapters.find((c) => c.id === `ch${t.deck}`)?.no ?? ''} · ${t.text}`,
+                      })}
+                      tagDeckKey={() => 'db'}
+                    />
+                  }
+                />
+              ))}
               <Route path="practice/:paperId" element={<DbPaperPage />} />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={DB_BASE} replace />} />

@@ -7,9 +7,13 @@ import PracticeCard from '../../components/practice/PracticeCard';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
+import { useQuestionBooks } from '../../lib/questionBooks';
+import { BookCards } from '../../components/practice/books';
 
 /** 单卷进度存储 key（与算法课/计网课各自独立） */
-const AI_STORE_KEY = 'ai-practice-progress-v1';
+/** 书页路由复用同一进度键（导出给课程根） */
+export const AI_PRACTICE_STORE_KEY = 'ai-practice-progress-v1';
+const AI_STORE_KEY = AI_PRACTICE_STORE_KEY;
 
 /** 单题作答状态（设计题为开放题，只会有 revealed） */
 type AiResult = 'right' | 'wrong' | 'revealed';
@@ -58,8 +62,12 @@ export default function AiPracticePage() {
   const s = params.get('s');
 
   const [results, setResults] = useProgressStore<AiResult>(AI_STORE_KEY);
+  const books = useQuestionBooks('ai');
 
-  const onResult = (qid: string, r: AiResult) => setResults((prev) => ({ ...prev, [qid]: r }));
+  const onResult = (qid: string, r: AiResult) => {
+    setResults((prev) => ({ ...prev, [qid]: r }));
+    books.trackResult(qid, r);
+  };
 
   const { done, total } = useMemo(() => {
     const done = aiPaper.questions.filter((q) => results[q.id]).length;
@@ -134,6 +142,8 @@ export default function AiPracticePage() {
         <p className="callout-h">题库说明</p>
         <div dangerouslySetInnerHTML={{ __html: aiPaper.intro }} />
       </div>
+
+      <BookCards base={AI_BASE} course="ai" />
 
       {/* 总进度条：设计题为开放题，进度即「已查阅」 */}
       <div className="pq-progress material">
@@ -219,6 +229,7 @@ export default function AiPracticePage() {
                       label={seqOf.get(qid) ?? qid}
                       result={results[qid]}
                       onResult={onResult}
+                      favorite={{ on: books.favorited(qid), onToggle: () => books.toggleFavorite(qid) }}
                       tagNav={tagNav}
                       tagDeckKey={() => 'ai'}
                     />

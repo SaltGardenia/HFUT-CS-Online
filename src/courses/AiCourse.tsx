@@ -8,7 +8,9 @@ import Sidebar, { SidebarContent, type NavEntry } from '../components/Sidebar';
 import MobileDrawer from '../components/MobileDrawer';
 import type { SearchIndexItem } from '../components/SearchBox';
 import AiPracticePage from '../pages/ai/AiPracticePage';
+import { AI_PRACTICE_STORE_KEY } from '../pages/ai/AiPracticePage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { type BookEntry } from '../components/practice/books';
 import { AI_BASE, findCourseByBase } from './registry';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
@@ -31,6 +33,13 @@ function buildAiIndex(): SearchIndexItem[] {
  * 课件为 0：本课程只含设计报告题库的在线练习（单试卷直接展示），
  * 布局与算法课完全一致（同一套上游样式），主题色为品红（--ai）。
  */
+/** AI 试题的书页条目：题号按题库全序，短标取所属方向（与答题页 seqOf 一致） */
+const AI_BOOK_ENTRIES: BookEntry[] = aiPaper.questions.map((q) => {
+  const sec = aiPaper.sections.find((x) => x.questionIds.includes(q.id));
+  const no = aiPaper.questions.findIndex((x) => x.id === q.id) + 1;
+  return { qid: q.id, quiz: q, label: `${sec?.short ?? '题目'} ${no}`, paper: aiPaper.title };
+});
+
 export default function AiCourse() {
   const location = useLocation();
 
@@ -171,6 +180,44 @@ export default function AiCourse() {
             <Routes location={location}>
               <Route index element={<Navigate to={practicePath} replace />} />
               <Route path="practice" element={<AiPracticePage />} />
+              <Route
+                path="practice/wrongbook"
+                element={
+                  <QuestionBookPage
+                    kind="wrong"
+                    course="ai"
+                    storeKey={AI_PRACTICE_STORE_KEY}
+                    entries={AI_BOOK_ENTRIES}
+                    tagNav={(t) => {
+                      const sec = aiPaper.sections.find((x) => x.no === t.deck);
+                      return {
+                        href: `${AI_BASE}/practice?s=${t.sec}`,
+                        tip: `跳转到 ${sec ? sec.title : '题库方向'} · ${t.text}`,
+                      };
+                    }}
+                    tagDeckKey={() => 'ai'}
+                  />
+                }
+              />
+              <Route
+                path="practice/favorites"
+                element={
+                  <QuestionBookPage
+                    kind="fav"
+                    course="ai"
+                    storeKey={AI_PRACTICE_STORE_KEY}
+                    entries={AI_BOOK_ENTRIES}
+                    tagNav={(t) => {
+                      const sec = aiPaper.sections.find((x) => x.no === t.deck);
+                      return {
+                        href: `${AI_BASE}/practice?s=${t.sec}`,
+                        tip: `跳转到 ${sec ? sec.title : '题库方向'} · ${t.text}`,
+                      };
+                    }}
+                    tagDeckKey={() => 'ai'}
+                  />
+                }
+              />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={practicePath} replace />} />
             </Routes>

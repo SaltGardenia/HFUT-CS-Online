@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Navigate, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import { useScrollMemory } from '../lib/scrollMemory';
 import { MATH_BASE, courses, findCourseByBase } from './registry';
-import { mathChapters, mathPapers } from '../content/math';
+import { mathChapters, mathPapers, MATH_KIND_LABEL, MATH_SECTIONS } from '../content/math';
 import { type SearchIndexItem } from '../components/SearchBox';
 import { appendOutlineIndex } from '../lib/outlineSearch';
 import TopBar, { type CourseTab } from '../components/TopBar';
@@ -14,6 +14,7 @@ import MathChapterPage from '../pages/MathChapterPage';
 import MathPracticeIndex from '../pages/MathPracticeIndex';
 import MathPaperPage from '../pages/MathPaperPage';
 import CourseAttachmentsPage from '../pages/CourseAttachmentsPage';
+import QuestionBookPage, { buildBookEntries } from '../components/practice/books';
 import { recordCourseView } from '../lib/recentCourses';
 import { decodeEntities } from '../lib/text';
 
@@ -34,6 +35,12 @@ function buildMathIndex(): SearchIndexItem[] {
 }
 
 /** 高等数学课程根组件 —— 挂在 /math/* 下，布局与算法课同构（顶栏 + 侧栏 + 章节页/练习页） */
+/** MATH 试卷题目的书页条目：qid 与作答进度同一套 id，序号与答题页题卡一致 */
+const MATH_BOOK_ENTRIES = buildBookEntries(
+  mathPapers,
+  MATH_KIND_LABEL,
+);
+
 export default function MathCourse() {
   const location = useLocation();
 
@@ -199,6 +206,25 @@ export default function MathCourse() {
               <Route index element={<MathHomePage />} />
               <Route path="chapter/:chapterId" element={<MathChapterPage />} />
               <Route path="practice" element={<MathPracticeIndex />} />
+              {(['wrong', 'fav'] as const).map((kind) => (
+                <Route
+                  key={kind}
+                  path={kind === 'wrong' ? 'practice/wrongbook' : 'practice/favorites'}
+                  element={
+                    <QuestionBookPage
+                      kind={kind}
+                      course="math"
+                      storeKey="math-practice-progress-v1"
+                      entries={MATH_BOOK_ENTRIES}
+                      tagNav={(t) => ({
+                        href: `${MATH_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+                        tip: `跳转到 ${MATH_SECTIONS[t.deck]?.[t.sec] ?? t.text} · ${t.text}`,
+                      })}
+                      tagDeckKey={() => 'math'}
+                    />
+                  }
+                />
+              ))}
               <Route path="practice/:paperId" element={<MathPaperPage />} />
               <Route path="attachments" element={<CourseAttachmentsPage />} />
               <Route path="*" element={<Navigate to={MATH_BASE} replace />} />
