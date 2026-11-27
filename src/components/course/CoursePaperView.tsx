@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import type {
   CourseConfig,
   CoursePaper,
@@ -9,8 +10,10 @@ import type {
 } from '../../content/course-types';
 import PracticeCard from '../practice/PracticeCard';
 import { BookCards } from '../practice/books';
+import PracticeReport from '../practice/report/PracticeReport';
+import { shellDeckMeta } from '../practice/report/aggregates';
 import ClearProgress from '../practice/ClearProgress';
-import { IconChevronUp } from '../icons';
+import { IconArrowLeft, IconChevronUp } from '../icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 import { useQuestionBooks } from '../../lib/questionBooks';
 
@@ -195,9 +198,19 @@ export default function CoursePaperView({
     };
   };
 
+  const deckMeta = useMemo(() => shellDeckMeta(config), [config]);
+
   return (
     <div className="page practice-page">
-      <h1>{paper.title}</h1>
+      <div className="paper-title-row">
+          {!config.singlePaperDirect && (
+            <Link to={`${config.base}/practice`} className="paper-back">
+              <IconArrowLeft size={13} />
+              返回试卷列表
+            </Link>
+          )}
+        <h1>{paper.title}</h1>
+      </div>
       {config.singlePaperDirect && <BookCards base={config.base} course={config.base.replace(/^\/+/, '')} />}
       <div className="lede">
         <p>
@@ -304,6 +317,15 @@ export default function CoursePaperView({
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions}
+        results={results}
+        deckMeta={deckMeta}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

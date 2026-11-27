@@ -4,8 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { PHYS_BASE } from '../../courses/registry';
 import { findPhysPaper, type PhysPaper, type PhysQuestion } from '../../content/phys';
 import PracticeCard from '../../components/practice/PracticeCard';
+import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
-import { IconChevronUp } from '../../components/icons';
+import { IconArrowLeft, IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 import { useQuestionBooks } from '../../lib/questionBooks';
 import { PHYS_PRACTICE_STORE_KEY, physPaperStats, type PhysResult } from './PracticeList';
@@ -154,13 +155,16 @@ function PhysPaperInner({ paper }: { paper: PhysPaper }) {
   return (
     <div className="page practice-page">
       <div className="net-paper-head">
-        <h1>{paper.title}</h1>
+        <div className="paper-title-row">
+          <Link to={`${PHYS_BASE}/practice`} className="paper-back">
+            <IconArrowLeft size={13} />
+            返回试卷列表
+          </Link>
+          <h1>{paper.title}</h1>
+        </div>
         <p className="net-paper-sub">
           {paper.source} · {paper.answerSource}
         </p>
-        <Link to={`${PHYS_BASE}/practice`} className="net-paper-back">
-          ← 返回试卷列表
-        </Link>
       </div>
 
       {/* 总进度条 */}
@@ -267,6 +271,15 @@ function PhysPaperInner({ paper }: { paper: PhysPaper }) {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染）；本课进度键带卷前缀，这里同步改写 */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions.map((q) => ({ ...q, kind: 'essay' as const, id: `${paper.id}:${q.id}` }))}
+        results={results}
+        deckMeta={(deck) => ({ name: `第 ${deck} 章`, color: `var(--phys${deck}, var(--deck-accent))` })}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

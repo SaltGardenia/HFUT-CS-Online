@@ -1,11 +1,14 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { MATH_BASE } from '../courses/registry';
-import { mathPapers, MATH_KIND_LABEL, type MathQuizKind } from '../content/math';
+import { mathPapers, mathChapters, MATH_KIND_LABEL, type MathQuizKind } from '../content/math';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
+import { chapterNamesFrom } from '../lib/exam-insights';
+import ExamInsights from '../components/practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../components/icons';
 import { BookCards } from '../components/practice/books';
+import PracticeReport from '../components/practice/report/PracticeReport';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷完成度 */
 const STORE_KEY = 'math-practice-progress-v1';
@@ -36,12 +39,13 @@ export default function MathPracticeIndex() {
   return (
     <div className="page">
       <h1>在线练习</h1>
-      <div className="lede">
-        <p>
-          按试卷整理的试题：先选择一份试卷，进入答题页后作答——左侧为题型热力图（一格一题、绿对红错），
-          右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的章节位置。
-        </p>
-      </div>
+      <ExamInsights
+        papers={mathPapers}
+        kindLabel={MATH_KIND_LABEL}
+        tagHref={(deck, sec) => `${MATH_BASE}/chapter/ch${deck}?s=${sec}`}
+        chapterNames={chapterNamesFrom(mathChapters)}
+        progress={progress}
+      />
       <BookCards base={MATH_BASE} course="math" />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
@@ -51,9 +55,7 @@ export default function MathPracticeIndex() {
             </span>
             <span className="ext-card-body">
               <span className="ext-card-title">{p.title}</span>
-              <span className="ext-card-desc">
-                {p.source} · {p.questions.length} 题（{kinds}） · 参考答案：{p.answerSource}
-              </span>
+              <span className="ext-card-desc">{kinds}</span>
               <span className="ext-card-progress">
                 <i aria-hidden="true">
                   <span style={{ width: `${(done / p.questions.length) * 100}%` }} />
@@ -67,6 +69,18 @@ export default function MathPracticeIndex() {
           </Link>
         ))}
       </nav>
+
+      {/* 全部习题报告：各份试卷合并口径，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={mathPapers.flatMap((p) => p.questions)}
+        results={progress as Record<string, 'right' | 'wrong' | 'revealed'>}
+        deckMeta={(deck) => ({ name: `第${deck}章`, color: `var(--math${deck - 7}, var(--deck-accent))` })}
+        tagNav={(t) => ({
+          href: `${MATH_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+          tip: `跳转到 第 ${t.deck} 章 · ${t.text}`,
+        })}
+      />
     </div>
   );
 }

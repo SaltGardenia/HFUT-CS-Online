@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
 import { practiceQuestions, KIND_META, type PracticeKind } from '../content/practice';
 import PracticeCard from '../components/practice/PracticeCard';
+import PracticeReport from '../components/practice/report/PracticeReport';
 import ClearProgress from '../components/practice/ClearProgress';
 import { BookCards } from '../components/practice/books';
 import { IconChevronUp } from '../components/icons';
@@ -271,6 +272,9 @@ export default function PracticePage() {
           </div>
         </div>
       </div>
+
+      {/* 全部习题报告：420 题全库口径，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport title="全部习题报告" questions={practiceQuestions} results={results} />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

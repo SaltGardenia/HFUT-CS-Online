@@ -5,6 +5,7 @@ import { PAT_BASE } from '../../courses/registry';
 import { papers } from '../../content/pat';
 import type { PatPaper } from '../../content/pat';
 import PracticeCard from '../../components/practice/PracticeCard';
+import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { BookCards } from '../../components/practice/books';
 import { useQuestionBooks } from '../../lib/questionBooks';
@@ -194,6 +195,18 @@ export default function PatPractice() {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions.map((q) => ({ ...q, kind: 'essay' as const }))}
+        results={results}
+        deckMeta={(deck) => ({ name: `第 ${deck} 讲`, color: `var(--pat${deck}, var(--deck-accent))` })}
+        tagNav={(t) => ({
+          href: `${PAT_BASE}/deck/deck${t.deck}?s=${t.sec}`,
+          tip: `跳转到 ${decodeDeckTitle(t.deck)} · ${t.text}`,
+        })}
+      />
 
       {/* 置顶按钮 */}
       <AnimatePresence>

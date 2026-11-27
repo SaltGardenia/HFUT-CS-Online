@@ -1,12 +1,14 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { DB_BASE } from '../courses/registry';
 import { dbChapters, dbPapers, DB_KIND_LABEL } from '../content/db';
 import type { DbPaper, DbQuizKind, DbTag } from '../content/db';
 import PracticeCard from '../components/practice/PracticeCard';
+import PracticeReport from '../components/practice/report/PracticeReport';
+import { shellDeckMeta } from '../components/practice/report/aggregates';
 import ClearProgress from '../components/practice/ClearProgress';
-import { IconChevronUp } from '../components/icons';
+import { IconArrowLeft, IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
 import { useQuestionBooks } from '../lib/questionBooks';
 
@@ -196,7 +198,13 @@ function PaperInner({ paper }: { paper: DbPaper }) {
 
   return (
     <div className="page practice-page">
-      <h1>{paper.title}</h1>
+      <div className="paper-title-row">
+            <Link to={`${DB_BASE}/practice`} className="paper-back">
+              <IconArrowLeft size={13} />
+              返回试卷列表
+            </Link>
+        <h1>{paper.title}</h1>
+      </div>
       <div className="lede">
         <p>
           {paper.source} · 共 {total} 题 · 参考答案：{paper.answerSource}。左侧热力图可切换题型、点击格子跳到具体题；
@@ -308,6 +316,15 @@ function PaperInner({ paper }: { paper: DbPaper }) {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（整卷未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={paper.questions}
+        results={results}
+        deckMeta={shellDeckMeta({ deckKey: 'db', chapters: dbChapters })}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

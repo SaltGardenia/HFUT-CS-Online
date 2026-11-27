@@ -1384,7 +1384,7 @@ button {
   margin: 5px 0;
 }
 /* 链接：hover 用下划线示意可点，不铺色底（块级卡片锚点不参与药丸/下划线，走各自的抬升+阴影） */
-.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card) {
+.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):not(.paper-back) {
   color: var(--deck-accent);
   text-decoration: none;
   padding: 1px 3px;
@@ -1392,7 +1392,7 @@ button {
   border-radius: 5px;
   transition: color 140ms var(--press-ease);
 }
-.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):hover {
+.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):not(.paper-back):hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -3891,14 +3891,37 @@ pre.code .cl-code:empty + .cl-com {
   color: var(--ink-3);
   line-height: 1.6;
 }
-.net-paper-back {
-  font-size: 0.8125rem;
-  color: var(--ink-3);
-  text-decoration: none;
-  width: fit-content;
+/* 试卷页标题行：胶囊返回按钮在标题左侧（net/phys 答题页共用） */
+.paper-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
-.net-paper-back:hover {
+.paper-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--panel-solid);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 140ms, border-color 140ms, transform 100ms var(--press-ease), box-shadow 140ms;
+}
+.paper-back:hover {
   color: var(--deck-accent);
+  border-color: color-mix(in srgb, var(--deck-accent) 45%, transparent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+  text-decoration: none;
+}
+.paper-back:active {
+  transform: scale(0.97);
 }
 
 /* --------------------------------------------- 方向背景折叠块（人工智能原理题库） */
@@ -4142,6 +4165,379 @@ pre.code .cl-code:empty + .cl-com {
   color: var(--ink-3);
   font-variant-numeric: tabular-nums;
 }
+
+/* ============================================================
+   考点分析（在线练习页顶部）：章级排行条形 + 高频考点 + 卷×章矩阵
+   + 个人易错榜。数据来自 lib/exam-insights 的纯聚合，条形为纯 CSS，
+   系列色 --ei-k0..k5 全块共用一套图例。
+   ============================================================ */
+.exam-insights {
+  margin: 18px 0 26px;
+  padding: 18px 20px 16px;
+  border-radius: var(--r-l);
+  background: var(--panel-solid);
+  border: 1px solid var(--hairline-soft);
+  /* 题型系列色：浅色取站内既有色相的降饱和版，深色整体提亮 */
+  --ei-k0: #4c7fb8; /* 单选 · 蓝 */
+  --ei-k1: #8a63c9; /* 多选 · 紫 */
+  --ei-k2: #3f9d63; /* 判断 · 绿 */
+  --ei-k3: #c08a2d; /* 填空 · 琥珀 */
+  --ei-k4: #c4577f; /* 解答 · 玫红 */
+  --ei-k5: #4aa8a0; /* 其余题型 · 青 */
+}
+[data-theme='dark'] .exam-insights {
+  --ei-k0: #6aa5d8;
+  --ei-k1: #a985e0;
+  --ei-k2: #52c47e;
+  --ei-k3: #e0b054;
+  --ei-k4: #e07a9f;
+  --ei-k5: #63c2b8;
+}
+.ei-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.exam-insights h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.ei-sum {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.ei-block {
+  margin-top: 16px;
+}
+/* 块 1/2 两列并排：考点分布（左）+ 高频考点（右）；窄屏收单列 */
+.ei-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 4px 24px;
+  margin-top: 16px;
+  align-items: start;
+}
+.ei-top .ei-block {
+  margin-top: 0;
+}
+.ei-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.exam-insights h3 {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: var(--ink-2);
+}
+/* 排序切换（AA 式小切换组） */
+.ei-sort {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.ei-sort button {
+  border: 0;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+  background: transparent;
+  cursor: pointer;
+  transition: color 120ms var(--press-ease), background 120ms var(--press-ease);
+}
+.ei-sort button:hover {
+  color: var(--ink-2);
+}
+.ei-sort button[data-on='true'] {
+  color: var(--ink);
+  background: var(--panel-solid);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+}
+[data-theme='dark'] .ei-sort button[data-on='true'] {
+  background: var(--panel-2);
+}
+
+/* 条形行：标签 | 轨道 | 数字（AA 式行尾双指标列） */
+.ei-bars,
+.ei-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.ei-row,
+.ei-tag-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 4px;
+  border-radius: 8px;
+}
+.ei-row-label {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 128px;
+}
+.ei-no {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-2);
+  background: var(--panel-2);
+  font-variant-numeric: tabular-nums;
+}
+.ei-row-name {
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ei-track {
+  flex: 1;
+  min-width: 0;
+  height: 14px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--hairline-soft) 55%, transparent);
+}
+.ei-fill {
+  display: flex;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  transform-origin: left center;
+  animation: ei-grow 420ms var(--press-ease) backwards;
+}
+.ei-fill-accent {
+  background: color-mix(in srgb, var(--deck-accent) 72%, transparent);
+}
+.ei-fill-warn {
+  background: color-mix(in srgb, var(--warn) 62%, transparent);
+}
+.ei-seg {
+  height: 100%;
+  min-width: 2px;
+}
+.ei-k0 { background: var(--ei-k0); }
+.ei-k1 { background: var(--ei-k1); }
+.ei-k2 { background: var(--ei-k2); }
+.ei-k3 { background: var(--ei-k3); }
+.ei-k4 { background: var(--ei-k4); }
+.ei-k5 { background: var(--ei-k5); }
+@keyframes ei-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.ei-row-nums {
+  flex: none;
+  width: 96px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ei-row-nums b {
+  color: var(--ink-2);
+  font-weight: 700;
+}
+
+/* 图例：与条内堆叠段同一套系列色 */
+.ei-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.ei-legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+/* 高频考点行：可点跳课件，卡片式悬浮（放大+阴影，不加色底） */
+.ei-tag-row {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 100ms var(--press-ease), box-shadow 140ms;
+}
+.ei-tag-row:hover {
+  transform: scale(1.01);
+  box-shadow: var(--shadow-2);
+  text-decoration: none;
+}
+/* 行内弹窗要盖过相邻行：行是 relative + z-auto，按 DOM 序绘制，后面的行会整层
+   压住悬浮行（含其 z-30 的弹窗），悬浮时必须把整行抬到同层最上 */
+.ei-tag-row:hover,
+.ei-row:hover {
+  z-index: 50;
+}
+.ei-tag-row:hover .ei-row-name {
+  color: var(--deck-accent);
+}
+.ei-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+  margin: 0 2px;
+}
+.ei-dot[data-on='true'] {
+  background: var(--deck-accent);
+  box-shadow: none;
+}
+.ei-dot-warn {
+  background: var(--warn);
+  box-shadow: none;
+}
+
+/* 悬停明细：行内弹出，不进 JS；背景必须不透明（panel-solid），否则行文字会透出来 */
+.ei-tip {
+  position: absolute;
+  z-index: 30;
+  left: 4px;
+  top: calc(100% + 4px);
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--panel-solid);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-2);
+  font-size: 12px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.ei-row:hover .ei-tip,
+.ei-tag-row:hover .ei-tip {
+  display: flex;
+}
+
+/* 卷×章矩阵 */
+.ei-matrix-wrap {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-bottom: 2px;
+}
+.ei-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.ei-matrix th,
+.ei-matrix td {
+  border: 1px solid var(--hairline-soft);
+  padding: 5px 8px;
+  text-align: center;
+}
+.ei-matrix thead th {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--ink-3);
+  background: var(--panel-2);
+}
+.ei-m-ch {
+  width: 44px;
+}
+.ei-m-paper {
+  max-width: 220px;
+  text-align: left !important;
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ei-m-cell {
+  color: var(--ink);
+  font-weight: 650;
+}
+.ei-m-zero {
+  background: color-mix(in srgb, var(--hairline-soft) 30%, transparent);
+}
+.ei-m-total {
+  color: var(--ink-2);
+  font-weight: 650;
+  background: var(--panel-2);
+}
+
+@media (max-width: 1080px) {
+  .ei-top {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .exam-insights {
+    padding: 14px 14px 12px;
+  }
+  .ei-row,
+  .ei-tag-row {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .ei-row-label {
+    min-width: 0;
+    max-width: calc(100% - 70px);
+  }
+  .ei-track {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .ei-row-nums {
+    margin-left: auto;
+    width: auto;
+  }
+  .ei-m-paper {
+    max-width: 140px;
+  }
+  .ei-tip {
+    display: none !important; /* 小屏无悬浮，明细依赖标签跳转本身 */
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ei-fill {
+    animation: none;
+  }
+  .ei-tag-row,
+  .ei-tag-row:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
 /* 清空进度按钮行（总进度条移除后的落位） */
 .pq-clear-row {
   display: flex;

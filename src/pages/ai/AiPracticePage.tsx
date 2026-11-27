@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { AI_BASE } from '../../courses/registry';
 import { aiPaper } from '../../content/ai';
 import PracticeCard from '../../components/practice/PracticeCard';
+import PracticeReport from '../../components/practice/report/PracticeReport';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
@@ -240,6 +241,19 @@ export default function AiPracticePage() {
           </div>
         </div>
       </div>
+
+      {/* 本卷报告：作答数据图表化，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="本卷报告"
+        questions={aiPaper.questions}
+        results={results}
+        deckMeta={(deck) => ({
+          name: aiPaper.sections.find((x) => x.no === deck)?.title ?? `方向 ${deck}`,
+          // AI 课无章节色板（课件为 0）：借全局讲色板区分方向
+          color: `var(--deck${deck}, var(--deck-accent))`,
+        })}
+        tagNav={tagNav}
+      />
 
       {/* 右侧进度轨：每 10 题一段，点击跳转（仅宽屏） */}
       <AnimatePresence>

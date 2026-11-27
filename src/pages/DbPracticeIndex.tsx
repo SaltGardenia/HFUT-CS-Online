@@ -1,11 +1,15 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { DB_BASE } from '../courses/registry';
-import { dbPapers, DB_KIND_LABEL } from '../content/db';
+import { dbChapters, dbPapers, DB_KIND_LABEL } from '../content/db';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
+import { chapterNamesFrom } from '../lib/exam-insights';
+import ExamInsights from '../components/practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../components/icons';
 import { BookCards } from '../components/practice/books';
+import PracticeReport from '../components/practice/report/PracticeReport';
+import { shellDeckMeta } from '../components/practice/report/aggregates';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷的完成度 */
 const STORE_KEY = 'db-practice-progress-v1';
@@ -40,12 +44,13 @@ export default function DbPracticeIndex() {
   return (
     <div className="page">
       <h1>在线练习</h1>
-      <div className="lede">
-        <p>
-          按试卷整理的历年试题：先选择一份试卷，进入答题页后作答——左侧为题型热力图（一格一题、绿对红错），
-          右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
-        </p>
-      </div>
+      <ExamInsights
+        papers={dbPapers}
+        kindLabel={DB_KIND_LABEL}
+        tagHref={(deck, sec) => `${DB_BASE}/chapter/ch${deck}?s=${sec}`}
+        chapterNames={chapterNamesFrom(dbChapters)}
+        progress={progress}
+      />
       <BookCards base={DB_BASE} course="db" />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
@@ -55,9 +60,7 @@ export default function DbPracticeIndex() {
             </span>
             <span className="ext-card-body">
               <span className="ext-card-title">{p.title}</span>
-              <span className="ext-card-desc">
-                {p.source} · {p.questions.length} 题（{kinds}） · 参考答案：{p.answerSource}
-              </span>
+              <span className="ext-card-desc">{kinds}</span>
               <span className="ext-card-progress">
                 <i aria-hidden="true">
                   <span style={{ width: `${(done / p.questions.length) * 100}%` }} />
@@ -71,6 +74,18 @@ export default function DbPracticeIndex() {
           </Link>
         ))}
       </nav>
+
+      {/* 全部习题报告：各份试卷合并口径，随作答实时更新（全未作答时不渲染） */}
+      <PracticeReport
+        title="全部习题报告"
+        questions={dbPapers.flatMap((p) => p.questions)}
+        results={progress as Record<string, 'right' | 'wrong' | 'revealed'>}
+        deckMeta={shellDeckMeta({ deckKey: 'db', chapters: dbChapters })}
+        tagNav={(t) => ({
+          href: `${DB_BASE}/chapter/ch${t.deck}?s=${t.sec}`,
+          tip: `跳转到 ${dbChapters.find((c) => c.id === `ch${t.deck}`)?.no ?? ''} · ${t.text}`,
+        })}
+      />
     </div>
   );
 }
