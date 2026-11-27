@@ -20,12 +20,6 @@ interface Card {
   name: string;
   href: string;
   ready: boolean;
-  /** 已上线课程的来源说明；未上线为 null */
-  source: string | null;
-  courseware: number;
-  exams: number;
-  misc: number;
-  total: number;
 }
 
 const REPO_URL = 'https://github.com/SaltGardenia/HFUT-CS-Online';
@@ -209,11 +203,6 @@ export default function CourseHubPage() {
         name: c.name,
         href: entry ? entry.base : `${STUB_BASE}/${encodeURIComponent(c.name)}`,
         ready: !!entry,
-        source: entry?.source ?? null,
-        courseware: c.courseware,
-        exams: c.exams,
-        misc: c.misc,
-        total: c.total,
       });
     }
     for (const entry of courses) {
@@ -222,11 +211,6 @@ export default function CourseHubPage() {
         name: entry.name,
         href: entry.base,
         ready: true,
-        source: entry.source,
-        courseware: 0,
-        exams: 0,
-        misc: 0,
-        total: 0,
       });
     }
     const order = [...SEMESTERS, ...[...bySem.keys()].filter((s) => !SEMESTERS.includes(s))];
@@ -262,12 +246,6 @@ export default function CourseHubPage() {
           aria-label={c.ready ? `${c.name}，进入课程` : `${c.name}，查看资料统计`}
         >
           <span className="course-title">{c.name}</span>
-          {c.source && <span className="course-desc">{c.source}</span>}
-          {c.total > 0 && (
-            <span className="course-meta">
-              课件 {c.courseware} · 试题 {c.exams} · 附件 {c.misc} · 共 {c.total} 份
-            </span>
-          )}
           {c.ready && <span className="course-go" aria-hidden="true">→</span>}
         </Link>
         {/* 收藏按钮：卡片 Link 的兄弟节点，避免嵌套可点击元素 */}
@@ -307,11 +285,6 @@ export default function CourseHubPage() {
       name,
       href: entry ? entry.base : `${STUB_BASE}/${encodeURIComponent(name)}`,
       ready: !!entry,
-      source: entry?.source ?? null,
-      courseware: c?.courseware ?? 0,
-      exams: c?.exams ?? 0,
-      misc: c?.misc ?? 0,
-      total: c?.total ?? 0,
     };
   };
 

@@ -402,13 +402,15 @@
 }
 
 /* ---------------------------------------------------------- 课程卡片 */
+/* 单行卡片：课程名 + 进入箭头（右侧固定留出星标位），纵向空间尽量压缩 */
 .course-card {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 7px;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
   height: 100%;
-  padding: 16px 16px 14px;
+  padding: 14px 44px 14px 16px;
   background: var(--panel);
   border: 1px solid var(--hairline-soft);
   border-radius: var(--r-l);
@@ -432,43 +434,27 @@
 }
 
 .course-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  min-width: 0; /* 超长课程名换行而不是顶开箭头 */
   font-size: 15px;
   font-weight: 600;
 }
 .course-go {
-  position: absolute;
-  right: 14px;
-  bottom: 12px;
+  flex: none;
+  margin-left: auto;
   color: var(--accent);
   transition: transform 0.18s var(--press-ease);
 }
 .course-card.ready:hover .course-go {
   transform: translateX(3px);
 }
-
-.course-desc {
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--ink-2);
-}
-.course-meta {
-  font-size: 12px;
-  color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-  padding-right: 26px; /* 给右下角箭头留位，长统计行不与之重叠 */
-}
 /* 卡片容器：给收藏星标提供定位锚点 */
 .course-cell {
   position: relative;
 }
-/* 收藏星标：卡片右上角，Link 的兄弟节点（不嵌套可点击元素）；悬浮只放大变色不铺底 */
+/* 收藏星标：卡片右侧竖直居中，Link 的兄弟节点（不嵌套可点击元素）；悬浮只放大变色不铺底 */
 .course-fav {
   position: absolute;
-  top: 9px;
+  top: calc(50% - 14px);
   right: 9px;
   display: inline-flex;
   align-items: center;
