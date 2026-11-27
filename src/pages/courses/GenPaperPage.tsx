@@ -1,11 +1,11 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import type { CourseSpec, GenPaper, GenQuizKind, GenTag } from '../../content/courses/types';
 import { GEN_KIND_LABEL } from '../../content/courses/labels';
 import PracticeCard from '../../components/practice/PracticeCard';
 import ClearProgress from '../../components/practice/ClearProgress';
-import { IconChevronUp } from '../../components/icons';
+import { IconArrowLeft, IconChevronUp } from '../../components/icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 
 /** 作答结果的持久化 key（每门课独立，避免跨课串数据） */
@@ -182,7 +182,13 @@ function PaperInner({ paper, spec, storeKey }: { paper: GenPaper; spec: CourseSp
 
   return (
     <div className="page practice-page">
-      <h1>{paper.title}</h1>
+      <div className="paper-title-row">
+            <Link to={`${spec.base}/practice`} className="paper-back">
+              <IconArrowLeft size={13} />
+              返回试卷列表
+            </Link>
+        <h1>{paper.title}</h1>
+      </div>
       <div className="lede">
         <p>
           {paper.source} · 共 {total} 题 · 参考答案：{paper.answerSource}。左侧热力图可切换题型、点击格子跳到具体题；

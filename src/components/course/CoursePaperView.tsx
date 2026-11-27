@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import type {
   CourseConfig,
   CoursePaper,
@@ -11,7 +12,7 @@ import PracticeCard from '../practice/PracticeCard';
 import PracticeReport from '../practice/report/PracticeReport';
 import { shellDeckMeta } from '../practice/report/aggregates';
 import ClearProgress from '../practice/ClearProgress';
-import { IconChevronUp } from '../icons';
+import { IconArrowLeft, IconChevronUp } from '../icons';
 import { clearProgress, useProgressStore } from '../../lib/sync';
 
 type Result = 'right' | 'wrong' | 'revealed';
@@ -195,7 +196,15 @@ export default function CoursePaperView({
 
   return (
     <div className="page practice-page">
-      <h1>{paper.title}</h1>
+      <div className="paper-title-row">
+          {!config.singlePaperDirect && (
+            <Link to={`${config.base}/practice`} className="paper-back">
+              <IconArrowLeft size={13} />
+              返回试卷列表
+            </Link>
+          )}
+        <h1>{paper.title}</h1>
+      </div>
       <div className="lede">
         <p>
           {paper.source} · 共 {total} 题 · 参考答案：{paper.answerSource}。左侧热力图可切换题型、点击格子跳到具体题；

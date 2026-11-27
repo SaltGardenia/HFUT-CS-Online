@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'motion/react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { ST_BASE } from '../courses/registry';
 import { stChapters, stPapers, ST_KIND_LABEL } from '../content/st';
 import type { StPaper, StQuizKind, StTag } from '../content/st';
@@ -8,7 +8,7 @@ import PracticeCard from '../components/practice/PracticeCard';
 import PracticeReport from '../components/practice/report/PracticeReport';
 import { shellDeckMeta } from '../components/practice/report/aggregates';
 import ClearProgress from '../components/practice/ClearProgress';
-import { IconChevronUp } from '../components/icons';
+import { IconArrowLeft, IconChevronUp } from '../components/icons';
 import { clearProgress, useProgressStore } from '../lib/sync';
 
 /** 作答结果的持久化 key（软件测试课程独立于算法课/OS/SE 等课程的进度存储） */
@@ -193,7 +193,13 @@ function PaperInner({ paper }: { paper: StPaper }) {
 
   return (
     <div className="page practice-page">
-      <h1>{paper.title}</h1>
+      <div className="paper-title-row">
+            <Link to={`${ST_BASE}/practice`} className="paper-back">
+              <IconArrowLeft size={13} />
+              返回试卷列表
+            </Link>
+        <h1>{paper.title}</h1>
+      </div>
       <div className="lede">
         <p>
           {paper.source} · 共 {total} 题 · 参考答案：{paper.answerSource}。左侧热力图可切换题型、点击格子跳到具体题；
