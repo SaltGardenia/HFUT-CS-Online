@@ -15,6 +15,11 @@ import { useToc } from '../lib/toc';
 /** 学期分组顺序：8 个学期 */
 const SEMESTERS = ['大一上', '大一下', '大二上', '大二下', '大三上', '大三下', '大四上', '大四下'];
 
+/** 学习通题库课程（非学期课，不在 catalog/registry）：名称 → 路由，收藏与最近查看按此解析 */
+const QUESTION_BANK_ROUTES: Record<string, string> = {
+  毛概: '/maogai',
+};
+
 interface Card {
   semester: string;
   name: string;
@@ -275,11 +280,16 @@ export default function CourseHubPage() {
           transition: { duration: 0.4, delay, ease: [0.25, 0.1, 0.25, 1] as const },
         };
 
-  // 按课程名解析成展示卡片（数据取 catalog + registry，名字已不在资料库的忽略）
+  // 按课程名解析成展示卡片（数据取 catalog + registry，名字已不在资料库的忽略；
+  // 学习通题库课程不在两者之内，按名称兜底到对应路由）
   const resolveCard = (name: string): Card | null => {
     const c = catalog.find((x) => x.name === name);
     const entry = findCourseByName(name);
-    if (!c && !entry) return null;
+    if (!c && !entry) {
+      const href = QUESTION_BANK_ROUTES[name];
+      if (!href) return null;
+      return { semester: '学习通题库', name, href, ready: true };
+    }
     return {
       semester: c?.semester ?? entry!.semester,
       name,
@@ -439,10 +449,23 @@ export default function CourseHubPage() {
               animate={reduced ? undefined : { opacity: 1, y: 0 }}
               transition={reduced ? { duration: 0 } : { duration: 0.24, delay: 0.06, ease: [0.25, 0.1, 0.25, 1] }}
             >
-              <Link to="/maogai" className="course-card ready" aria-label="毛概，进入背题">
+              <Link to="/maogai" className="course-card ready" aria-label="毛概，进入课程">
                 <span className="course-title">毛概</span>
                 <span className="course-go" aria-hidden="true">→</span>
               </Link>
+              {/* 收藏按钮：卡片 Link 的兄弟节点，与学期课程卡同款 */}
+              <button
+                type="button"
+                className={`course-fav${favs.includes('毛概') ? ' on' : ''}`}
+                aria-pressed={favs.includes('毛概')}
+                aria-label={favs.includes('毛概') ? '取消收藏 毛概' : '收藏 毛概'}
+                title={favs.includes('毛概') ? '取消收藏' : '收藏'}
+                onClick={() => {
+                  toggleFavorite('毛概');
+                }}
+              >
+                <IconStar size={16} />
+              </button>
             </motion.div>
           </div>
         </section>

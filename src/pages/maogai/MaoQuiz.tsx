@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { IconArrowLeft } from '../../components/icons';
 import ThemeToggle from '../../components/ThemeToggle';
 import AccountButton from '../../components/AccountButton';
+import { recordCourseView } from '../../lib/recentCourses';
 
 const MaoQuizHome = lazy(() => import('./MaoQuizHome'));
 const MaoQuizSession = lazy(() => import('./MaoQuizSession'));
@@ -19,6 +20,8 @@ export default function MaoQuiz() {
 
   useEffect(() => {
     document.documentElement.dataset.deck = 'maogai';
+    // 记入「最近查看」：首页收藏区/最近区按课程名解析（QUESTION_BANK_ROUTES 兜底）
+    recordCourseView('毛概');
     return () => {
       delete document.documentElement.dataset.deck;
     };
