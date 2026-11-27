@@ -254,6 +254,7 @@ export default function PhysCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="phys"
+                      base={PHYS_BASE}
                       storeKey={PHYS_PRACTICE_STORE_KEY}
                       entries={PHYS_BOOK_ENTRIES}
                       tagNav={(t) => {

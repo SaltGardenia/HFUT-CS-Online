@@ -232,6 +232,7 @@ export default function CaCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="ca"
+                      base={CA_BASE}
                       storeKey="ca-practice-progress-v1"
                       entries={CA_BOOK_ENTRIES}
                       tagNav={(t) => ({

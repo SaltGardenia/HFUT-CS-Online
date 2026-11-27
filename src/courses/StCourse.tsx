@@ -229,6 +229,7 @@ export default function StCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="st"
+                      base={ST_BASE}
                       storeKey="st-practice-progress-v1"
                       entries={ST_BOOK_ENTRIES}
                       tagNav={(t) => ({

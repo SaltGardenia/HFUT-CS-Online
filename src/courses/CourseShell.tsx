@@ -260,6 +260,7 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
                       <QuestionBookPage
                         kind="wrong"
                         course={key}
+                        base={base}
                         storeKey={storeKey}
                         entries={bookEntries}
                         tagNav={(t) => ({
@@ -276,6 +277,7 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
                       <QuestionBookPage
                         kind="fav"
                         course={key}
+                        base={base}
                         storeKey={storeKey}
                         entries={bookEntries}
                         tagNav={(t) => ({

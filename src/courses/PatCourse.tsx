@@ -257,6 +257,7 @@ export default function PatCourse() {
                     <QuestionBookPage
                       kind={kind}
                       course="pat"
+                      base={PAT_BASE}
                       storeKey={PAT_PRACTICE_STORE_KEY}
                       entries={PAT_BOOK_ENTRIES}
                       tagNav={(t) => ({

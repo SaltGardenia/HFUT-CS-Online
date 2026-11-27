@@ -3728,6 +3728,34 @@ pre.code .cl-code:empty + .cl-com {
   background: color-mix(in srgb, var(--deck-accent) 10%, transparent);
 }
 
+/* 书页标题行左侧的返回键：与顶栏返回胶囊同款（玻璃圆胶囊 + icon-btn） */
+.qbook-back {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 42px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline-soft);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+.qbook-back:hover {
+  border-color: var(--hairline);
+  box-shadow: var(--shadow-1);
+}
+.qbook-back .icon-btn {
+  background: none;
+}
+/* 标题行里的 h1 收掉默认下边距，行内对齐 */
+.paper-title-row h1 {
+  margin: 0;
+}
+
 /* 书页：账目摘要行 + 按试卷分组的题卡列表 */
 .qbook-page .pq-progress {
   margin-bottom: 22px;

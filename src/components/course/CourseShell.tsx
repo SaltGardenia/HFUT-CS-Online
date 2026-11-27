@@ -326,6 +326,7 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
                         <QuestionBookPage
                           kind={kind}
                           course={courseSlug}
+                          base={config.base}
                           storeKey={config.storeKey}
                           entries={bookEntries}
                           tagNav={(t) => {

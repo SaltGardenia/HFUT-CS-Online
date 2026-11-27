@@ -186,6 +186,7 @@ export default function AiCourse() {
                   <QuestionBookPage
                     kind="wrong"
                     course="ai"
+                    base={AI_BASE}
                     storeKey={AI_PRACTICE_STORE_KEY}
                     entries={AI_BOOK_ENTRIES}
                     tagNav={(t) => {
@@ -205,6 +206,7 @@ export default function AiCourse() {
                   <QuestionBookPage
                     kind="fav"
                     course="ai"
+                    base={AI_BASE}
                     storeKey={AI_PRACTICE_STORE_KEY}
                     entries={AI_BOOK_ENTRIES}
                     tagNav={(t) => {
