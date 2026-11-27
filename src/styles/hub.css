@@ -402,7 +402,7 @@
 }
 
 /* ---------------------------------------------------------- 课程卡片 */
-/* 单行卡片：课程名 + 进入箭头（右侧固定留出星标位），纵向空间尽量压缩 */
+/* 单行卡片：星标 + 课程名 + 进入箭头（左侧固定留出星标位），纵向空间尽量压缩 */
 .course-card {
   position: relative;
   display: flex;
@@ -410,7 +410,7 @@
   align-items: center;
   gap: 10px;
   height: 100%;
-  padding: 14px 44px 14px 16px;
+  padding: 14px 16px 14px 44px;
   background: var(--panel);
   border: 1px solid var(--hairline-soft);
   border-radius: var(--r-l);
@@ -451,11 +451,11 @@
 .course-cell {
   position: relative;
 }
-/* 收藏星标：卡片右侧竖直居中，Link 的兄弟节点（不嵌套可点击元素）；悬浮只放大变色不铺底 */
+/* 收藏星标：课程名左侧竖直居中，Link 的兄弟节点（不嵌套可点击元素）；悬浮只放大变色不铺底 */
 .course-fav {
   position: absolute;
   top: calc(50% - 14px);
-  right: 9px;
+  left: 9px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
