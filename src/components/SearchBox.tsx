@@ -204,7 +204,10 @@ export default function SearchBox({ index, linkTo }: Props) {
                   <span className="pi-kind">{item.kind}</span>
                   {path ? (
                     <span className="pi-body">
-                      <span className="pi-section">{path.heading}</span>
+                      <span className="pi-body-head">
+                        <span className="pi-section">{path.heading}</span>
+                        <span className="pi-path">{path.chapter}</span>
+                      </span>
                       {path.subheading && <span className="pi-subsection">{path.subheading}</span>}
                       <span className="pi-snippet">
                         <Highlight text={searchSnippet(item.text, query)} query={query} />

@@ -62,9 +62,9 @@ describe('讲义正文搜索', () => {
     expect(currentSearchUnit('/net/attachments')).toBeUndefined();
   });
 
-  it('正文路径包含章名、二级标题及命中的三级标题，且二级标题不重复', () => {
-    expect(outlineResultPath(findSearchResults(items, '滑动窗口')[0])).toEqual({ heading: '网络 · 概述', subheading: '协议' });
-    expect(outlineResultPath(findSearchResults(items, '资源共享')[0])).toEqual({ heading: '网络 · 概述', subheading: null });
+  it('正文路径分别提供章名、二级标题和可选的三级标题', () => {
+    expect(outlineResultPath(findSearchResults(items, '滑动窗口')[0])).toEqual({ chapter: '网络', heading: '概述', subheading: '协议' });
+    expect(outlineResultPath(findSearchResults(items, '资源共享')[0])).toEqual({ chapter: '网络', heading: '概述', subheading: null });
   });
 
   it('长正文摘要包含实际命中词', () => {

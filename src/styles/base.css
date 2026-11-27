@@ -2591,7 +2591,20 @@ pre.code .cl-code:empty + .cl-com {
   flex-direction: column;
   gap: 4px;
 }
+.search-drop .pi-body-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.search-drop .pi-body-head .pi-path {
+  flex: 0 1 auto;
+  max-width: 34%;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
 .search-drop .pi-section {
+  flex: 1;
   display: block;
   min-width: 0;
   font-size: 0.8438rem;

@@ -87,12 +87,12 @@ export function searchSnippet(text: string, query: string): string {
   return (start ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
 }
 
-/** 第一行显示章名与 H2，独立的小字号第二行显示 H3；无 H3 时省略。 */
-export function outlineResultPath(item: SearchIndexItem): { heading: string; subheading: string | null } {
+/** H2 与章名分列显示，独立的小字号第二行显示 H3；无 H3 时省略。 */
+export function outlineResultPath(item: SearchIndexItem): { chapter: string; heading: string; subheading: string | null } {
   const chapter = item.unit ? item.unitTitle : '首页';
   const section = item.parentSectionTitle || item.sectionTitle;
-  const heading = section && section !== chapter ? chapter + ' · ' + section : chapter;
+  const heading = section || chapter;
   const subheading = item.parentSectionTitle && item.sectionTitle && item.sectionTitle !== section
     ? item.sectionTitle : null;
-  return { heading, subheading };
+  return { chapter, heading, subheading };
 }
