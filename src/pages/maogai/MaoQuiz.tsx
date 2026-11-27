@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { IconArrowLeft } from '../../components/icons';
 import ThemeToggle from '../../components/ThemeToggle';
 import AccountButton from '../../components/AccountButton';
@@ -30,6 +30,7 @@ export default function MaoQuiz() {
   return (
     <div className="hub-shell mq-shell">
       <header className="hub-topbar">
+        {/* 与课程页顶栏一致：返回胶囊 + 课程名胶囊（topbar-title，链接课程首页） */}
         <div className="hub-nav-left">
           <button
             className="topbar-ctl nav-pill"
@@ -41,7 +42,9 @@ export default function MaoQuiz() {
               <IconArrowLeft size={18} />
             </span>
           </button>
-          <span className="hub-brand">毛概</span>
+          <Link to="/maogai" className="topbar-ctl nav-pill topbar-title" title="毛概 · 学习通题库">
+            毛概
+          </Link>
         </div>
         <div className="hub-topbar-right">
           <div className="topbar-ctl nav-pill">
