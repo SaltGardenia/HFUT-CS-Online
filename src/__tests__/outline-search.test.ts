@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DeckData } from '../content/types';
 import type { SearchIndexItem } from '../components/SearchBox';
-import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath } from '../lib/outlineSearch';
+import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit } from '../lib/outlineSearch';
 
 describe('讲义正文搜索', () => {
   const deck: DeckData = {
@@ -31,6 +31,35 @@ describe('讲义正文搜索', () => {
     expect(results[0]).toBe(title);
     expect(results.filter(r => r.sectionId === '1')).toHaveLength(1);
     expect(results).toHaveLength(12);
+  });
+
+  it('当前章节整体优先，其余章节保持标题优先和原有顺序', () => {
+    const hit = (unit: string, sectionId: string, kind: SearchIndexItem['kind'], text = '流量控制'): SearchIndexItem =>
+      ({ unit, sectionId, kind, text, unitTitle: unit });
+    const entries = [
+      hit('ch1', 'a', '章节'),
+      hit('ch2', 'b', '正文'),
+      hit('ch3', 'c', '正文'),
+      hit('ch3', 'd', '章节', '关于流量控制'),
+      hit('ch4', 'e', '章节', '关于流量控制'),
+      hit('ch4', 'f', '正文'),
+      hit('ch3', 'd', '正文'),
+    ];
+    expect(findSearchResults(entries, '流量控制', 12, 'ch3').map(r => r.sectionId))
+      .toEqual(['d', 'c', 'a', 'e', 'b', 'f']);
+    expect(findSearchResults(entries, '流量控制').map(r => r.sectionId))
+      .toEqual(['a', 'd', 'e', 'b', 'c', 'f']);
+    expect(findSearchResults(entries, '流量控制', 2, 'ch3').map(r => r.sectionId))
+      .toEqual(['d', 'c']);
+  });
+
+  it('识别两种课程章节路由，非讲义页面不设置当前章', () => {
+    expect(currentSearchUnit('/net/deck/ch3')).toBe('ch3');
+    expect(currentSearchUnit('/os/chapter/ch3/')).toBe('ch3');
+    expect(currentSearchUnit('/algo/deck/deck2')).toBe('deck2');
+    expect(currentSearchUnit('/net')).toBeUndefined();
+    expect(currentSearchUnit('/net/practice/ch3')).toBeUndefined();
+    expect(currentSearchUnit('/net/attachments')).toBeUndefined();
   });
 
   it('正文路径包含章名、二级标题及命中的三级标题，且二级标题不重复', () => {

@@ -47,8 +47,13 @@ export function appendOutlineIndex(
   }
 }
 
-/** 标题、试卷等原有条目优先；正文匹配不受前面命中数量限制。 */
-export function findSearchResults(index: SearchIndexItem[], query: string, limit = 12): SearchIndexItem[] {
+/** 两套讲义路由均支持；首页、试卷和附件页不偏向任何章节。 */
+export function currentSearchUnit(pathname: string): string | undefined {
+  return /^\/[^/]+\/(?:deck|chapter)\/([^/]+)\/?$/.exec(pathname)?.[1];
+}
+
+/** 当前章整体优先；同组内保持原有标题优先及讲义顺序。 */
+export function findSearchResults(index: SearchIndexItem[], query: string, limit = 12, currentUnit?: string): SearchIndexItem[] {
   const q = normalize(query).toLowerCase();
   if (!q) return [];
   const hits: { item: SearchIndexItem; score: number }[] = [];
@@ -58,7 +63,8 @@ export function findSearchResults(index: SearchIndexItem[], query: string, limit
     const score = item.kind === '正文' ? 3 : idx === 0 ? 0 : idx < 6 ? 1 : 2;
     hits.push({ item, score });
   }
-  hits.sort((a, b) => a.score - b.score);
+  const priority = (item: SearchIndexItem) => currentUnit && item.unit === currentUnit ? 0 : 1;
+  hits.sort((a, b) => priority(a.item) - priority(b.item) || a.score - b.score);
   const seen = new Set<string>();
   const result: SearchIndexItem[] = [];
   for (const { item } of hits) {

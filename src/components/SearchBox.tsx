@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { decks, homeData } from '../content';
 import { decodeEntities } from '../lib/text';
-import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath } from '../lib/outlineSearch';
+import { appendOutlineIndex, findSearchResults, searchSnippet, outlineResultPath, currentSearchUnit } from '../lib/outlineSearch';
 import { IconSearch, IconX } from './icons';
 
 export interface SearchIndexItem {
@@ -90,6 +90,7 @@ interface Props {
  */
 export default function SearchBox({ index, linkTo }: Props) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -98,7 +99,8 @@ export default function SearchBox({ index, linkTo }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const results = useMemo(() => findSearchResults(index, query), [query, index]);
+  const currentUnit = currentSearchUnit(pathname);
+  const results = useMemo(() => findSearchResults(index, query, 12, currentUnit), [query, index, currentUnit]);
 
   // 点击容器外部收起：输入框回到圆形图标胶囊
   useEffect(() => {
@@ -114,7 +116,7 @@ export default function SearchBox({ index, linkTo }: Props) {
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
 
-  useEffect(() => setActive(0), [query]);
+  useEffect(() => setActive(0), [query, currentUnit]);
 
   const select = (item: SearchIndexItem) => {
     setOpen(false);
