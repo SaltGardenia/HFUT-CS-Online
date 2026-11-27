@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { MATH_BASE } from '../courses/registry';
-import { mathPapers, MATH_KIND_LABEL, type MathQuizKind } from '../content/math';
+import { mathPapers, mathChapters, MATH_KIND_LABEL, type MathQuizKind } from '../content/math';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
+import { chapterNamesFrom } from '../lib/exam-insights';
+import ExamInsights from '../components/practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../components/icons';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷完成度 */
@@ -41,6 +43,13 @@ export default function MathPracticeIndex() {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的章节位置。
         </p>
       </div>
+      <ExamInsights
+        papers={mathPapers}
+        kindLabel={MATH_KIND_LABEL}
+        tagHref={(deck, sec) => `${MATH_BASE}/chapter/ch${deck}?s=${sec}`}
+        chapterNames={chapterNamesFrom(mathChapters)}
+        progress={progress}
+      />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${MATH_BASE}/practice/${p.id}`}>

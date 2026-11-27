@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import type { CourseConfig, CourseQuizKind } from '../../content/course-types';
 import { useToc } from '../../lib/toc';
 import { useStoredRecord } from '../../lib/sync';
+import { chapterNamesFrom } from '../../lib/exam-insights';
+import ExamInsights from '../practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../icons';
 
 const KINDS: CourseQuizKind[] = ['single', 'multi', 'judge', 'fill', 'essay'];
@@ -40,6 +42,13 @@ export default function CoursePracticeIndex({ config }: { config: CourseConfig }
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的章节位置。
         </p>
       </div>
+      <ExamInsights
+        papers={config.papers}
+        kindLabel={config.kindLabel}
+        tagHref={(deck, sec) => `${config.base}/chapter/${config.chapters[deck - 1]?.id ?? config.chapters[0].id}?s=${sec}`}
+        chapterNames={chapterNamesFrom(config.chapters)}
+        progress={progress}
+      />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${config.base}/practice/${p.id}`}>

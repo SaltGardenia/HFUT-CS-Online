@@ -2,11 +2,22 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { NET_BASE } from '../../courses/registry';
-import { netPapers } from '../../content/net';
+import { netPapers, netChapters } from '../../content/net';
 import { IconArrowRight } from '../../components/icons';
+import ExamInsights from '../../components/practice/ExamInsights';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { clearProgressStore, useProgressStore } from '../../lib/sync';
+import { chapterNamesFrom } from '../../lib/exam-insights';
 import { NET_PRACTICE_STORE_KEY, netPaperStats, type NetResult } from './netPracticeState';
+
+/** 计网的题型标签与算法课一致 */
+const NET_KIND_LABEL: Record<string, string> = {
+  single: '单选',
+  multi: '多选',
+  judge: '判断',
+  fill: '填空',
+  essay: '解答',
+};
 
 /** 「计算机网络」在线练习 · 试卷列表：多份试卷先选卷，再进入答题页 */
 export default function NetPracticeListPage() {
@@ -30,6 +41,15 @@ export default function NetPracticeListPage() {
           tip="清空全部试卷的作答进度？"
         />
       </div>
+
+      <ExamInsights
+        papers={netPapers}
+        kindLabel={NET_KIND_LABEL}
+        tagHref={(deck, sec) => `${NET_BASE}/deck/ch${deck}?s=${sec}`}
+        chapterNames={chapterNamesFrom(netChapters)}
+        progress={results}
+        resultKey={(paperId, qid) => `${paperId}:${qid}`}
+      />
 
       <div className="net-paper-grid">
         {netPapers.map((p, i) => {

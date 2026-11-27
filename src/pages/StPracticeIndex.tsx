@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ST_BASE } from '../courses/registry';
-import { stPapers, ST_KIND_LABEL } from '../content/st';
+import { stPapers, stChapters, ST_KIND_LABEL } from '../content/st';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
+import { chapterNamesFrom } from '../lib/exam-insights';
+import ExamInsights from '../components/practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../components/icons';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷的完成度 */
@@ -45,6 +47,13 @@ export default function StPracticeIndex() {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
         </p>
       </div>
+      <ExamInsights
+        papers={stPapers}
+        kindLabel={ST_KIND_LABEL}
+        tagHref={(deck, sec) => `${ST_BASE}/deck/deck${deck}?s=${sec}`}
+        chapterNames={chapterNamesFrom(stChapters)}
+        progress={progress}
+      />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${ST_BASE}/practice/${p.id}`}>

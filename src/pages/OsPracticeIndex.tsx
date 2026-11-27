@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { OS_BASE } from '../courses/registry';
-import { osPapers, OS_KIND_LABEL } from '../content/os';
+import { osPapers, osChapters, OS_KIND_LABEL } from '../content/os';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
+import { chapterNamesFrom } from '../lib/exam-insights';
+import ExamInsights from '../components/practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../components/icons';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷的完成度 */
@@ -45,6 +47,13 @@ export default function OsPracticeIndex() {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
         </p>
       </div>
+      <ExamInsights
+        papers={osPapers}
+        kindLabel={OS_KIND_LABEL}
+        tagHref={(deck, sec) => `${OS_BASE}/chapter/ch${deck}?s=${sec}`}
+        chapterNames={chapterNamesFrom(osChapters)}
+        progress={progress}
+      />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${OS_BASE}/practice/${p.id}`}>

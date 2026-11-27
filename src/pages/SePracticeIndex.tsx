@@ -1,9 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { SE_BASE } from '../courses/registry';
-import { sePapers, SE_KIND_LABEL } from '../content/se';
+import { sePapers, seChapters, SE_KIND_LABEL } from '../content/se';
 import { useToc } from '../lib/toc';
 import { useStoredRecord } from '../lib/sync';
+import { chapterNamesFrom } from '../lib/exam-insights';
+import ExamInsights from '../components/practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../components/icons';
 
 /** 作答进度（与答题页共用同一 key），列表卡上展示每卷的完成度 */
@@ -45,6 +47,13 @@ export default function SePracticeIndex() {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
         </p>
       </div>
+      <ExamInsights
+        papers={sePapers}
+        kindLabel={SE_KIND_LABEL}
+        tagHref={(deck, sec) => `${SE_BASE}/deck/${deck === 14 ? 'cd' : `deck${deck}`}?s=${sec}`}
+        chapterNames={chapterNamesFrom(seChapters)}
+        progress={progress}
+      />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${SE_BASE}/practice/${p.id}`}>

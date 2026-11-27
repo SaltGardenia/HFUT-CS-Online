@@ -4,6 +4,8 @@ import type { CourseSpec } from '../../content/courses/types';
 import { GEN_KIND_LABEL } from '../../content/courses/labels';
 import { useToc } from '../../lib/toc';
 import { useStoredRecord } from '../../lib/sync';
+import { chapterNamesFrom } from '../../lib/exam-insights';
+import ExamInsights from '../../components/practice/ExamInsights';
 import { IconArrowRight, IconFileText } from '../../components/icons';
 
 interface Props {
@@ -46,6 +48,13 @@ export default function GenPracticeIndex({ spec, storeKey }: Props) {
           右侧为答题区；每道题附<strong>知识点标签</strong>，点击可跳转到课件中对应的位置。
         </p>
       </div>
+      <ExamInsights
+        papers={papers}
+        kindLabel={GEN_KIND_LABEL}
+        tagHref={(deck, sec) => `${base}/deck/deck${deck}?s=${sec}`}
+        chapterNames={chapterNamesFrom(spec.chapters)}
+        progress={progress}
+      />
       <nav className="ext-cards" aria-label="试卷列表">
         {cards.map(({ paper: p, done, right, kinds }) => (
           <Link key={p.id} className="ext-card" to={`${base}/practice/${p.id}`}>

@@ -2,10 +2,12 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { PHYS_BASE } from '../../courses/registry';
-import { physPapers } from '../../content/phys';
+import { physPapers, physDecks } from '../../content/phys';
 import { IconArrowRight } from '../../components/icons';
+import ExamInsights from '../../components/practice/ExamInsights';
 import ClearProgress from '../../components/practice/ClearProgress';
 import { clearProgressStore, useProgressStore } from '../../lib/sync';
+import { chapterNamesFrom } from '../../lib/exam-insights';
 
 /** 作答结果持久化 key（qid = `${paperId}:${questionId}`，与算法课的 practice-progress-v1 分开） */
 export const PHYS_PRACTICE_STORE_KEY = 'phys-practice-progress-v1';
@@ -41,6 +43,15 @@ export default function PhysPracticeList() {
           tip="清空全部试卷的作答进度？"
         />
       </div>
+
+      <ExamInsights
+        papers={physPapers}
+        kindLabel={{ essay: '简答', calc: '计算' }}
+        tagHref={(deck, sec) => (deck === 0 ? PHYS_BASE : `${PHYS_BASE}/deck/deck${deck}?s=${sec}`)}
+        chapterNames={chapterNamesFrom(physDecks)}
+        progress={results}
+        resultKey={(paperId, qid) => `${paperId}:${qid}`}
+      />
 
       <div className="net-paper-grid">
         {physPapers.map((p, i) => {
