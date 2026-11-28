@@ -362,7 +362,7 @@ class SyncManager {
         const name = courseNameBySlug(slug);
         if (name) nextMeta[name] = stamp;
       }
-      local.writeFavorites(nextNames, nextMeta);
+      local.writeFavorites([...new Set(nextNames)], nextMeta);
       if (merged.push.length > 0) {
         this.favoritesDirty = true;
         this.favoritesSeq += 1;
@@ -387,7 +387,7 @@ class SyncManager {
         const name = courseNameBySlug(slug);
         if (name) nextMeta[name] = t;
       }
-      local.writeRecent(nextNames, nextMeta);
+      local.writeRecent([...new Set(nextNames)], nextMeta);
       if (merged.push.length > 0) {
         this.recentDirty = true;
         this.recentSeq += 1;

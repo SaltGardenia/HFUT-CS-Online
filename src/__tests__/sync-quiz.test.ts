@@ -105,8 +105,15 @@ describe('本地背题账读写', () => {
 describe('课程 slug 映射（收藏/最近查看同步用）', () => {
   it('学期课程 → 路由首段；学习通题库课程 → quiz/<slug>', () => {
     expect(courseSlugByName('计算机网络')).toBe('net');
+    expect(courseSlugByName('毛概')).toBe('quiz/maogai');
+    expect(courseNameBySlug('quiz/maogai')).toBe('毛概');
+  });
+
+  it('题库课程旧全名归一：slug 解析与云端旧名称 slug 都映射到现短名', () => {
     expect(courseSlugByName('毛泽东思想和中国特色社会主义理论体系概论')).toBe('quiz/maogai');
-    expect(courseNameBySlug('quiz/maogai')).toBe('毛泽东思想和中国特色社会主义理论体系概论');
+    expect(courseNameBySlug('毛泽东思想和中国特色社会主义理论体系概论')).toBe('毛概');
+    expect(courseNameBySlug('形势与政策（2026秋）')).toBe('形势与政策');
+    expect(courseNameBySlug('习近平新时代中国特色社会主义思想概论')).toBe('习概');
   });
 
   it('历史中文名 slug 往返稳定（防止旧收藏被云端回灌时丢失）；未知 ASCII slug 不还原', () => {

@@ -29,7 +29,7 @@ export const QUIZ_COURSES: readonly QuizCourse[] = [
   },
   {
     slug: 'maogai',
-    name: '毛泽东思想和中国特色社会主义理论体系概论',
+    name: '毛概',
     count: 619,
     load: async () => normalize((await import('./banks/maogai.json')).default),
   },
@@ -41,13 +41,13 @@ export const QUIZ_COURSES: readonly QuizCourse[] = [
   },
   {
     slug: 'xigai',
-    name: '习近平新时代中国特色社会主义思想概论',
+    name: '习概',
     count: 450,
     load: async () => normalize((await import('./banks/xigai.json')).default),
   },
   {
     slug: 'xingce',
-    name: '形势与政策（2026秋）',
+    name: '形势与政策',
     count: 450,
     load: async () => normalize((await import('./banks/xingce.json')).default),
   },
@@ -62,10 +62,26 @@ export const QUIZ_COURSES: readonly QuizCourse[] = [
 export const findQuizCourse = (slug: string | undefined): QuizCourse | undefined =>
   QUIZ_COURSES.find((c) => c.slug === slug);
 
+/** 历史显示名 → 现显示名：改名后本地收藏/最近查看与云端旧行统一归一 */
+export const QUIZ_LEGACY_NAMES: Record<string, string> = {
+  毛泽东思想和中国特色社会主义理论体系概论: '毛概',
+  习近平新时代中国特色社会主义思想概论: '习概',
+  '形势与政策（2026秋）': '形势与政策',
+};
+
+/** 课程名归一（历史全名 → 短名） */
+export const normalizeQuizName = (name: string): string => QUIZ_LEGACY_NAMES[name] ?? name;
+
 /** 课程名 → 路由（首页收藏/最近查看按名称解析用） */
 export const QUIZ_ROUTE_BY_NAME: Record<string, string> = Object.fromEntries(
   QUIZ_COURSES.map((c) => [c.name, `/quiz/${c.slug}`]),
 );
+
+/** 含历史名称的解析表（迁移未跑完/云端仍有旧名称时，卡片也不会丢） */
+export const QUIZ_ROUTE_BY_ANY_NAME: Record<string, string> = {
+  ...Object.fromEntries(Object.entries(QUIZ_LEGACY_NAMES).map(([old, now]) => [old, QUIZ_ROUTE_BY_NAME[now]])),
+  ...QUIZ_ROUTE_BY_NAME,
+};
 
 /* ------------------------------------------------ 题库加载（带缓存） */
 

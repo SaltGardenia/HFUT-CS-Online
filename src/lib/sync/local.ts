@@ -237,6 +237,64 @@ export function writeFavorites(list: string[], meta: FavoriteMeta) {
   writeRaw(FAVORITE_META_KEY, JSON.stringify(meta), false);
 }
 
+/** 课程改名迁移：收藏 / 最近查看（列表与时间戳）里的旧名称换成新名称。
+ *  收藏改名时给旧名写一条「取消收藏」墓碑，云端旧行会随同步删除。返回改动条数。 */
+export function renameUserCourseNames(rename: (name: string) => string): number {
+  let changed = 0;
+
+  // 收藏
+  const favNames = readFavorites();
+  const favMeta = readFavoriteMeta();
+  const nextFav: string[] = [];
+  const nextFavMeta: FavoriteMeta = {};
+  const seenFav = new Set<string>();
+  for (const name of favNames) {
+    const now = rename(name);
+    if (now !== name) {
+      changed += 1;
+      nextFavMeta[name] = { t: Date.now(), on: false }; // 旧名称墓碑
+    }
+    if (seenFav.has(now)) continue;
+    seenFav.add(now);
+    nextFav.push(now);
+  }
+  for (const [name, stamp] of Object.entries(favMeta)) {
+    // 旧名的收藏时间戳记到新名下（取较新）
+    const target = rename(name);
+    const prev = nextFavMeta[target];
+    if (!prev || stamp.t >= prev.t) nextFavMeta[target] = stamp;
+  }
+  if (changed > 0) {
+    writeFavorites(nextFav, nextFavMeta);
+    emitDirty({ kind: 'favorite' });
+  }
+
+  // 最近查看
+  const recNames = readRecent();
+  const recMeta = readRecentMeta();
+  const nextRec: string[] = [];
+  const nextRecMeta: RecentMeta = {};
+  const seenRec = new Set<string>();
+  let recChanged = 0;
+  for (const name of recNames) {
+    const now = rename(name);
+    if (now !== name) recChanged += 1;
+    if (seenRec.has(now)) continue;
+    seenRec.add(now);
+    nextRec.push(now);
+  }
+  for (const [name, t] of Object.entries(recMeta)) {
+    const target = rename(name);
+    nextRecMeta[target] = Math.max(nextRecMeta[target] ?? 0, t);
+  }
+  if (recChanged > 0) {
+    writeRecent(nextRec, nextRecMeta);
+    emitDirty({ kind: 'recent' });
+  }
+
+  return changed + recChanged;
+}
+
 /** 首次登录前已收藏的课程补时间戳（视为本机最新，参与合并上传） */
 export function ensureFavoriteStamps(): string[] {
   const list = readFavorites();

@@ -3,7 +3,7 @@
  * 新增课程练习页时，把它的进度键登记到这里，账号同步才会覆盖它。
  */
 import { courses } from '../../courses/registry';
-import { QUIZ_COURSES } from '../../content/quizbank';
+import { QUIZ_COURSES, QUIZ_LEGACY_NAMES, normalizeQuizName } from '../../content/quizbank';
 
 export interface ProgressStore {
   /** localStorage 键 */
@@ -75,7 +75,8 @@ const QUIZ_NAME_BY_SLUG = new Map(QUIZ_COURSES.map((c) => [c.slug, c.name]));
 export function courseSlugByName(name: string): string {
   const c = courses.find((x) => x.name === name);
   if (c) return c.base.replace(/^\/+/, '') || 'hub';
-  const quiz = QUIZ_COURSES.find((x) => x.name === name);
+  const normalized = normalizeQuizName(name);
+  const quiz = QUIZ_COURSES.find((x) => x.name === normalized);
   if (quiz) return `quiz/${quiz.slug}`;
   return name;
 }
@@ -85,6 +86,8 @@ export function courseNameBySlug(slug: string): string | undefined {
   const c = courses.find((x) => x.base.replace(/^\/+/, '') === slug);
   if (c) return c.name;
   if (slug.startsWith('quiz/')) return QUIZ_NAME_BY_SLUG.get(slug.slice(5));
+  // 云端可能残留改名前的旧名称 slug：归一到现显示名
+  if (QUIZ_LEGACY_NAMES[slug]) return QUIZ_LEGACY_NAMES[slug];
   // 占位课程（未上线）用中文名当 slug，原样还原；避免把历史脏 slug 变成收藏项
   return /[一-龥]/.test(slug) ? slug : undefined;
 }
