@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""把 gen_course_color_blocks.txt 的三个块写入 src/styles/tokens.css。
+"""把 gen_course_color_blocks.txt 的三个块写入 src/styles/tokens.css（可重复执行）。
 
-区域（按内容锚点定位，与行号无关）：
-  LIGHT：起「/* 每讲一色：讲次 tabs */」注释行，止「--het-att: #71874f;」行（含），
-         其后保留空行与 --deck-accent 行。
-  DARK ：起「--deck1: #0a84ff;」行，止「--het-att: #b2e4aa;」行（含）。
-  MAP  ：起「当前讲次 → 主题色」整行注释，止最后一条 data-pg 映射规则行（含）。
+区域锚点与已转换过的文件结构对齐：
+  LIGHT：起「一课一色：全站 59 门课程主题色（亮色）」注释行，
+         止 --deck-accent 行前的空行（不含）。
+  DARK ：起「课程主题色（暗色提亮变体」注释行，止 --key-bg 暗色行前的空行（不含）。
+  MAP  ：起「一课一色：html[data-deck=课key]」注释行，止毛概映射规则行（含）。
 """
 import os
 import re
@@ -31,44 +31,38 @@ def find_line(pred, desc):
     return hits[0]
 
 
-def line_eq(s):
-    return lambda ln: ln.strip() == s
+l_start = find_line(lambda ln: '一课一色：全站 59 门课程主题色（亮色）' in ln, 'light 起')
+da = find_line(lambda ln: ln.strip().startswith('--deck-accent: var(--accent)'), 'deck-accent')
+d_start = find_line(lambda ln: '课程主题色（暗色提亮变体' in ln, 'dark 起')
+kb = find_line(lambda ln: '--key-bg: rgba(10, 132, 255, 0.14)' in ln, 'dark key-bg')
+m_start = find_line(lambda ln: '一课一色：html[data-deck' in ln, 'map 起')
+m_end = find_line(lambda ln: ln.strip() == ":root[data-deck='maogai'] { --deck-accent: var(--maogai); }", 'map 止')
 
+assert l_start < da < d_start < kb < m_start < m_end, '区域顺序异常'
 
-# LIGHT 区域
-l_start = find_line(lambda ln: ln.strip().startswith('/* 每讲一色：讲次 tabs'), 'light 起')
-l_end = find_line(line_eq('--het-att: #71874f;'), 'light 止')
-# DARK 区域
-d_start = find_line(line_eq('--deck1: #0a84ff;'), 'dark 起')
-d_end = find_line(line_eq('--het-att: #b2e4aa;'), 'dark 止')
-# MAP 区域
-m_start = find_line(lambda ln: '当前讲次 → 主题色' in ln, 'map 起')
-m_end = find_line(line_eq(":root[data-deck='ee'][data-pg='att'] { --deck-accent: var(--ee-att); }"), 'map 止')
-
-assert l_start < l_end < d_start < d_end < m_start < m_end, '区域顺序异常'
-
-new_header_light = [
+light_region = [
     '  /* ---------------- 一课一色：全站 59 门课程主题色（亮色）。',
     '   * 每课所有页面（总目录/章节/练习/附件）共用一个主题色，选色由',
-    '   * _tools/pick_course_colors.py 全局重排：白底对比 ≥4.5、OKLCH 彩度',
-    '   * ≤0.125（低饱和不刺眼）、课间两两 CIEDE2000 ≥8.8、避开对/错语义色。 */',
+    '   * _tools/pick_course_colors.py 全局重排（色相族×明暗坡道）：白底对比 ≥4.0、',
+    '   * OKLCH 明度 0.50~0.67、彩度 ≤0.155（鲜而不刺眼、不压暗）、避开对/错语义色，',
+    '   * 同色相近邻在明度或彩度上强拉开。 */',
+    light_block,
 ]
-new_header_dark = [
-    '  /* 课程主题色（暗色提亮变体，色相与亮色一一对应，对 #1e1e20 面板对比 ≥4.5） */',
+dark_region = [
+    '  /* 课程主题色（暗色提亮变体，色相与亮色一一对应，对 #1e1e20 面板对比 ≥4.0，排霓虹角） */',
+    dark_block,
 ]
-new_header_map = [
+map_region = [
     '/* ---------------- 一课一色：html[data-deck=课key] → 课程主题色。',
     ' * 章节页/练习页/附件页不再覆盖（旧 data-ch/data-pg 机制已移除）。',
     ' * 每次路由变化课程根组件都会重新声明 data-deck。 */',
+    '',
+    map_block,
 ]
 
-light_region = new_header_light + [light_block]
-dark_region = new_header_dark + [dark_block]
-map_region = new_header_map + ['', map_block]
-
 new_lines = (
-    lines[:l_start] + light_region + lines[l_end + 1:d_start]
-    + dark_region + lines[d_end + 1:m_start] + map_region + lines[m_end + 1:]
+    lines[:l_start] + light_region + lines[da - 1:d_start]
+    + dark_region + lines[kb - 1:m_start] + map_region + lines[m_end + 1:]
 )
 
 with open(TOKENS, 'w', encoding='utf-8', newline='') as f:

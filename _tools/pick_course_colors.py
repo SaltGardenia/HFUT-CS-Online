@@ -55,6 +55,12 @@ SEMANTIC = {
 }
 MIN_SEM = 9.5
 HUE_WINDOW = 14.0
+HUE_NEAR = 14.0     # 色相小于此间隔的两课视为「同族」，必须拉开明度或彩度
+NEAR_DL = 0.08      # 同族拉开：明度差门槛
+NEAR_DC = 0.045     # 同族拉开：彩度差门槛
+
+# 毛概锚定色的 OKLCH 侧写（L/C/色相），用于同族判定
+ANCHOR_META = {'maogai': (0.55, 0.19, 29.0)}
 
 # ---------------------------------------------------------------- 色彩数学（同 pick_colors3.py 家族）
 
@@ -162,35 +168,58 @@ def ciede2000(lab1, lab2):
 # ---------------------------------------------------------------- 选色
 
 def build_pool(light):
-    """OKLCH 网格 → 过滤色域 / 对比度，返回 [(hex, lab, hue, L, C)]。"""
+    """OKLCH 网格 → 过滤色域 / 对比度，返回 [(hex, lab, hue, L, C)]。
+
+    亮色放宽到明度 0.48~0.68、彩度 0.08~0.155（不刺眼但明显不暗）；
+    对比硬下限 4.0（黄金区被对比自然压暗），暗色相应提亮放宽。"""
     if light:
-        l_steps = [0.40 + 0.015 * i for i in range(15)]     # 0.400..0.610
-        c_steps = [0.065 + 0.01 * i for i in range(7)]      # 0.065..0.125
+        l_steps = [0.48 + 0.015 * i for i in range(14)]     # 0.480..0.675
+        c_steps = [0.08 + 0.005 * i for i in range(16)]     # 0.080..0.155
         bg = WHITE
+        min_ct = 4.0
     else:
-        l_steps = [0.70 + 0.02 * i for i in range(9)]       # 0.70..0.86
-        c_steps = [0.07 + 0.01 * i for i in range(8)]       # 0.07..0.14
+        l_steps = [0.72 + 0.02 * i for i in range(9)]       # 0.72..0.88
+        c_steps = [0.09 + 0.005 * i for i in range(17)]     # 0.090..0.170
         bg = DARK_PANEL
+        min_ct = 4.0
     pool = []
     for h in range(0, 360, 2):
         for L in l_steps:
             for C in c_steps:
                 rgb = oklch_to_srgb(h, L, C)
-                if rgb is None or contrast(rgb, bg) < 4.5:
+                if rgb is None or contrast(rgb, bg) < min_ct:
                     continue
                 pool.append((rgb_to_hex(rgb), srgb_to_lab(rgb), h, L, C))
     return pool
+
+
+def near_penalty(meta1, meta2):
+    """同族（色相近且明度彩度都近）时判为过近；返回 True 表示需压分。"""
+    _, _, h1, L1, C1 = meta1
+    _, _, h2, L2, C2 = meta2
+    if h1 is None or h2 is None:
+        return False
+    hd = abs((h1 - h2 + 180) % 360 - 180)
+    return hd < HUE_NEAR and abs(L1 - L2) < NEAR_DL and abs(C1 - C2) < NEAR_DC
+
+
+def pair_dist(meta1, meta2):
+    """选点距离：ΔE2000，同族压到 7.5 迫使优化器拉开。"""
+    d = ciede2000(meta1[1], meta2[1])
+    if near_penalty(meta1, meta2):
+        d = min(d, 7.5)
+    return d
 
 
 def fps(pool, k, seeds, sem_labs):
     """惰性更新最远点采样；语义色作为虚拟已选点参与距离，天然避开。"""
     chosen = list(seeds)
 
-    def dist_to_chosen(lab):
-        m = min((ciede2000(lab, s[1]) for s in chosen), default=1e9)
-        return min(m, min(ciede2000(lab, s) for s in sem_labs))
+    def dist_to_chosen(meta):
+        m = min((pair_dist(meta, s) for s in chosen), default=1e9)
+        return min(m, min(ciede2000(meta[1], s) for s in sem_labs))
 
-    mind = [dist_to_chosen(p[1]) for p in pool]
+    mind = [dist_to_chosen(p) for p in pool]
     used = {s[0] for s in chosen}
     while len(chosen) < k:
         best_i, best_d = -1, -1
@@ -207,7 +236,7 @@ def fps(pool, k, seeds, sem_labs):
         for i, q in enumerate(pool):
             if q[0] in used:
                 continue
-            d = ciede2000(q[1], p[1])
+            d = pair_dist(q, p)
             if d < mind[i]:
                 mind[i] = d
     return chosen
@@ -216,7 +245,7 @@ def fps(pool, k, seeds, sem_labs):
 def refine(chosen, pool, fixed_flags, sem_labs, rounds=8):
     """局部爬山：每点在 OKLCH 邻域内找能抬高自身最小距离的替换（含语义色距离）。"""
     def own_min_of(cand, idx):
-        m = min(ciede2000(cand[1], o[1]) for i, o in enumerate(chosen) if i != idx)
+        m = min(pair_dist(cand, o) for i, o in enumerate(chosen) if i != idx)
         return min(m, min(ciede2000(cand[1], s) for s in sem_labs))
 
     for _ in range(rounds):
@@ -248,57 +277,63 @@ def main():
     print(f'候选池：亮 {len(light_pool)} / 暗 {len(dark_pool)}', file=sys.stderr)
 
     keys = [k for k, _ in COURSES]
-    anchor_l = hex_to_rgb(ANCHOR['maogai'][0])
-    anchor_d = hex_to_rgb(ANCHOR['maogai'][1])
-
     sem_l = [srgb_to_lab(hex_to_rgb(s)) for s in SEMANTIC['light']]
     sem_d = [srgb_to_lab(hex_to_rgb(s)) for s in SEMANTIC['dark']]
-    light_sel = fps(light_pool, len(keys),
-                    [(rgb_to_hex(anchor_l), srgb_to_lab(anchor_l), None, 0, 0)], sem_l)
-    # fps 返回 [种子, 其余逐个选取]；种子须对位到毛概的课程序号
-    picks = iter(light_sel[1:])
-    anchor = light_sel[0]
-    light_sel = [anchor if k == 'maogai' else next(picks) for k in keys]
-    light_sel = refine(light_sel, light_pool, [k == 'maogai' for k in keys], sem_l)
-    labs_l = [x[1] for x in light_sel]
+    anchor_l, anchor_d = hex_to_rgb(ANCHOR['maogai'][0]), hex_to_rgb(ANCHOR['maogai'][1])
 
-    # 暗色：先按各课亮色色相切窗口，惰性 FPS 全局选，再爬山
-    l_hues = []
-    for hx, lab, hue, L, C in light_sel:
-        if hue is None:  # 锚定项无 OKLCH 色相，用 Lab 反推
-            _, a_, b_ = lab
-            hue = math.degrees(math.atan2(b_, a_)) % 360
-        l_hues.append(hue)
-    wins = [[i for i, p in enumerate(dark_pool)
-             if abs((p[2] - lh + 180) % 360 - 180) <= HUE_WINDOW]
-            for lh in l_hues]
-
-    dark_sel = [None] * len(keys)
-    seeds = [(rgb_to_hex(anchor_d), srgb_to_lab(anchor_d), None, 0, 0)]
-    # 语义色一次性烘进初始最小距离（mind 只减不增，后续更新无需重算语义项）
-    mind = [min(min((ciede2000(p[1], s[1]) for s in seeds), default=1e9),
-                min(ciede2000(p[1], s) for s in sem_d)) for p in dark_pool]
-    taken = {seeds[0][0]}
-    dark_sel[keys.index('maogai')] = seeds[0]
-    for idx in range(len(keys)):
-        if dark_sel[idx] is not None:
-            continue
-        best_i, best_d = -1, -1
-        for i in wins[idx]:
-            if dark_pool[i][0] in taken:
+    # 候选预过滤：语义色距离硬性达标（暗色另排霓虹角：高明度×高彩度）
+    def feasible(pool, sem_labs, dark):
+        out = []
+        for item in pool:
+            if min(ciede2000(item[1], s) for s in sem_labs) < MIN_SEM:
                 continue
-            if mind[i] > best_d:
-                best_i, best_d = i, mind[i]
-        p = dark_pool[best_i]
-        taken.add(p[0])
-        dark_sel[idx] = p
-        for i, q in enumerate(dark_pool):
-            if q[0] not in taken:
-                dd = ciede2000(q[1], p[1])
-                if dd < mind[i]:
-                    mind[i] = dd
-    dark_list = refine(dark_sel, dark_pool, [k == 'maogai' for k in keys], sem_d)
-    labs_d = [x[1] for x in dark_list]
+            if dark and item[3] > 0.80 and item[4] > 0.13:
+                continue
+            out.append(item)
+        return out
+
+    light_pool = feasible(light_pool, sem_l, False)
+    dark_pool = feasible(dark_pool, sem_d, True)
+    print(f'预过滤后：亮 {len(light_pool)} / 暗 {len(dark_pool)}', file=sys.stderr)
+
+    # 色相族 × 坡道槽位：20 族（18° 步进），族内按明暗坡道强拉开；
+    # 课程 i 落入族 (i*7)%20（7 与 20 互质 → 相邻课程跨族，族内成员相距 20 个注册位）
+    NFAM, STEP, OFFSET = 20, 18, 8
+    LIGHT_RAMP = [(0.67, 0.115), (0.585, 0.15), (0.50, 0.105)]
+    DARK_RAMP = [(0.85, 0.105), (0.78, 0.145), (0.72, 0.10)]
+
+    def angdist(a, b):
+        return abs((a - b + 180) % 360 - 180)
+
+    def pick(pool, tH, tL, tC):
+        best, best_s = None, 1e9
+        for p in pool:
+            s = angdist(p[2], tH) * 0.02 + abs(p[3] - tL) * 2.0 + abs(p[4] - tC) * 3.0
+            if s < best_s:
+                best, best_s = p, s
+        return best
+
+    light_sel, dark_sel = [], []
+    for i, (key, _) in enumerate(COURSES):
+        if key == 'maogai':
+            light_sel.append((rgb_to_hex(anchor_l), srgb_to_lab(anchor_l), ANCHOR_META['maogai'][2],
+                              ANCHOR_META['maogai'][0], ANCHOR_META['maogai'][1]))
+            dark_sel.append((rgb_to_hex(anchor_d), srgb_to_lab(anchor_d), ANCHOR_META['maogai'][2],
+                             ANCHOR_META['maogai'][0], ANCHOR_META['maogai'][1]))
+            continue
+        fam = ((i * 7) % NFAM) * STEP + OFFSET
+        slot = i // NFAM
+        tL, tC = LIGHT_RAMP[slot]
+        light_sel.append(pick(light_pool, fam, tL, tC))
+        dL, dC = DARK_RAMP[slot]
+        dark_sel.append(pick(dark_pool, fam, dL, dC))
+
+    # 全局微调：同族判定下的局部爬山（小幅，只修残余过近）
+    fixed = [k == 'maogai' for k in keys]
+    light_sel = refine(light_sel, light_pool, fixed, sem_l, rounds=3)
+    dark_sel = refine(dark_sel, dark_pool, fixed, sem_d, rounds=3)
+    labs_l = [x[1] for x in light_sel]
+    labs_d = [x[1] for x in dark_sel]
 
     def pairwise_min(labs):
         m = 1e9
@@ -312,12 +347,12 @@ def main():
     out = {}
     bad = 0
     for idx, (key, name) in enumerate(COURSES):
-        lh, dh = light_sel[idx][0], dark_list[idx][0]
+        lh, dh = light_sel[idx][0], dark_sel[idx][0]
         cl = contrast(hex_to_rgb(lh), WHITE)
         cd = contrast(hex_to_rgb(dh), DARK_PANEL)
         sl = min(ciede2000(labs_l[idx], s) for s in sem_l)
         sd = min(ciede2000(labs_d[idx], s) for s in sem_d)
-        ok = cl >= 4.5 and cd >= 4.5 and sl >= MIN_SEM and sd >= MIN_SEM
+        ok = cl >= 4.0 and cd >= 4.0 and sl >= MIN_SEM and sd >= MIN_SEM
         bad += 0 if ok else 1
         out[key] = {'name': name, 'light': lh, 'dark': dh,
                     'contrast_light': round(cl, 2), 'contrast_dark': round(cd, 2),
