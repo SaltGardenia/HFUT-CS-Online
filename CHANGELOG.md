@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.7.0 (2026-11-28)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### 新功能
+* feat(quiz): 学习通题库扩至七门课——通用背题页、错题本清空与章节布局 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/54
+* feat(quiz): 每组题数可自定义——背单词式分组，学完一组再进下一组 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/62
+* feat(quiz): 题卡标注连对次数，答错归零 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/63
+* feat(quiz): 学习/复习每组题数分开设置，入口改为开始学习/开始复习 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/64
+### 修复
+* fix(quiz): 答对后「答案：X」改用绿色，不再沿用课程朱红 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/61
+* fix(pat): 热力图格子未作答也显示绿色——state 兜底值 'none' 为真值 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/60
+* fix(quiz): 答对只描边不铺绿底——题卡与选项与答错同款 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/59
+* fix(quiz): 完成页卡片互换——返回在左带左箭头，继续在右带右箭头 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/65
+### 杂项
+* chore(tools): 毛概题库清洗脚本（合并两份原始题库、去重与答案解析） by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/57
+* chore(env): 仓库内置公开 Supabase 配置，本地预览开箱即可登录 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/56
+
+
+**Full Changelog**: https://github.com/SaltGardenia/HFUT-CS-Online/compare/v2.6.0...v2.7.0
+
 ## 2.6.0 (2026-11-28)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
