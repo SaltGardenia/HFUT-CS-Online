@@ -8,7 +8,9 @@ import {
   deferOverflow,
   gradeCard,
   learnQueue,
+  readGroupSize,
   reviewPool,
+  takeGroup,
   takeReviewQueue,
   useQuizState,
 } from '../../lib/maoquiz';
@@ -23,47 +25,68 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
 
   const kind = mode === 'review' ? 'review' : 'learn';
   const [bank, setBank] = useState<QuizQuestion[] | null>(null);
+  const [group, setGroup] = useState<QuizQuestion[] | null>(null);
   const [queue, setQueue] = useState<QuizQuestion[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [tally, setTally] = useState({ good: 0, bad: 0 });
 
-  // 题库按需加载；加载完成后按模式定格本轮队列
+  // 题库按需加载；加载完成后按模式与「每组题数」定格本组
   useEffect(() => {
     let alive = true;
     loadQuizBank(course).then((b) => {
       if (!alive) return;
       setBank(b);
       const state = live;
+      let full: QuizQuestion[];
       if (kind === 'review') {
         const picked = takeReviewQueue(b, state, Date.now());
         deferOverflow(course.slug, picked.state);
-        setQueue(picked.queue);
+        full = picked.queue;
       } else {
-        setQueue(learnQueue(b, state));
+        full = learnQueue(b, state);
       }
+      const picked = takeGroup(full, readGroupSize());
+      setGroup(picked);
+      setQueue(picked);
     });
     return () => {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [course.slug]);
+  }, [course.slug, kind]);
 
   const q = queue && idx < queue.length ? queue[idx] : null;
   const finished = queue !== null && idx >= queue.length;
+
+  // 本组进度：学习看「已掌握」，复习看「已作答」
+  const groupTotal = group?.length ?? 0;
+  const doneInGroup = !group
+    ? 0
+    : kind === 'review'
+      ? Math.min(idx, group.length)
+      : group.filter((item) => (live.cards[item.id]?.st ?? 0) >= 1).length;
 
   // 收藏星标（hb-qmarks:<slug> 的收藏本）
   const marks = useCourseQMarks(course.slug);
   const favOn = (id: string) => !!marks.fav[id]?.on;
   const toggleFav = (id: string) => setQMark(course.slug, 'fav', id, !favOn(id));
 
-  const buildQueue = (m: 'learn' | 'review', now = Date.now()) => {
-    if (!bank) return [];
+  /** 从当前模式的剩余队列取下一组并重置本组进度 */
+  const startGroup = (m: 'learn' | 'review', now = Date.now()) => {
+    if (!bank) return;
+    let full: QuizQuestion[];
     if (m === 'review') {
       const picked = takeReviewQueue(bank, live, now);
       deferOverflow(course.slug, picked.state);
-      return picked.queue;
+      full = picked.queue;
+    } else {
+      full = learnQueue(bank, live);
     }
-    return learnQueue(bank, live);
+    const picked = takeGroup(full, readGroupSize());
+    setGroup(picked);
+    setQueue(picked);
+    setIdx(0);
+    setTally({ good: 0, bad: 0 });
   };
 
   /**
@@ -113,27 +136,25 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
   if (finished) {
     return (
       <main className="mq-main mq-center">
-        <h1 className="mq-done-h">本轮完成</h1>
-        <p className="mq-done-s">答对 {tally.good} · 答错 {tally.bad}</p>
+        <h1 className="mq-done-h">本组完成</h1>
+        <p className="mq-done-s">
+          答对 {tally.good} · 答错 {tally.bad} · 本组 {groupTotal} 题
+        </p>
         <div className="mq-modes">
           {endActions.learnLeft > 0 && (
-            <button type="button" className="mq-mode" onClick={() => {
-              setQueue(buildQueue('learn'));
-              setIdx(0);
-              setTally({ good: 0, bad: 0 });
-            }}>
+            <button type="button" className="mq-mode" onClick={() => startGroup('learn')}>
               <b>继续学习</b>
-              <span>{endActions.learnLeft} 张卡</span>
+              <span>
+                下一组 {Math.min(readGroupSize(), endActions.learnLeft)} 题 · 待学 {endActions.learnLeft}
+              </span>
             </button>
           )}
           {endActions.reviewLeft > 0 && (
-            <button type="button" className="mq-mode" onClick={() => {
-              setQueue(buildQueue('review'));
-              setIdx(0);
-              setTally({ good: 0, bad: 0 });
-            }}>
+            <button type="button" className="mq-mode" onClick={() => startGroup('review')}>
               <b>接着复习</b>
-              <span>到期 {endActions.reviewLeft} 题</span>
+              <span>
+                下一组 {Math.min(readGroupSize(), endActions.reviewLeft)} 题 · 到期 {endActions.reviewLeft}
+              </span>
             </button>
           )}
           <Link className="btn" to={`/quiz/${course.slug}`}>返回总览</Link>
@@ -153,10 +174,12 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
   return (
     <main className="mq-main">
       <div className="mq-top">
-        <span className="mq-top-n">第 {idx + 1} / {queue!.length} 题</span>
+        <span className="mq-top-n">
+          {kind === 'learn' ? '本组已掌握' : '本组已复习'} {doneInGroup} / {groupTotal} 题
+        </span>
       </div>
       <div className="mq-top-bar">
-        <i style={{ width: `${(idx / queue!.length) * 100}%` }} />
+        <i style={{ width: `${groupTotal ? (doneInGroup / groupTotal) * 100 : 0}%` }} />
       </div>
       <motion.div
         key={`${q.id}-${idx}`}

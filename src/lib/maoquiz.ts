@@ -42,6 +42,21 @@ export const SLOW_FAIL_INTERVAL = 3;
 /** 单日复习保护上限：到期池超过该数量时溢出部分顺延一天 */
 export const REVIEW_DAILY_CAP = 150;
 
+/* ------------------------------------------------ 每组题数（背单词式分组节奏） */
+
+/** 每组题数的存储键（全局偏好，不分课、不参与云端同步） */
+export const QUIZ_GROUP_KEY = 'hb-maquiz-group-size';
+export const GROUP_SIZE_DEFAULT = 10;
+export const GROUP_SIZE_PRESETS = [5, 10, 20] as const;
+export const GROUP_SIZE_MIN = 1;
+export const GROUP_SIZE_MAX = 100;
+
+/** 把任意输入收敛到合法题数（整数、1–100；非法值回落默认） */
+export function normalizeGroupSize(n: number): number {
+  if (!Number.isFinite(n)) return GROUP_SIZE_DEFAULT;
+  return Math.min(GROUP_SIZE_MAX, Math.max(GROUP_SIZE_MIN, Math.round(n)));
+}
+
 const DAY = 86_400_000;
 /** 每门课一份账（键定义在 sync/keys，云端 course 为 quiz/<slug>） */
 export const storeKey = quizCardsKey;
@@ -158,6 +173,42 @@ export function useQuizState(slug: string): QuizState {
   );
 }
 
+const groupListeners = new Set<() => void>();
+
+/** 读取每组题数（页面每次取快照都直接读 localStorage，跨标签页改动能即时反映） */
+export function readGroupSize(): number {
+  try {
+    const raw = localStorage.getItem(QUIZ_GROUP_KEY);
+    return raw === null ? GROUP_SIZE_DEFAULT : normalizeGroupSize(Number(raw));
+  } catch {
+    return GROUP_SIZE_DEFAULT;
+  }
+}
+
+/** 写入每组题数，返回收敛后的值（隐私模式下仅在本次会话生效） */
+export function writeGroupSize(n: number): number {
+  const size = normalizeGroupSize(n);
+  try {
+    localStorage.setItem(QUIZ_GROUP_KEY, String(size));
+  } catch {
+    /* 写失败：内存里生效 */
+  }
+  groupListeners.forEach((l) => l());
+  return size;
+}
+
+/** 订阅每组题数（总览页的设置控件用） */
+export function useQuizGroupSize(): number {
+  return useSyncExternalStore(
+    (l) => {
+      groupListeners.add(l);
+      return () => groupListeners.delete(l);
+    },
+    readGroupSize,
+    readGroupSize,
+  );
+}
+
 /* ------------------------------------------------ 分支规则（纯函数，供测试） */
 
 /**
@@ -265,6 +316,11 @@ export function learnQueue(bank: readonly QuizQuestion[], state: QuizState): Qui
     const rec = state.cards[q.id];
     return !rec || rec.st === 0;
   });
+}
+
+/** 从队列头切出一组（每组题数由总览页设置） */
+export function takeGroup<T>(items: readonly T[], size: number): T[] {
+  return items.slice(0, normalizeGroupSize(size));
 }
 
 /** 总览统计 */

@@ -3,7 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { QUIZ_KINDS, QUIZ_KIND_WEIGHTS } from '../../content/quizbank/consts';
 import { loadQuizBank, type QuizCourse } from '../../content/quizbank';
 import type { QuizQuestion } from '../../content/quizbank/types';
-import { useQuizState, countsOf, resetQuizState } from '../../lib/maoquiz';
+import {
+  useQuizState,
+  countsOf,
+  resetQuizState,
+  GROUP_SIZE_PRESETS,
+  GROUP_SIZE_MIN,
+  GROUP_SIZE_MAX,
+  useQuizGroupSize,
+  writeGroupSize,
+} from '../../lib/maoquiz';
 import { useCourseQMarks } from '../../lib/sync';
 import ClearProgress from '../../components/practice/ClearProgress';
 
@@ -25,7 +34,21 @@ export default function QuizHome({ course }: { course: QuizCourse }) {
   const navigate = useNavigate();
   const state = useQuizState(course.slug);
   const marks = useCourseQMarks(course.slug);
+  const groupSize = useQuizGroupSize();
+  const [groupText, setGroupText] = useState(() => String(groupSize));
   const [bank, setBank] = useState<QuizQuestion[] | null>(null);
+
+  // 预设按钮改动后同步输入框；正在输入的自定义值不受影响（提交时才写回）
+  useEffect(() => setGroupText(String(groupSize)), [groupSize]);
+
+  const applyGroupText = () => {
+    if (!groupText.trim()) {
+      setGroupText(String(groupSize));
+      return;
+    }
+    setGroupText(String(writeGroupSize(Number(groupText))));
+  };
+  const presetActive = (GROUP_SIZE_PRESETS as readonly number[]).includes(groupSize);
 
   useEffect(() => {
     let alive = true;
@@ -144,6 +167,45 @@ export default function QuizHome({ course }: { course: QuizCourse }) {
         <Stat label="待复习" value={stats.due} />
         <Stat label="已掌握" value={stats.graduated} />
       </div>
+
+      {/* 每组题数：背单词式的分组节奏，学习与复习共用 */}
+      <section className="mq-card mq-group-card">
+        <h2>每组题数</h2>
+        <div className="mq-group-row" role="group" aria-label="每组题数">
+          {GROUP_SIZE_PRESETS.map((n) => (
+            <button
+              key={n}
+              type="button"
+              className="mq-group-btn"
+              aria-pressed={groupSize === n}
+              onClick={() => setGroupText(String(writeGroupSize(n)))}
+            >
+              {n} 题
+            </button>
+          ))}
+          <label className="mq-group-custom" data-active={presetActive ? undefined : true}>
+            自定义
+            <input
+              className="mq-group-input"
+              type="number"
+              inputMode="numeric"
+              min={GROUP_SIZE_MIN}
+              max={GROUP_SIZE_MAX}
+              value={groupText}
+              onChange={(e) => setGroupText(e.target.value)}
+              onBlur={applyGroupText}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  applyGroupText();
+                }
+              }}
+              aria-label="自定义每组题数"
+            />
+            题
+          </label>
+        </div>
+      </section>
 
       {/* 四个入口：学习 / 复习 / 错题本 / 收藏本 */}
       <div className="mq-modes">
