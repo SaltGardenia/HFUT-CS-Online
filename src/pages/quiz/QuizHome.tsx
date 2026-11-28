@@ -197,7 +197,7 @@ export default function QuizHome({ course }: { course: QuizCourse }) {
         <div className="mq-rows">
           {chapters.map((c) => (
             <div key={c.name} className="mq-row">
-              <span className="mq-row-name">{c.name}</span>
+              <span className="mq-row-name" title={c.name}>{c.name}</span>
               <div className="mq-row-track">
                 <i style={{ width: `${(c.graduated / c.total) * 100}%` }} className="mq-seg-done" />
                 <i style={{ width: `${((c.learned - c.graduated) / c.total) * 100}%` }} className="mq-seg-learn" />
