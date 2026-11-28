@@ -56,7 +56,7 @@ const EeCourse = lazy(() => import('./courses/EeCourse'));
 /** 大二下 12 门课共用入口：再按课程前缀加载各自的数据包 */
 const D2XCourse = lazy(() => import('./courses/D2XCourse'));
 /** 学习通题库（毛概背题）：不走课程外壳，首页「学习通题库」栏接入 */
-const MaoQuizCourse = lazy(() => import('./pages/maogai/MaoQuiz'));
+const QuizCourse = lazy(() => import('./pages/quiz/QuizCourse'));
 
 /** 旧版单课程链接 → /algo/*（历史收藏与外链不失效） */
 function LegacyDeckRedirect() {
@@ -132,8 +132,11 @@ export default function App() {
         <Route path={`${DSCD_BASE}/*`} element={<DscdCourse />} />
         <Route path={`${LA_BASE}/*`} element={<LaCourse />} />
         <Route path={`${EE_BASE}/*`} element={<EeCourse />} />
-        {/* 学习通题库（毛概背题） */}
-        <Route path="/maogai/*" element={<MaoQuizCourse />} />
+        {/* 学习通题库（七门课背题，共用一套课程页） */}
+        <Route path="/quiz/:slug/*" element={<QuizCourse />} />
+        {/* 旧链接兼容：/maogai → /quiz/maogai */}
+        <Route path="/maogai" element={<Navigate to="/quiz/maogai" replace />} />
+        <Route path="/maogai/*" element={<Navigate to="/quiz/maogai" replace />} />
         {/* 大二下 12 门课：按 URL 首段分发到同一套课程外壳（数据各自按需加载） */}
         <Route path="/:courseKey/*" element={<D2XCourse />} />
         <Route path="/course/:name/*" element={<CourseStubPage />} />

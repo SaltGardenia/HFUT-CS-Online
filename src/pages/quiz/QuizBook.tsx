@@ -1,0 +1,75 @@
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { loadQuizBank, type QuizCourse } from '../../content/quizbank';
+import type { QuizQuestion } from '../../content/quizbank/types';
+import { gradeCard } from '../../lib/maoquiz';
+import { setQMark } from '../../lib/sync/local';
+import { useCourseQMarks } from '../../lib/sync';
+import QuestionCard from './QuestionCard';
+
+/**
+ * 题库错题本 / 收藏本（账在 hb-qmarks:<slug>，与其他课程的两本账同约定）。
+ * 卡片可重做：作答照常进艾宾浩斯调度；答错的题自动回到错题本。
+ */
+export default function QuizBook({ course }: { course: QuizCourse }) {
+  const { kind } = useParams();
+  const book = kind === 'fav' ? 'fav' : 'wrong';
+  const marks = useCourseQMarks(course.slug);
+  const [bank, setBank] = useState<QuizQuestion[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    loadQuizBank(course).then((b) => {
+      if (alive) setBank(b);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [course]);
+
+  // 按标记时间倒序：最近出错 / 最近收藏的在前
+  const entries = (bank ?? [])
+    .filter((q) => marks[book][q.id]?.on)
+    .sort((a, b) => (marks[book][b.id]?.t ?? 0) - (marks[book][a.id]?.t ?? 0));
+
+  const title = book === 'wrong' ? '错题本' : '收藏本';
+
+  return (
+    <main className="mq-main">
+      <div className="mq-head">
+        <h1>{title}</h1>
+        <p>{course.name} · {entries.length} 题</p>
+      </div>
+
+      {bank !== null && entries.length === 0 ? (
+        <div className="mq-center mq-empty-page">
+          <p className="mq-empty">{book === 'wrong' ? '还没有答错的题。' : '还没有收藏的题——答题时点右上角星标即可收藏。'}</p>
+          <Link className="btn" to={`/quiz/${course.slug}`}>返回总览</Link>
+        </div>
+      ) : (
+        <div className="mq-book-list">
+          {entries.map((q) => (
+            <QuestionCard
+              key={q.id}
+              q={q}
+              onGrade={(good, elapsedMs) => {
+                gradeCard(course.slug, q.id, good, elapsedMs, q.kind);
+                if (!good) setQMark(course.slug, 'wrong', q.id, true);
+                else if (book === 'wrong') setQMark(course.slug, 'wrong', q.id, false);
+              }}
+              fav={{
+                on: !!marks.fav[q.id]?.on,
+                onToggle: () => setQMark(course.slug, 'fav', q.id, !marks.fav[q.id]?.on),
+              }}
+              cornerAction={
+                book === 'wrong'
+                  ? { label: '移出错题本', onClick: () => setQMark(course.slug, 'wrong', q.id, false) }
+                  : { label: '取消收藏', onClick: () => setQMark(course.slug, 'fav', q.id, false) }
+              }
+            />
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}

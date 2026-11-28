@@ -11,14 +11,13 @@ import ContactCard from '../components/ContactCard';
 import { IconChevronDown, IconChevronUp, IconGitHub, IconStar } from '../components/icons';
 import { toggleFavorite } from '../lib/favoriteCourses';
 import { useToc } from '../lib/toc';
+import { QUIZ_COURSES, QUIZ_ROUTE_BY_NAME } from '../content/quizbank';
 
 /** 学期分组顺序：8 个学期 */
 const SEMESTERS = ['大一上', '大一下', '大二上', '大二下', '大三上', '大三下', '大四上', '大四下'];
 
 /** 学习通题库课程（非学期课，不在 catalog/registry）：名称 → 路由，收藏与最近查看按此解析 */
-const QUESTION_BANK_ROUTES: Record<string, string> = {
-  毛概: '/maogai',
-};
+const QUESTION_BANK_ROUTES: Record<string, string> = QUIZ_ROUTE_BY_NAME;
 
 interface Card {
   semester: string;
@@ -442,30 +441,37 @@ export default function CourseHubPage() {
             <h2>学习通题库</h2>
           </div>
           <div className="hub-grid">
-            <motion.div
-              className="course-cell"
-              initial={reduced ? undefined : { opacity: 0, y: 10 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              transition={reduced ? { duration: 0 } : { duration: 0.24, delay: 0.06, ease: [0.25, 0.1, 0.25, 1] }}
-            >
-              <Link to="/maogai" className="course-card ready" aria-label="毛概，进入课程">
-                <span className="course-title">毛概</span>
-                <span className="course-go" aria-hidden="true">→</span>
-              </Link>
-              {/* 收藏按钮：卡片 Link 的兄弟节点，与学期课程卡同款 */}
-              <button
-                type="button"
-                className={`course-fav${favs.includes('毛概') ? ' on' : ''}`}
-                aria-pressed={favs.includes('毛概')}
-                aria-label={favs.includes('毛概') ? '取消收藏 毛概' : '收藏 毛概'}
-                title={favs.includes('毛概') ? '取消收藏' : '收藏'}
-                onClick={() => {
-                  toggleFavorite('毛概');
-                }}
+            {QUIZ_COURSES.map((qc, i) => (
+              <motion.div
+                key={qc.slug}
+                className="course-cell"
+                initial={reduced ? undefined : { opacity: 0, y: 10 }}
+                animate={reduced ? undefined : { opacity: 1, y: 0 }}
+                transition={reduced ? { duration: 0 } : { duration: 0.24, delay: Math.min(0.06 + i * 0.03, 0.24), ease: [0.25, 0.1, 0.25, 1] }}
               >
-                <IconStar size={16} />
-              </button>
-            </motion.div>
+                <Link
+                  to={`/quiz/${qc.slug}`}
+                  className="course-card ready"
+                  aria-label={`${qc.name}，进入课程`}
+                >
+                  <span className="course-title">{qc.name}</span>
+                  <span className="course-go" aria-hidden="true">→</span>
+                </Link>
+                {/* 收藏按钮：卡片 Link 的兄弟节点，与学期课程卡同款 */}
+                <button
+                  type="button"
+                  className={`course-fav${favs.includes(qc.name) ? ' on' : ''}`}
+                  aria-pressed={favs.includes(qc.name)}
+                  aria-label={favs.includes(qc.name) ? `取消收藏 ${qc.name}` : `收藏 ${qc.name}`}
+                  title={favs.includes(qc.name) ? '取消收藏' : '收藏'}
+                  onClick={() => {
+                    toggleFavorite(qc.name);
+                  }}
+                >
+                  <IconStar size={16} />
+                </button>
+              </motion.div>
+            ))}
           </div>
         </section>
         {groups.map((g) => (

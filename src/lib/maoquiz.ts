@@ -1,6 +1,6 @@
 /**
- * 毛概背题调度 —— 百词斩式分支逻辑（作答即判分，无人工自评）。
- * 数据只存本地 localStorage（键 hb-maoquiz-v1）；账号云同步的进度层
+ * 学习通题库背题调度（七门课共用）—— 百词斩式分支逻辑（作答即判分，无人工自评）。
+ * 数据按课程分账存本地 localStorage（键 hb-maquiz:<slug>）；账号云同步的进度层
  * 是简单的结果映射，带排期的时间表暂不在其覆盖范围内。
  *
  * 卡片状态（CardRec.st）：
@@ -22,7 +22,8 @@
  *   学习队列不限量（新词按用户要求不设每日上限）。
  */
 import { useSyncExternalStore } from 'react';
-import { MAO_KIND_WEIGHTS, type MaoKind, type MaoQuestion } from '../content/maogai';
+import { QUIZ_KIND_WEIGHTS } from '../content/quizbank/consts';
+import type { QuizKind, QuizQuestion } from '../content/quizbank/types';
 
 /** 学习中学会所需连续答对次数 */
 export const LEARN_STREAK = 3;
@@ -40,7 +41,8 @@ export const SLOW_FAIL_INTERVAL = 3;
 export const REVIEW_DAILY_CAP = 150;
 
 const DAY = 86_400_000;
-export const STORE_KEY = 'hb-maoquiz-v1';
+/** 每门课一份账 */
+export const storeKey = (slug: string): string => `hb-maquiz:${slug}`;
 
 export interface CardRec {
   /** 0 学习中 / 1 复习中 / 2 薄弱 / 3 毕业 */
@@ -56,7 +58,7 @@ export interface CardRec {
   rv: number;
 }
 
-export interface MaoState {
+export interface QuizState {
   v: 1;
   cards: Record<string, CardRec>;
 }
@@ -67,11 +69,11 @@ const dayStart = (t: number): number => {
   return d.getTime();
 };
 
-export const emptyState = (): MaoState => ({ v: 1, cards: {} });
+export const emptyState = (): QuizState => ({ v: 1, cards: {} });
 
-const isMaoState = (x: unknown): x is MaoState =>
-  typeof x === 'object' && x !== null && (x as MaoState).v === 1 &&
-  typeof (x as MaoState).cards === 'object';
+const isQuizState = (x: unknown): x is QuizState =>
+  typeof x === 'object' && x !== null && (x as QuizState).v === 1 &&
+  typeof (x as QuizState).cards === 'object';
 
 /** 旧账迁移：第一版 {s,k,w,due} → 新四态（间隔表折算成 ivl；w 为累计错次，不并入连续失败） */
 const STAGE_TABLE = [1, 2, 4, 7, 15, 30, 60];
@@ -92,18 +94,18 @@ const normalizeRec = (r: Record<string, unknown>): CardRec => {
   };
 };
 
-/* ------------------------------------------------ 本地持久化 + 订阅 */
+/* ------------------------------------------------ 本地持久化 + 订阅（按 slug 分账） */
 
-let cache: MaoState | null = null;
-const listeners = new Set<() => void>();
+const caches = new Map<string, QuizState>();
+const listeners = new Map<string, Set<() => void>>();
 
-const readFresh = (): MaoState => {
-  let base: MaoState = emptyState();
+const readFresh = (slug: string): QuizState => {
+  let base: QuizState = emptyState();
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = localStorage.getItem(storeKey(slug));
     if (raw) {
       const parsed: unknown = JSON.parse(raw);
-      if (isMaoState(parsed)) {
+      if (isQuizState(parsed)) {
         const cards: Record<string, CardRec> = {};
         for (const [id, rec] of Object.entries(parsed.cards)) cards[id] = normalizeRec(rec as unknown as Record<string, unknown>);
         base = { v: 1, cards };
@@ -115,29 +117,38 @@ const readFresh = (): MaoState => {
   return base;
 };
 
-const persist = (s: MaoState) => {
-  cache = s;
+const persist = (slug: string, s: QuizState) => {
+  caches.set(slug, s);
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(s));
+    localStorage.setItem(storeKey(slug), JSON.stringify(s));
   } catch {
     /* 写失败（配额满）：内存账仍可用 */
   }
-  listeners.forEach((l) => l());
+  listeners.get(slug)?.forEach((l) => l());
 };
 
-const subscribe = (l: () => void) => {
-  listeners.add(l);
-  return () => listeners.delete(l);
+const subscribeTo = (slug: string, l: () => void) => {
+  if (!listeners.has(slug)) listeners.set(slug, new Set());
+  listeners.get(slug)!.add(l);
+  return () => listeners.get(slug)?.delete(l);
 };
 
-const getSnapshot = (): MaoState => {
-  if (!cache) cache = readFresh();
-  return cache;
+const getSnapshotOf = (slug: string): QuizState => {
+  let hit = caches.get(slug);
+  if (!hit) {
+    hit = readFresh(slug);
+    caches.set(slug, hit);
+  }
+  return hit;
 };
 
-/** 订阅毛概背题账（页面展示与答题页共用一份真相） */
-export function useMaoState(): MaoState {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+/** 订阅某门课的背题账（页面展示与答题页共用一份真相） */
+export function useQuizState(slug: string): QuizState {
+  return useSyncExternalStore(
+    (l) => subscribeTo(slug, l),
+    () => getSnapshotOf(slug),
+    () => getSnapshotOf(slug),
+  );
 }
 
 /* ------------------------------------------------ 分支规则（纯函数，供测试） */
@@ -147,14 +158,14 @@ export function useMaoState(): MaoState {
  * 反应时长：≤3s 全额，3–8s 打 85 折，>8s（犹豫）与 <1s（蒙对）打 6 折；
  * 题型权重：填空置信度最高（拉更长），判断题最低。
  */
-const growthFactor = (streak: number, elapsedMs: number, kind: MaoKind): number => {
+const growthFactor = (streak: number, elapsedMs: number, kind: QuizKind): number => {
   const base = 1.6 + 0.1 * Math.min(streak, 4);
   const time = elapsedMs <= 1000 ? 0.5 : elapsedMs <= 3000 ? 1 : elapsedMs <= 8000 ? 0.85 : 0.6;
-  return 1 + (base - 1) * time * (MAO_KIND_WEIGHTS[kind] ?? 1);
+  return 1 + (base - 1) * time * (QUIZ_KIND_WEIGHTS[kind] ?? 1);
 };
 
 /** 记住一次：ivl 放大并封顶；达到上限且连对足够 → 毕业 */
-const growInterval = (rec: CardRec, elapsedMs: number, kind: MaoKind): CardRec => {
+const growInterval = (rec: CardRec, elapsedMs: number, kind: QuizKind): CardRec => {
   const ivl = Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, Math.round(rec.ivl * growthFactor(rec.streak, elapsedMs, kind))));
   const mastered = rec.ivl >= MAX_INTERVAL && rec.streak >= MASTER_STREAK;
   return { ...rec, st: mastered ? 3 : 1, ivl: mastered ? rec.ivl : ivl };
@@ -172,7 +183,7 @@ const degradeInterval = (rec: CardRec): CardRec => {
 };
 
 /** 对一道题记一次作答结果，返回新账（不改入参）；elapsedMs 为本题作答用时（反应时长修正） */
-export function applyGrade(state: MaoState, qid: string, good: boolean, elapsedMs: number, kind: MaoKind, now: number): MaoState {
+export function applyGrade(state: QuizState, qid: string, good: boolean, elapsedMs: number, kind: QuizKind, now: number): QuizState {
   const prev = state.cards[qid];
   const cards = { ...state.cards };
   const today = dayStart(now);
@@ -209,7 +220,7 @@ export function applyGrade(state: MaoState, qid: string, good: boolean, elapsedM
  * 复习候选池：st1/st2 且到期。
  * 优先级：薄弱（st2）> 刚学不久（ivl ≤ 3）> 长期熟词；同档按到期先后。
  */
-export function reviewPool(bank: readonly MaoQuestion[], state: MaoState, now: number): MaoQuestion[] {
+export function reviewPool(bank: readonly QuizQuestion[], state: QuizState, now: number): QuizQuestion[] {
   const rank = (rec: CardRec): number => (rec.st === 2 ? 0 : rec.ivl <= 3 ? 1 : 2);
   return bank
     .filter((q) => {
@@ -228,10 +239,10 @@ export function reviewPool(bank: readonly MaoQuestion[], state: MaoState, now: n
  * （分摊不删除，断档不一次性炸任务）。返回当期队列与顺延后的新账；无溢出时原账返回。
  */
 export function takeReviewQueue(
-  bank: readonly MaoQuestion[],
-  state: MaoState,
+  bank: readonly QuizQuestion[],
+  state: QuizState,
   now: number,
-): { queue: MaoQuestion[]; state: MaoState } {
+): { queue: QuizQuestion[]; state: QuizState } {
   const pool = reviewPool(bank, state, now);
   if (pool.length <= REVIEW_DAILY_CAP) return { queue: pool, state };
   const queue = pool.slice(0, REVIEW_DAILY_CAP);
@@ -242,7 +253,7 @@ export function takeReviewQueue(
 }
 
 /** 学习队列：未学新卡 + 学习中的卡，按题库顺序（不限量——新词不设每日上限） */
-export function learnQueue(bank: readonly MaoQuestion[], state: MaoState): MaoQuestion[] {
+export function learnQueue(bank: readonly QuizQuestion[], state: QuizState): QuizQuestion[] {
   return bank.filter((q) => {
     const rec = state.cards[q.id];
     return !rec || rec.st === 0;
@@ -250,7 +261,7 @@ export function learnQueue(bank: readonly MaoQuestion[], state: MaoState): MaoQu
 }
 
 /** 总览统计 */
-export function countsOf(bank: readonly MaoQuestion[], state: MaoState, now: number) {
+export function countsOf(bank: readonly QuizQuestion[], state: QuizState, now: number) {
   let learned = 0;
   let learning = 0;
   let weak = 0;
@@ -275,16 +286,16 @@ export function countsOf(bank: readonly MaoQuestion[], state: MaoState, now: num
 }
 
 /** 写入一次作答结果（订阅者自动刷新） */
-export function gradeCard(qid: string, good: boolean, elapsedMs: number, kind: MaoKind): void {
-  persist(applyGrade(getSnapshot(), qid, good, elapsedMs, kind, Date.now()));
+export function gradeCard(slug: string, qid: string, good: boolean, elapsedMs: number, kind: QuizKind): void {
+  persist(slug, applyGrade(getSnapshotOf(slug), qid, good, elapsedMs, kind, Date.now()));
 }
 
 /** 复习溢出顺延落盘（进复习页时调用；无溢出为空操作） */
-export function deferOverflow(state: MaoState): void {
-  if (state !== getSnapshot()) persist(state);
+export function deferOverflow(slug: string, state: QuizState): void {
+  if (state !== getSnapshotOf(slug)) persist(slug, state);
 }
 
-/** 清空背题账 */
-export function resetMaoState(): void {
-  persist(emptyState());
+/** 清空本课背题账 */
+export function resetQuizState(slug: string): void {
+  persist(slug, emptyState());
 }

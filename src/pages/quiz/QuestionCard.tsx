@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { maoKindLabel, JUDGE_OPTIONS, optionsOf, type MaoQuestion } from '../../content/maogai';
+import { quizKindLabel, JUDGE_OPTIONS, optionsOf } from '../../content/quizbank/consts';
+import type { QuizQuestion } from '../../content/quizbank/types';
 import { decodeEntities } from '../../lib/text';
 import { IconCheck, IconReset, IconStar, IconX } from '../../components/icons';
 
@@ -7,14 +8,14 @@ const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const normalize = (s: string) => s.replace(/\s+/g, '').replace(/　/g, '');
 
 /** 判分展示文本（字母 / 正确错误 / 填空原文） */
-export const answerTextOf = (q: MaoQuestion): string => {
+export const answerTextOf = (q: QuizQuestion): string => {
   if (q.kind === 'fill') return String(q.answer);
   if (q.kind === 'judge') return JUDGE_OPTIONS[(q.answer as number[])[0]];
   return (q.answer as number[]).map((i) => LETTERS[i]).join('、');
 };
 
 interface Props {
-  q: MaoQuestion;
+  q: QuizQuestion;
 /** 判分上报：good = 答对；elapsedMs = 本题反应时长（间隔增幅修正）；「看答案」按没答上处理（回炉） */
   onGrade: (good: boolean, elapsedMs: number) => void;
 /** 下一题动作：传入则判分后出现「下一题」按钮（会话模式）；不传显示「重做」（书页模式） */
@@ -26,7 +27,7 @@ interface Props {
 }
 
 /**
- * 毛概题卡：作答即判分（无人工自评）。
+ * 题库题卡：作答即判分（无人工自评），七门课共用。
  * 单选/判断点选项立即判分；多选勾选后提交；填空输入比对；
  * 「直接看答案」视为没答上。判分结果经 onGrade 交给外层（调度账 + 错题本）。
  */
@@ -147,7 +148,7 @@ export default function QuestionCard({ q, onGrade, onNext, fav, cornerAction }: 
       )}
 
       <p className="quiz-q">
-        <span className="pq-kind" data-kind={q.kind}>{maoKindLabel(q.kind)}</span>
+        <span className="pq-kind" data-kind={q.kind}>{quizKindLabel(q.kind)}</span>
         <span>{decodeEntities(q.question)}</span>
       </p>
       {q.chapter && <span className="mq-chip">{q.chapter}</span>}
