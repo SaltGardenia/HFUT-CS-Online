@@ -5224,6 +5224,17 @@ pre.code .cl-code:empty + .cl-com {
 /* 判对后答案块跟随语义色：课程朱红主题下红条红字容易被误读成答错 */
 .mq-qcard.answered-right .quiz-a { border-left-color: var(--ok); }
 .mq-qcard.answered-right .quiz-a b { color: var(--ok); }
+/* 判对卡里的主操作（下一题）也跟随语义绿，整块不再出现朱红 */
+.mq-qcard.answered-right .quiz-actions .btn.primary {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: var(--on-accent);
+}
+.mq-qcard.answered-right .quiz-actions .btn.primary:hover {
+  background: var(--ok);
+  color: var(--on-accent);
+  filter: brightness(1.06);
+}
 .mq-chip {
   display: inline-block;
   margin: 0 0 10px;
