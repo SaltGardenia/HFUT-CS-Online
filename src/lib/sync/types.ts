@@ -79,6 +79,37 @@ export interface RemoteQMarkRow {
   updated_at: string;
 }
 
+/** 学习通题库：一张卡的调度状态（自带更新时间，跨设备取新） */
+export interface QuizCardState {
+  /** 0 学习中 / 1 复习中 / 2 薄弱 / 3 毕业 */
+  st: number;
+  streak: number;
+  fails: number;
+  ivl: number;
+  due: number;
+  rv: number;
+  /** 本地更新时间（毫秒） */
+  t: number;
+}
+
+export type QuizCardMap = Record<string, QuizCardState>;
+
+export interface RemoteQuizRow {
+  course: string;
+  question_id: string;
+  st: number;
+  streak: number;
+  fails: number;
+  ivl: number;
+  due: number;
+  rv: number;
+  updated_at: string;
+}
+
+export interface PushQuizRow extends RemoteQuizRow {
+  device_id: string;
+}
+
 export interface RemoteRecentRow {
   course: string;
   viewed_at: string;
@@ -126,6 +157,7 @@ export interface PushPayload {
   recent: PushRecentRow[];
   reading: PushReadingRow[];
   qmarks: PushQMarkRow[];
+  quiz: PushQuizRow[];
 }
 
 export interface SyncUser {

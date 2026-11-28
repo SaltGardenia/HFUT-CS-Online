@@ -22,6 +22,8 @@
  *   学习队列不限量（新词按用户要求不设每日上限）。
  */
 import { useSyncExternalStore } from 'react';
+import { emitQuizDirty } from './sync/local';
+import { quizCardsKey } from './sync/keys';
 import { QUIZ_KIND_WEIGHTS } from '../content/quizbank/consts';
 import type { QuizKind, QuizQuestion } from '../content/quizbank/types';
 
@@ -41,8 +43,8 @@ export const SLOW_FAIL_INTERVAL = 3;
 export const REVIEW_DAILY_CAP = 150;
 
 const DAY = 86_400_000;
-/** 每门课一份账 */
-export const storeKey = (slug: string): string => `hb-maquiz:${slug}`;
+/** 每门课一份账（键定义在 sync/keys，云端 course 为 quiz/<slug>） */
+export const storeKey = quizCardsKey;
 
 export interface CardRec {
   /** 0 学习中 / 1 复习中 / 2 薄弱 / 3 毕业 */
@@ -56,6 +58,8 @@ export interface CardRec {
   due: number;
   /** 累计作答次数（统计指标，不作为停止条件） */
   rv: number;
+  /** 本地更新时间（毫秒；跨设备同步按它取新） */
+  t: number;
 }
 
 export interface QuizState {
@@ -80,9 +84,9 @@ const STAGE_TABLE = [1, 2, 4, 7, 15, 30, 60];
 const normalizeRec = (r: Record<string, unknown>): CardRec => {
   const s = typeof r.s === 'number' ? r.s : undefined;
   if (s !== undefined) {
-    if (s === 0) return { st: 0, streak: typeof r.k === 'number' ? r.k : 0, fails: 0, ivl: 0, due: Number(r.due) || 0, rv: 0 };
-    if (s >= 8) return { st: 3, streak: 0, fails: 0, ivl: 60, due: Number.MAX_SAFE_INTEGER, rv: 0 };
-    return { st: 1, streak: 0, fails: 0, ivl: STAGE_TABLE[s - 1] ?? 2, due: Number(r.due) || 0, rv: 0 };
+    if (s === 0) return { st: 0, streak: typeof r.k === 'number' ? r.k : 0, fails: 0, ivl: 0, due: Number(r.due) || 0, rv: 0, t: 0 };
+    if (s >= 8) return { st: 3, streak: 0, fails: 0, ivl: 60, due: Number.MAX_SAFE_INTEGER, rv: 0, t: 0 };
+    return { st: 1, streak: 0, fails: 0, ivl: STAGE_TABLE[s - 1] ?? 2, due: Number(r.due) || 0, rv: 0, t: 0 };
   }
   return {
     st: (r.st as CardRec['st']) ?? 0,
@@ -91,6 +95,7 @@ const normalizeRec = (r: Record<string, unknown>): CardRec => {
     ivl: typeof r.ivl === 'number' ? r.ivl : 0,
     due: typeof r.due === 'number' ? r.due : 0,
     rv: typeof r.rv === 'number' ? r.rv : 0,
+    t: typeof r.t === 'number' ? r.t : 0,
   };
 };
 
@@ -124,6 +129,8 @@ const persist = (slug: string, s: QuizState) => {
   } catch {
     /* 写失败（配额满）：内存账仍可用 */
   }
+  // 通知账号同步层：这门课的背题账有变更（未登录时监听器直接忽略）
+  emitQuizDirty(slug);
   listeners.get(slug)?.forEach((l) => l());
 };
 
@@ -187,7 +194,7 @@ export function applyGrade(state: QuizState, qid: string, good: boolean, elapsed
   const prev = state.cards[qid];
   const cards = { ...state.cards };
   const today = dayStart(now);
-  let rec: CardRec;
+  let rec: Omit<CardRec, 't'>;
 
   if (!prev || prev.st === 0) {
     // —— 学习中（含新卡）——
@@ -212,7 +219,7 @@ export function applyGrade(state: QuizState, qid: string, good: boolean, elapsed
     rec = degradeInterval({ ...prev, rv: prev.rv + 1 });
     rec = { ...rec, due: Math.max(today, prev.due) + rec.ivl * DAY };
   }
-  cards[qid] = rec;
+  cards[qid] = { ...rec, t: now };
   return { ...state, cards };
 }
 

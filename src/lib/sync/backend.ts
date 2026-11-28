@@ -4,6 +4,7 @@ import type {
   RemoteFavoriteRow,
   RemoteProgressRow,
   RemoteQMarkRow,
+  RemoteQuizRow,
   RemoteReadingRow,
   RemoteRecentRow,
   SyncUser,
@@ -16,6 +17,7 @@ export interface PullResult {
   recent: RemoteRecentRow[];
   reading: RemoteReadingRow[];
   qmarks: RemoteQMarkRow[];
+  quiz: RemoteQuizRow[];
 }
 
 export interface SyncBackend {
@@ -36,8 +38,8 @@ function ensure(error: { message: string } | null): void {
   if (error) throw new Error(error.message);
 }
 
-/** 云端还没执行新版 schema（缺 user_reading / user_qmarks 表或对应函数） */
-function isMissingReading(err: { code?: string }): boolean {
+/** 云端还没执行新版 schema（缺 user_reading / user_qmarks / user_quiz_cards 表或对应函数） */
+function isMissingOptionalTable(err: { code?: string }): boolean {
   return (
     err.code === 'PGRST202' ||
     err.code === 'PGRST205' ||
@@ -50,6 +52,7 @@ export function createSupabaseBackend(): SyncBackend {
   /** 探测结果：新表/新函数是否可用。不可用时阅读进度与题目两本账只留本机，其余同步照常 */
   let readingAvailable: boolean | null = null;
   let qmarksAvailable: boolean | null = null;
+  let quizAvailable: boolean | null = null;
 
   return {
     async getSession() {
@@ -98,7 +101,7 @@ export function createSupabaseBackend(): SyncBackend {
 
     async pull() {
       const supabase = await getSupabase();
-      const [progress, favorites, recent, reading, qmarks] = await Promise.all([
+      const [progress, favorites, recent, reading, qmarks, quiz] = await Promise.all([
         supabase.from('user_progress').select('course,question_id,result,updated_at'),
         supabase.from('user_favorites').select('course,favorited,updated_at'),
         supabase.from('user_recent').select('course,viewed_at'),
@@ -110,18 +113,25 @@ export function createSupabaseBackend(): SyncBackend {
         qmarksAvailable === false
           ? null
           : supabase.from('user_qmarks').select('course,question_id,kind,marked,updated_at'),
+        quizAvailable === false
+          ? null
+          : supabase
+              .from('user_quiz_cards')
+              .select('course,question_id,st,streak,fails,ivl,due,rv,updated_at'),
       ]);
       ensure(progress.error);
       ensure(favorites.error);
       ensure(recent.error);
       if (reading) readingAvailable = !reading.error;
       if (qmarks) qmarksAvailable = !qmarks.error;
+      if (quiz) quizAvailable = !quiz.error;
       return {
         progress: (progress.data ?? []) as RemoteProgressRow[],
         favorites: (favorites.data ?? []) as RemoteFavoriteRow[],
         recent: (recent.data ?? []) as RemoteRecentRow[],
         reading: (reading?.data ?? []) as RemoteReadingRow[],
         qmarks: (qmarks?.data ?? []) as RemoteQMarkRow[],
+        quiz: (quiz?.data ?? []) as RemoteQuizRow[],
       };
     },
 
@@ -140,7 +150,7 @@ export function createSupabaseBackend(): SyncBackend {
           p_reading: payload.reading,
         });
         if (!readingError) readingAvailable = true;
-        else if (isMissingReading(readingError)) readingAvailable = false;
+        else if (isMissingOptionalTable(readingError)) readingAvailable = false;
         else ensure(readingError);
       }
 
@@ -150,8 +160,18 @@ export function createSupabaseBackend(): SyncBackend {
           p_qmarks: payload.qmarks,
         });
         if (!qmarksError) qmarksAvailable = true;
-        else if (isMissingReading(qmarksError)) qmarksAvailable = false;
+        else if (isMissingOptionalTable(qmarksError)) qmarksAvailable = false;
         else ensure(qmarksError);
+      }
+
+      // 学习通题库背题账：同款降级（老库没跑新 SQL 时仅本机保留）
+      if (payload.quiz.length > 0 && quizAvailable !== false) {
+        const { error: quizError } = await supabase.rpc('sync_push_quiz', {
+          p_quiz: payload.quiz,
+        });
+        if (!quizError) quizAvailable = true;
+        else if (isMissingOptionalTable(quizError)) quizAvailable = false;
+        else ensure(quizError);
       }
     },
   };

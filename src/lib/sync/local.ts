@@ -10,14 +10,17 @@ import {
   FAVORITES_KEY,
   PROGRESS_STORES,
   QMARKS_PREFIX,
+  QUIZ_CARDS_PREFIX,
   READING_KEY,
   RECENT_KEY,
   RECENT_META_KEY,
   progressMetaKey,
   qmarksKey,
+  quizCardsKey,
 } from './keys';
 import type {
   CourseQMarks,
+  QuizCardMap,
   FavoriteMeta,
   FavoriteStamp,
   ProgressMap,
@@ -99,7 +102,7 @@ function sameJSON(a: unknown, b: unknown): boolean {
 /* ------------------------------------------------------------------ 进度 */
 
 export interface DirtyEvent {
-  kind: 'progress' | 'favorite' | 'recent' | 'reading' | 'qmarks';
+  kind: 'progress' | 'favorite' | 'recent' | 'reading' | 'qmarks' | 'quiz';
   /** progress：发生变化的进度存储键 */
   key?: string;
   /** progress：发生变化的题目 id */
@@ -234,6 +237,64 @@ export function writeFavorites(list: string[], meta: FavoriteMeta) {
   writeRaw(FAVORITE_META_KEY, JSON.stringify(meta), false);
 }
 
+/** 课程改名迁移：收藏 / 最近查看（列表与时间戳）里的旧名称换成新名称。
+ *  收藏改名时给旧名写一条「取消收藏」墓碑，云端旧行会随同步删除。返回改动条数。 */
+export function renameUserCourseNames(rename: (name: string) => string): number {
+  let changed = 0;
+
+  // 收藏
+  const favNames = readFavorites();
+  const favMeta = readFavoriteMeta();
+  const nextFav: string[] = [];
+  const nextFavMeta: FavoriteMeta = {};
+  const seenFav = new Set<string>();
+  for (const name of favNames) {
+    const now = rename(name);
+    if (now !== name) {
+      changed += 1;
+      nextFavMeta[name] = { t: Date.now(), on: false }; // 旧名称墓碑
+    }
+    if (seenFav.has(now)) continue;
+    seenFav.add(now);
+    nextFav.push(now);
+  }
+  for (const [name, stamp] of Object.entries(favMeta)) {
+    // 旧名的收藏时间戳记到新名下（取较新）
+    const target = rename(name);
+    const prev = nextFavMeta[target];
+    if (!prev || stamp.t >= prev.t) nextFavMeta[target] = stamp;
+  }
+  if (changed > 0) {
+    writeFavorites(nextFav, nextFavMeta);
+    emitDirty({ kind: 'favorite' });
+  }
+
+  // 最近查看
+  const recNames = readRecent();
+  const recMeta = readRecentMeta();
+  const nextRec: string[] = [];
+  const nextRecMeta: RecentMeta = {};
+  const seenRec = new Set<string>();
+  let recChanged = 0;
+  for (const name of recNames) {
+    const now = rename(name);
+    if (now !== name) recChanged += 1;
+    if (seenRec.has(now)) continue;
+    seenRec.add(now);
+    nextRec.push(now);
+  }
+  for (const [name, t] of Object.entries(recMeta)) {
+    const target = rename(name);
+    nextRecMeta[target] = Math.max(nextRecMeta[target] ?? 0, t);
+  }
+  if (recChanged > 0) {
+    writeRecent(nextRec, nextRecMeta);
+    emitDirty({ kind: 'recent' });
+  }
+
+  return changed + recChanged;
+}
+
 /** 首次登录前已收藏的课程补时间戳（视为本机最新，参与合并上传） */
 export function ensureFavoriteStamps(): string[] {
   const list = readFavorites();
@@ -320,6 +381,73 @@ export function clearQMarks(course: string, kind: QMarkKind) {
 /** 云端合并结果落盘（不产生脏标记，避免回声） */
 export function applyQMarks(course: string, marks: CourseQMarks) {
   if (!sameJSON(readQMarks(course), marks)) writeRaw(qmarksKey(course), JSON.stringify(marks));
+}
+
+/** 学习通题库背题账的课程 slug 列表（扫描本地键） */
+export function quizCardCourses(): string[] {
+  const courses: string[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(QUIZ_CARDS_PREFIX)) courses.push(key.slice(QUIZ_CARDS_PREFIX.length));
+    }
+  } catch {
+    /* ignore */
+  }
+  return courses;
+}
+
+/** 读某门课的背题账（云端合并与上传用；页面本身走 lib/maoquiz 自己的缓存） */
+export function readQuizCards(course: string): QuizCardMap {
+  const raw = readJSON<unknown>(quizCardsKey(course), {});
+  const record =
+    raw && typeof raw === 'object' && !Array.isArray(raw)
+      ? ((raw as Record<string, unknown>).cards as Record<string, unknown> | undefined) ?? {}
+      : {};
+  const out: QuizCardMap = {};
+  for (const [qid, value] of Object.entries(record)) {
+    if (!value || typeof value !== 'object') continue;
+    const v = value as Record<string, unknown>;
+    const num = (k: string) => (typeof v[k] === 'number' ? (v[k] as number) : 0);
+    out[qid] = {
+      st: num('st'),
+      streak: num('streak'),
+      fails: num('fails'),
+      ivl: num('ivl'),
+      due: num('due'),
+      rv: num('rv'),
+      t: num('t'),
+    };
+  }
+  return out;
+}
+
+/** 云端合并结果落盘（结构保持 hb-maquiz 原样：{v:1,cards}；不产生脏标记） */
+export function applyQuizCards(course: string, cards: QuizCardMap) {
+  const next = JSON.stringify({ v: 1, cards });
+  const current = readRaw(quizCardsKey(course));
+  if (current === next) return;
+  writeRaw(quizCardsKey(course), next);
+}
+
+/** 首次登录前的本地卡片没有时间戳：补成「现在」参与上传；返回补了几条 */
+export function ensureQuizStamps(course: string): number {
+  const cards = readQuizCards(course);
+  const now = Date.now();
+  let fixed = 0;
+  for (const card of Object.values(cards)) {
+    if (!card.t) {
+      card.t = now;
+      fixed += 1;
+    }
+  }
+  if (fixed > 0) applyQuizCards(course, cards);
+  return fixed;
+}
+
+/** 页面写入背题账后上报脏数据（lib/maoquiz 调用） */
+export function emitQuizDirty(course: string) {
+  emitDirty({ kind: 'quiz', course });
 }
 
 /** 一门课是否记过任何账（含墓碑）；登录时用它决定哪些课要参与上传 */
@@ -444,6 +572,13 @@ export function clearUserData() {
   for (const course of qmarkCourses()) {
     try {
       localStorage.removeItem(qmarksKey(course));
+    } catch {
+      /* ignore */
+    }
+  }
+  for (const course of quizCardCourses()) {
+    try {
+      localStorage.removeItem(quizCardsKey(course));
     } catch {
       /* ignore */
     }

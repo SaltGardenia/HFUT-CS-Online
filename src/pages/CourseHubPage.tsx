@@ -11,13 +11,13 @@ import ContactCard from '../components/ContactCard';
 import { IconChevronDown, IconChevronUp, IconGitHub, IconStar } from '../components/icons';
 import { toggleFavorite } from '../lib/favoriteCourses';
 import { useToc } from '../lib/toc';
-import { QUIZ_COURSES, QUIZ_ROUTE_BY_NAME } from '../content/quizbank';
+import { QUIZ_COURSES, QUIZ_ROUTE_BY_ANY_NAME } from '../content/quizbank';
 
 /** 学期分组顺序：8 个学期 */
 const SEMESTERS = ['大一上', '大一下', '大二上', '大二下', '大三上', '大三下', '大四上', '大四下'];
 
 /** 学习通题库课程（非学期课，不在 catalog/registry）：名称 → 路由，收藏与最近查看按此解析 */
-const QUESTION_BANK_ROUTES: Record<string, string> = QUIZ_ROUTE_BY_NAME;
+const QUESTION_BANK_ROUTES: Record<string, string> = QUIZ_ROUTE_BY_ANY_NAME;
 
 interface Card {
   semester: string;

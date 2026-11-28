@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { QUIZ_COURSES, loadQuizBank } from '../content/quizbank';
 import type { QuizQuestion } from '../content/quizbank/types';
 import type { QuizState } from '../lib/maoquiz';
+import type { QuizCardMap } from '../lib/sync/types';
 import {
   FAIL_CAP,
   LEARN_STREAK,
@@ -80,16 +81,16 @@ describe('百词斩式调度', () => {
   it('学习中新卡连对 3 次学会：零错从第 2 阶起步（2 天后首复习）', () => {
     let s = emptyState();
     s = applyGrade(s, 'T1', true, 2000, 'single', NOW);
-    expect(s.cards['T1']).toEqual({ st: 0, streak: 1, fails: 0, ivl: 0, due: TODAY, rv: 1 });
+    expect(s.cards['T1']).toEqual({ st: 0, streak: 1, fails: 0, ivl: 0, due: TODAY, rv: 1, t: NOW });
     s = applyGrade(s, 'T1', true, 2000, 'single', NOW);
     s = applyGrade(s, 'T1', true, 2000, 'single', NOW);
-    expect(s.cards['T1']).toEqual({ st: 1, streak: 3, fails: 0, ivl: 2, due: TODAY + 2 * DAY, rv: 3 });
+    expect(s.cards['T1']).toEqual({ st: 1, streak: 3, fails: 0, ivl: 2, due: TODAY + 2 * DAY, rv: 3, t: NOW });
   });
 
   it('学习期答错计连续失败；再学会时错过的从 1 天首复习起步', () => {
     let s = emptyState();
     s = applyGrade(s, 'T2', false, 4000, 'single', NOW);
-    expect(s.cards['T2']).toEqual({ st: 0, streak: 0, fails: 1, ivl: 0, due: TODAY, rv: 1 });
+    expect(s.cards['T2']).toEqual({ st: 0, streak: 0, fails: 1, ivl: 0, due: TODAY, rv: 1, t: NOW });
     s = applyGrade(s, 'T2', true, 2000, 'single', NOW + DAY / 2);
     s = applyGrade(s, 'T2', true, 2000, 'single', NOW + DAY / 2);
     s = applyGrade(s, 'T2', true, 2000, 'single', NOW + DAY / 2);
@@ -98,7 +99,7 @@ describe('百词斩式调度', () => {
   });
 
   it('复习记住放大间隔（反应时长/题型修正生效），封顶 MAX_INTERVAL 后连对足够即毕业', () => {
-    let s: QuizState = { v: 1, cards: { T: { st: 1, streak: 3, fails: 0, ivl: 2, due: TODAY, rv: 3 } } };
+    let s: QuizState = { v: 1, cards: { T: { st: 1, streak: 3, fails: 0, ivl: 2, due: TODAY, rv: 3, t: 0 } } };
     // streak→4，base=2.0，2s 全额 → ivl = 2×2.0 = 4
     s = applyGrade(s, 'T', true, 2000, 'single', NOW);
     expect(s.cards['T'].ivl).toBe(4);
@@ -106,10 +107,10 @@ describe('百词斩式调度', () => {
     s = applyGrade(s, 'T', true, 10_000, 'single', NOW + 4 * DAY);
     expect(s.cards['T'].ivl).toBe(6);
     // 填空权重 1.2：ivl 10 × 2.2 = 22
-    const s2: QuizState = { v: 1, cards: { T: { st: 1, streak: 3, fails: 0, ivl: 10, due: TODAY, rv: 3 } } };
+    const s2: QuizState = { v: 1, cards: { T: { st: 1, streak: 3, fails: 0, ivl: 10, due: TODAY, rv: 3, t: 0 } } };
     expect(applyGrade(s2, 'T', true, 2000, 'fill', NOW).cards['T'].ivl).toBe(22);
     // 封顶 → 毕业
-    let s3: QuizState = { v: 1, cards: { T: { st: 1, streak: 4, fails: 0, ivl: 60, due: TODAY, rv: 4 } } };
+    let s3: QuizState = { v: 1, cards: { T: { st: 1, streak: 4, fails: 0, ivl: 60, due: TODAY, rv: 4, t: 0 } } };
     s3 = applyGrade(s3, 'T', true, 2000, 'single', NOW);
     expect(s3.cards['T'].ivl).toBe(MAX_INTERVAL);
     s3 = applyGrade(s3, 'T', true, 2000, 'single', NOW);
@@ -118,7 +119,7 @@ describe('百词斩式调度', () => {
   });
 
   it('答错阶梯降级切薄弱池：错 1 次减半、错 2 次最小、连续失败达阈值止损放宽', () => {
-    let s: QuizState = { v: 1, cards: { T: { st: 1, streak: 3, fails: 0, ivl: 10, due: TODAY, rv: 3 } } };
+    let s: QuizState = { v: 1, cards: { T: { st: 1, streak: 3, fails: 0, ivl: 10, due: TODAY, rv: 3, t: 0 } } };
     s = applyGrade(s, 'T', false, 2000, 'single', NOW);
     expect(s.cards['T']).toMatchObject({ st: 2, fails: 1, streak: 0, ivl: 5 });
     expect(s.cards['T'].due).toBe(TODAY + 5 * DAY);
@@ -132,7 +133,7 @@ describe('百词斩式调度', () => {
   });
 
   it('薄弱答对恢复常规复习（fails 清零、间隔从低位放大）', () => {
-    let s: QuizState = { v: 1, cards: { T: { st: 2, streak: 0, fails: 2, ivl: 1, due: TODAY, rv: 5 } } };
+    let s: QuizState = { v: 1, cards: { T: { st: 2, streak: 0, fails: 2, ivl: 1, due: TODAY, rv: 5, t: 0 } } };
     s = applyGrade(s, 'T', true, 2000, 'single', NOW);
     expect(s.cards['T']).toMatchObject({ st: 1, fails: 0, streak: 1, ivl: 2 });
   });
@@ -144,10 +145,10 @@ describe('调度', () => {
     const state: QuizState = {
       v: 1,
       cards: {
-        [idA]: { st: 1 as const, streak: 2, fails: 0, ivl: 30, due: TODAY, rv: 5 },
-        [idB]: { st: 2 as const, streak: 0, fails: 1, ivl: 1, due: TODAY, rv: 6 },
-        [idC]: { st: 1 as const, streak: 1, fails: 0, ivl: 2, due: TODAY, rv: 4 },
-        [idD]: { st: 2 as const, streak: 0, fails: 2, ivl: 1, due: TODAY - DAY, rv: 7 },
+        [idA]: { st: 1 as const, streak: 2, fails: 0, ivl: 30, due: TODAY, rv: 5, t: 0 },
+        [idB]: { st: 2 as const, streak: 0, fails: 1, ivl: 1, due: TODAY, rv: 6, t: 0 },
+        [idC]: { st: 1 as const, streak: 1, fails: 0, ivl: 2, due: TODAY, rv: 4, t: 0 },
+        [idD]: { st: 2 as const, streak: 0, fails: 2, ivl: 1, due: TODAY - DAY, rv: 7, t: 0 },
       },
     };
     expect(reviewPool(someBank, state, NOW).map((q) => q.id)).toEqual([idD, idB, idC, idA]);
@@ -159,9 +160,9 @@ describe('调度', () => {
       ...someBank[0],
       id: `R${i + 1}`,
     }));
-    const cards: Record<string, { st: 1; streak: number; fails: number; ivl: number; due: number; rv: number }> = {};
-    for (const q of bank) cards[q.id] = { st: 1, streak: 3, fails: 0, ivl: 5, due: TODAY, rv: 3 };
-    const state: QuizState = { v: 1, cards };
+    const cards: QuizCardMap = {};
+    for (const q of bank) cards[q.id] = { st: 1, streak: 3, fails: 0, ivl: 5, due: TODAY, rv: 3, t: 0 };
+    const state: QuizState = { v: 1, cards: cards as QuizState['cards'] };
     const { queue, state: next } = takeReviewQueue(bank, state, NOW);
     expect(queue.length).toBe(REVIEW_DAILY_CAP);
     const kept = new Set(queue.map((q) => q.id));

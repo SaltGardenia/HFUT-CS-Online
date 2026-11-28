@@ -3,6 +3,8 @@ import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-do
 import CourseHubPage from './pages/CourseHubPage';
 import CourseStubPage from './pages/CourseStubPage';
 import { recordSiteVisit } from './lib/visits';
+import { renameUserCourseNames } from './lib/sync/local';
+import { QUIZ_LEGACY_NAMES } from './content/quizbank';
 import { ALGO_BASE, OS_BASE, NET_BASE, PAT_BASE, AI_BASE, SA_BASE, PHYS_BASE, CA_BASE, MATH_BASE, PD_BASE, NCD_BASE, NAP_BASE, HD_BASE, MC_BASE, NLU_BASE, OSCD_BASE, CPD_BASE, NTR_BASE, CV_BASE, SPM_BASE, BD_BASE, CAP_BASE, AIE_BASE, SEC_BASE, DB_BASE, SE_BASE, ST_BASE, DP_BASE, SWT_BASE, DSD_BASE, IP_BASE, PY_BASE, DM_BASE, CM_BASE, PROB_BASE, ASM_BASE, EDA_BASE, RES_BASE, PHYS_LAB_BASE, JAVA_BASE, DL_BASE, ROBOT_BASE, DS_BASE, DSCD_BASE, LA_BASE, EE_BASE } from './courses/registry';
 import { ErrataProvider } from './lib/errata/context';
 
@@ -76,6 +78,8 @@ export default function App() {
   // 每次打开站点上报一次访问（首页数字行展示累计/今日访问量；未配置数据库时静默跳过）
   useEffect(() => {
     void recordSiteVisit();
+    // 学习通题库课程改名：把历史收藏/最近查看里的旧名称归一到现名（幂等）
+    renameUserCourseNames((name) => QUIZ_LEGACY_NAMES[name] ?? name);
   }, []);
 
   return (
