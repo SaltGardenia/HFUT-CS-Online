@@ -37,15 +37,6 @@ export default function NapCourse() {
     };
   }, []);
 
-  // 附件页专属色：html[data-pg='att'] → tokens.css 覆盖 --deck-accent（本课唯一页面）
-  const onAtt = location.pathname.startsWith(`${NAP_BASE}/attachments`);
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   // Esc 关闭抽屉
   useEffect(() => {

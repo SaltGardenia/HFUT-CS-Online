@@ -29,23 +29,14 @@ export default function SpmCourse() {
   const reduced = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // 课程页 → html[data-deck='nap']：整套课程统一切换到软件项目管理主题色（深酒红紫）
+  // 课程页 → html[data-deck='spm']：整套课程统一切换到软件项目管理主题色（深酒红紫）
   useEffect(() => {
-    document.documentElement.dataset.deck = 'nap';
+    document.documentElement.dataset.deck = 'spm';
     return () => {
       delete document.documentElement.dataset.deck;
     };
   }, []);
 
-  // 附件页专属色：html[data-pg='att'] → tokens.css 覆盖 --deck-accent（本课唯一页面）
-  const onAtt = location.pathname.startsWith(`${SPM_BASE}/attachments`);
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   // Esc 关闭抽屉
   useEffect(() => {

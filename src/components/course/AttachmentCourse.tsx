@@ -34,13 +34,6 @@ export default function AttachmentCourse({ base, tip }: { base: string; tip: str
     };
   }, [course]);
 
-  // 附件页专属色：html[data-pg='att']
-  useEffect(() => {
-    document.documentElement.dataset.pg = 'att';
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, []);
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {

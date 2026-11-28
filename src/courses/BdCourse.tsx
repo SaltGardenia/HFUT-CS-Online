@@ -59,7 +59,7 @@ export default function BdCourse() {
     };
   }, []);
 
-  // 单讲课程：讲次页直接用课程基础色，无需 data-ch 映射（附件页由 data-pg='att' 覆盖）
+  // 单讲课程：讲次页直接用课程基础色
 
   // Esc 关闭抽屉
   useEffect(() => {
@@ -78,14 +78,6 @@ export default function BdCourse() {
   useEffect(() => setDrawerOpen(false), [location.pathname]);
 
   const onAtt = location.pathname.startsWith(`${BD_BASE}/attachments`);
-  // 附件页专属色：html[data-pg='att'] → tokens.css 覆盖 --deck-accent（不与讲次页重复）
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   // 顶栏导航：课程作业（单讲）+ 附件（试题未收录，无在线练习项）
   const tabs = useMemo<CourseTab[]>(

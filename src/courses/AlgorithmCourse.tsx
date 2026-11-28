@@ -43,14 +43,13 @@ export default function AlgorithmCourse() {
     return m ? m[1] : null;
   }, [location.pathname]);
 
-  // 当前讲次 → html[data-deck]：顶栏 tabs / 进度条 / 侧栏 / h2 编号统一切换讲次主题色
+  // 课程主题色 → html[data-deck='algo']：整课一个主题色，每次路由重新声明（子页面卸载时可能清掉它）
   useEffect(() => {
-    if (currentDeck) document.documentElement.dataset.deck = currentDeck;
-    else delete document.documentElement.dataset.deck;
+    document.documentElement.dataset.deck = 'algo';
     return () => {
       delete document.documentElement.dataset.deck;
     };
-  }, [currentDeck]);
+  }, [location.pathname]);
 
   // 讲次方向性转场：记录上一次的讲次序号，前/后翻页用不同方向
   const deckNo = currentDeck ? Number(currentDeck.slice(4)) : 0;
@@ -78,27 +77,11 @@ export default function AlgorithmCourse() {
 
   // 顶栏导航：总目录 + 第1~8讲 + 在线练习（课程资料随仓库自建，无 data/ 附件，不设附件页）
   const onPractice = location.pathname.startsWith(`${ALGO_BASE}/practice`);
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    if (onPractice) document.documentElement.dataset.pg = 'practice';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice]);
 
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    if (onPractice) document.documentElement.dataset.pg = 'practice';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice]);
 
   const tabs = useMemo<CourseTab[]>(
     () => [
-      { to: `${ALGO_BASE}`, full: '总目录', short: '目录', active: !currentDeck && !onPractice, key: null, tip: '课程首页 · 考点速查表', dot: 'var(--accent)' },
+      { to: `${ALGO_BASE}`, full: '总目录', short: '目录', active: !currentDeck && !onPractice, key: null, tip: '课程首页 · 考点速查表' },
       ...decks.map((d) => ({
         to: `${ALGO_BASE}/deck/${d.id}`,
         full: d.no,

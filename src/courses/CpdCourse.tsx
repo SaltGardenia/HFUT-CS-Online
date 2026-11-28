@@ -29,23 +29,14 @@ export default function CpdCourse() {
   const reduced = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // 课程页 → html[data-deck='nap']：整套课程统一切换到编译原理课程设计主题色（暗金）
+  // 课程页 → html[data-deck='cpd']：整套课程统一切换到编译原理课程设计主题色（暗金）
   useEffect(() => {
-    document.documentElement.dataset.deck = 'nap';
+    document.documentElement.dataset.deck = 'cpd';
     return () => {
       delete document.documentElement.dataset.deck;
     };
   }, []);
 
-  // 附件页专属色：html[data-pg='att'] → tokens.css 覆盖 --deck-accent（本课唯一页面）
-  const onAtt = location.pathname.startsWith(`${CPD_BASE}/attachments`);
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   // Esc 关闭抽屉
   useEffect(() => {

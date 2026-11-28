@@ -63,15 +63,6 @@ export default function PdCourse() {
     };
   }, []);
 
-  // 当前章 → html[data-ch]：tokens.css 按序数映射每章专属色（总目录/附件无 data-ch，用课程基础色）
-  const unitNo = currentChapter ? pdChapters.findIndex((d) => d.id === currentChapter) + 1 : 0;
-  useEffect(() => {
-    if (unitNo) document.documentElement.dataset.ch = String(unitNo);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [unitNo]);
 
   // Esc 关闭抽屉
   useEffect(() => {
@@ -90,14 +81,6 @@ export default function PdCourse() {
   useEffect(() => setDrawerOpen(false), [location.pathname]);
 
   const onAtt = location.pathname.startsWith(`${PD_BASE}/attachments`);
-  // 附件页专属色：html[data-pg='att'] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   // 顶栏导航：总目录 + 第1～9/11/12章 + 附件（试题未收录，无在线练习项）
   const tabs = useMemo<CourseTab[]>(

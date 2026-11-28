@@ -684,14 +684,6 @@ button {
 .site-nav li {
   --row-accent: var(--deck-accent);
 }
-.site-nav li[data-deck='deck1'] { --row-accent: var(--deck1); }
-.site-nav li[data-deck='deck2'] { --row-accent: var(--deck2); }
-.site-nav li[data-deck='deck3'] { --row-accent: var(--deck3); }
-.site-nav li[data-deck='deck4'] { --row-accent: var(--deck4); }
-.site-nav li[data-deck='deck5'] { --row-accent: var(--deck5); }
-.site-nav li[data-deck='deck6'] { --row-accent: var(--deck6); }
-.site-nav li[data-deck='deck7'] { --row-accent: var(--deck7); }
-.site-nav li[data-deck='deck8'] { --row-accent: var(--deck8); }
 .site-nav a.active {
   color: var(--row-accent);
   font-weight: 600;
@@ -752,7 +744,7 @@ button {
 }
 .site-nav a.active .nav-no {
   background: var(--row-accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* 侧栏目录：level 2 分组行 + 折叠开关；level 3 缩进子列表 */
@@ -881,12 +873,12 @@ button {
 }
 .btn.primary {
   background: var(--deck-accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn.primary:hover {
   background: var(--deck-accent);
   filter: brightness(1.08);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* --------------------------------------------------------- 3. 正文排版 */
@@ -2810,15 +2802,6 @@ pre.code .cl-code:empty + .cl-com {
     --accent: #0066cc;
     --accent-soft: rgba(0, 102, 204, 0.1);
     --accent-2: #006699;
-    /* 暗色下的霓虹讲次色在白纸上不可读，统一压回深色印刷色 */
-    --deck1: #0066cc;
-    --deck2: #4a49c8;
-    --deck3: #1d7a33;
-    --deck4: #a34e00;
-    --deck5: #c00010;
-    --deck6: #005f8c;
-    --deck7: #7a2aa8;
-    --deck8: #a82c5f;
     --code-bg: #f6f6f8;
     --code-ink: #000;
     --code-line: #d2d2d7;
@@ -3167,6 +3150,7 @@ pre.code .cl-code:empty + .cl-com {
 }
 /* 讲次分组分隔：长列表的定位锚点，编号圆点用各讲主题色 */
 .pq-group-h {
+  --row-accent: var(--deck-accent);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -3192,17 +3176,9 @@ pre.code .cl-code:empty + .cl-com {
   border-radius: 999px;
   font-size: 0.6875rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--row-accent, var(--accent));
 }
-.pq-group-h[data-deck='deck1'] { --row-accent: var(--deck1); }
-.pq-group-h[data-deck='deck2'] { --row-accent: var(--deck2); }
-.pq-group-h[data-deck='deck3'] { --row-accent: var(--deck3); }
-.pq-group-h[data-deck='deck4'] { --row-accent: var(--deck4); }
-.pq-group-h[data-deck='deck5'] { --row-accent: var(--deck5); }
-.pq-group-h[data-deck='deck6'] { --row-accent: var(--deck6); }
-.pq-group-h[data-deck='deck7'] { --row-accent: var(--deck7); }
-.pq-group-h[data-deck='deck8'] { --row-accent: var(--deck8); }
 .quiz.practice-q {
   position: relative;
   margin: 0 0 24px;
@@ -3426,6 +3402,7 @@ pre.code .cl-code:empty + .cl-com {
   border-top: 1px dashed var(--hairline-soft);
 }
 .ptag {
+  --row-accent: var(--deck-accent);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -3457,7 +3434,7 @@ pre.code .cl-code:empty + .cl-com {
   font-size: 0.6875rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #fff;
+  color: var(--on-accent);
   background: var(--row-accent, var(--accent));
 }
 .ptag-arrow {
@@ -3489,50 +3466,6 @@ pre.code .cl-code:empty + .cl-com {
   opacity: 1;
   transform: none;
 }
-.ptag[data-deck='deck1'] { --row-accent: var(--deck1); }
-.ptag[data-deck='deck2'] { --row-accent: var(--deck2); }
-.ptag[data-deck='deck3'] { --row-accent: var(--deck3); }
-.ptag[data-deck='deck4'] { --row-accent: var(--deck4); }
-.ptag[data-deck='deck5'] { --row-accent: var(--deck5); }
-.ptag[data-deck='deck6'] { --row-accent: var(--deck6); }
-.ptag[data-deck='deck7'] { --row-accent: var(--deck7); }
-.ptag[data-deck='deck8'] { --row-accent: var(--deck8); }
-/* 计网课：整课一个主题色（html[data-deck='net']），标签与分组头回落到 --net */
-.ptag[data-deck='net'],
-.pq-group-h[data-deck='net'],
-.site-nav li[data-deck='net'] { --row-accent: var(--net); }
-/* 程序设计艺术与方法课：整课一个主题色（html[data-deck='pat']），同上回落到 --pat */
-.ptag[data-deck='pat'],
-.pq-group-h[data-deck='pat'],
-.site-nav li[data-deck='pat'] { --row-accent: var(--pat); }
-/* 人工智能原理课：整课一个主题色（html[data-deck='ai']），同上回落到 --ai */
-.ptag[data-deck='ai'],
-.pq-group-h[data-deck='ai'],
-.site-nav li[data-deck='ai'] { --row-accent: var(--ai); }
-/* 软件体系结构课：整课一个主题色（html[data-deck='sa']），同上回落到 --sa */
-.ptag[data-deck='sa'],
-.pq-group-h[data-deck='sa'],
-.site-nav li[data-deck='sa'] { --row-accent: var(--sa); }
-/* 大学物理课：整课一个主题色（html[data-deck='phys']），同上回落到 --phys */
-.ptag[data-deck='phys'],
-.pq-group-h[data-deck='phys'],
-.site-nav li[data-deck='phys'] { --row-accent: var(--phys); }
-/* 高等数学课：整课一个主题色（html[data-deck='math']），同上回落到 --math */
-.ptag[data-deck='math'],
-.pq-group-h[data-deck='math'],
-.site-nav li[data-deck='math'] { --row-accent: var(--math); }
-/* 大二上批次：整课一个主题色，练习标签 / 分组头 / 抽屉导航徽章统一回落到课程色 */
-.ptag[data-deck='py'], .pq-group-h[data-deck='py'], .site-nav li[data-deck='py'] { --row-accent: var(--py); }
-.ptag[data-deck='dm'], .pq-group-h[data-deck='dm'], .site-nav li[data-deck='dm'] { --row-accent: var(--dm); }
-.ptag[data-deck='cm'], .pq-group-h[data-deck='cm'], .site-nav li[data-deck='cm'] { --row-accent: var(--cm); }
-.ptag[data-deck='prob'], .pq-group-h[data-deck='prob'], .site-nav li[data-deck='prob'] { --row-accent: var(--prob); }
-.ptag[data-deck='asm'], .pq-group-h[data-deck='asm'], .site-nav li[data-deck='asm'] { --row-accent: var(--asm); }
-.ptag[data-deck='eda'], .pq-group-h[data-deck='eda'], .site-nav li[data-deck='eda'] { --row-accent: var(--eda); }
-.ptag[data-deck='res'], .pq-group-h[data-deck='res'], .site-nav li[data-deck='res'] { --row-accent: var(--res); }
-.ptag[data-deck='physlab'], .pq-group-h[data-deck='physlab'], .site-nav li[data-deck='physlab'] { --row-accent: var(--physlab); }
-.ptag[data-deck='java'], .pq-group-h[data-deck='java'], .site-nav li[data-deck='java'] { --row-accent: var(--java); }
-.ptag[data-deck='dl'], .pq-group-h[data-deck='dl'], .site-nav li[data-deck='dl'] { --row-accent: var(--dl); }
-.ptag[data-deck='robot'], .pq-group-h[data-deck='robot'], .site-nav li[data-deck='robot'] { --row-accent: var(--robot); }
 
 /* --------------------------------------------- 右侧进度轨（仅 ≥1200px） */
 .pq-track {

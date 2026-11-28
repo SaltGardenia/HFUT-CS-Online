@@ -63,15 +63,6 @@ export default function SaCourse() {
     };
   }, []);
 
-  // 当前单元 → html[data-ch]：tokens.css 按序数映射每单元专属色（首页/练习无 data-ch，用课程基础色）
-  const unitNo = currentChapter ? saChapters.findIndex((d) => d.id === currentChapter) + 1 : 0;
-  useEffect(() => {
-    if (unitNo) document.documentElement.dataset.ch = String(unitNo);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [unitNo]);
 
   // Esc 关闭抽屉
   useEffect(() => {
@@ -90,23 +81,7 @@ export default function SaCourse() {
   useEffect(() => setDrawerOpen(false), [location.pathname]);
 
   const onAtt = location.pathname.startsWith(`${SA_BASE}/attachments`);
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
 
   // 顶栏导航：总目录 + 第4/5/7章 + RSA 专题 + 附件（试题未收录，无在线练习项）

@@ -68,15 +68,6 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
   const onAtt = location.pathname.startsWith(`${config.base}/attachments`);
   const onExtra = extras.find((e) => location.pathname.startsWith(`${config.base}/${e.path}`)) ?? null;
 
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent
-  useEffect(() => {
-    const pg = onPractice ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice, onAtt]);
 
   // 课程主题色：html[data-deck]
   // 每次路由变化都重新声明：子页面卸载时可能清掉它（如模拟器），否则主题会回落成全局红色。
@@ -87,15 +78,8 @@ export default function CourseShell({ config, extras = [] }: { config: CourseCon
     };
   }, [config.deckKey, location.pathname]);
 
-  // 当前章 → html[data-ch]：tokens.css 按课内序数映射每章专属色
+  // 章内序数（仅用于章节方向性转场）
   const chIdx = currentChapter ? config.chapters.findIndex((c) => c.id === currentChapter) + 1 : 0;
-  useEffect(() => {
-    if (chIdx) document.documentElement.dataset.ch = String(chIdx);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [chIdx]);
 
   // 章节方向性转场：按章序前后翻页决定方向
   const prevIdxRef = useRef(0);

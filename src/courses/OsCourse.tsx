@@ -66,25 +66,7 @@ export default function OsCourse() {
 
   const onPractice = location.pathname.startsWith(`${OS_BASE}/practice`);
   const onAtt = location.pathname.startsWith(`${OS_BASE}/attachments`);
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = onPractice ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice, onAtt]);
 
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = onPractice ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice, onAtt]);
 
   // 课程主题色：html[data-deck='os'] → --deck-accent = 橄榄绿（首页/在线练习用）
   useEffect(() => {
@@ -96,14 +78,6 @@ export default function OsCourse() {
 
   // 章节方向性转场：按章号前后翻页决定方向
   const chNo = currentChapter ? Number(currentChapter.slice(2)) : 0;
-  // 当前章 → html[data-ch]：tokens.css 按序数映射每章专属色（首页/练习无 data-ch，用课程基础色）
-  useEffect(() => {
-    if (chNo) document.documentElement.dataset.ch = String(chNo);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [chNo]);
   const prevNoRef = useRef(0);
   const dir = chNo && prevNoRef.current && chNo !== prevNoRef.current ? Math.sign(chNo - prevNoRef.current) : 0;
   useEffect(() => {
@@ -127,7 +101,7 @@ export default function OsCourse() {
   // 顶栏导航：目录 + 第1～7章 + 大题精讲 + 在线练习（末位固定）
   const tabs = useMemo<CourseTab[]>(
     () => [
-      { to: `${OS_BASE}`, full: '总目录', short: '目录', active: !currentChapter && !onPractice && !onAtt, key: null, tip: '课程首页 · 课程与资料概况', dot: 'var(--os)' },
+      { to: `${OS_BASE}`, full: '总目录', short: '目录', active: !currentChapter && !onPractice && !onAtt, key: null, tip: '课程首页 · 课程与资料概况' },
       ...osChapters.map((c) => ({
         to: `${OS_BASE}/chapter/${c.id}`,
         full: c.no,

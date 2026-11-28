@@ -78,25 +78,7 @@ export default function AiCourse() {
 
   const practicePath = `${AI_BASE}/practice`;
   const onAtt = location.pathname.startsWith(`${AI_BASE}/attachments`);
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = !onAtt ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = !onAtt ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
 
   // 顶栏导航：仅 在线练习 + 附件（本课无课件，不做知识总结页；方向选择在练习页热力图内完成）

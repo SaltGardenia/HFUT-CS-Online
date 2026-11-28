@@ -50,7 +50,6 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
     const m = location.pathname.match(/\/deck\/(deck\d+)$/);
     return m ? m[1] : null;
   }, [location.pathname]);
-  const chNo = currentChapter ? Number(currentChapter.slice(4)) : 0;
 
   const onPractice = location.pathname.startsWith(`${base}/practice`);
   const onAtt = location.pathname.startsWith(`${base}/attachments`);
@@ -63,24 +62,7 @@ export default function CourseShell({ spec }: { spec: CourseSpec }) {
     };
   }, [key]);
 
-  // 当前章 → html[data-ch]：tokens.css 按章号映射每章专属色
-  useEffect(() => {
-    if (chNo) document.documentElement.dataset.ch = String(chNo);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [chNo]);
 
-  // 练习 / 附件页专属色：html[data-pg]
-  useEffect(() => {
-    const pg = onPractice ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice, onAtt]);
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {

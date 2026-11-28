@@ -48,14 +48,6 @@ export default function SecCourse() {
   }, [location.pathname]);
 
   const onAtt = location.pathname.startsWith(`${SEC_BASE}/attachments`);
-  // 附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   // 课程主题色：html[data-deck='sec'] → --deck-accent = 暗松绿
   useEffect(() => {
@@ -67,14 +59,6 @@ export default function SecCourse() {
 
   // 章节方向性转场：按序号前后翻页决定方向（deck 编号 1～4、6、7 直接用数字比大小）
   const chNo = currentChapter ? Number(currentChapter.slice(4)) : 0;
-  // 当前章 → html[data-ch]：tokens.css 按序数映射每章专属色（首页/附件无 data-ch，用课程基础色）
-  useEffect(() => {
-    if (currentChapter) document.documentElement.dataset.ch = String(chNo);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [currentChapter, chNo]);
   const prevNoRef = useRef(0);
   const dir = chNo && prevNoRef.current && chNo !== prevNoRef.current ? Math.sign(chNo - prevNoRef.current) : 0;
   useEffect(() => {
@@ -98,7 +82,7 @@ export default function SecCourse() {
   // 顶栏导航：总目录 + 第1～4、6、7章 + 附件（导航栏本题未收录，无在线练习项）
   const tabs = useMemo<CourseTab[]>(
     () => [
-      { to: `${SEC_BASE}`, full: '总目录', short: '目录', active: !currentChapter && !onAtt, key: null, tip: '课程首页 · 课程与资料概况', dot: 'var(--sec)' },
+      { to: `${SEC_BASE}`, full: '总目录', short: '目录', active: !currentChapter && !onAtt, key: null, tip: '课程首页 · 课程与资料概况' },
       ...secChapters.map((c) => ({
         to: `${SEC_BASE}/deck/${c.id}`,
         full: c.no,

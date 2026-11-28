@@ -36,15 +36,6 @@ export default function DscdCourse() {
     };
   }, []);
 
-  // 附件页专属色
-  const onAtt = location.pathname.startsWith(`${DSCD_BASE}/attachments`);
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {

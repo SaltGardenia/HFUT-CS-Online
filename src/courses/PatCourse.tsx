@@ -88,15 +88,6 @@ export default function PatCourse() {
     };
   }, []);
 
-  // 当前讲 → html[data-ch]：tokens.css 按序数映射每讲专属色（首页/练习无 data-ch，用课程基础色）
-  const deckNo = currentDeck ? Number(currentDeck.slice(4)) : 0;
-  useEffect(() => {
-    if (deckNo) document.documentElement.dataset.ch = String(deckNo);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [deckNo]);
 
   // Esc 关闭抽屉
   useEffect(() => {
@@ -117,29 +108,11 @@ export default function PatCourse() {
   // 顶栏导航：总目录 + 三讲 + 讲义三章 + 在线练习 + 附件
   const onPractice = location.pathname.startsWith(`${PAT_BASE}/practice`);
   const onAtt = location.pathname.startsWith(`${PAT_BASE}/attachments`);
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = onPractice ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice, onAtt]);
 
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = onPractice ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice, onAtt]);
 
   const tabs = useMemo<CourseTab[]>(
     () => [
-      { to: `${PAT_BASE}`, full: '总目录', short: '目录', active: !currentDeck && !onPractice && !onAtt, key: null, tip: '课程主页 · 内容地图与课程实验', dot: 'var(--pat)' },
+      { to: `${PAT_BASE}`, full: '总目录', short: '目录', active: !currentDeck && !onPractice && !onAtt, key: null, tip: '课程主页 · 内容地图与课程实验' },
       ...patDecks.map((d) => ({
         to: `${PAT_BASE}/deck/${d.id}`,
         full: d.no,

@@ -77,15 +77,6 @@ export default function CaCourse() {
 
   const onPractice = location.pathname.startsWith(`${CA_BASE}/practice`);
   const onAtt = location.pathname.startsWith(`${CA_BASE}/attachments`);
-  // 练习/附件页专属色：html[data-pg] → tokens.css 覆盖 --deck-accent（不与总目录、各章重复）
-  useEffect(() => {
-    const pg = onPractice ? 'practice' : onAtt ? 'att' : null;
-    if (pg) document.documentElement.dataset.pg = pg;
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onPractice, onAtt]);
 
   // 课程主题色：html[data-deck='ca'] → --deck-accent = 暗酒红
   useEffect(() => {
@@ -97,15 +88,6 @@ export default function CaCourse() {
 
   // 章节方向性转场：按讲号前后翻页决定方向
   const chNo = currentChapter ? Number(currentChapter.slice(2)) : 0;
-  // 当前讲 → html[data-ch]：tokens.css 按课内序数映射每讲专属色（首页/练习无 data-ch，用课程基础色）
-  const chIdx = currentChapter ? caChapters.findIndex((c) => c.id === currentChapter) + 1 : 0;
-  useEffect(() => {
-    if (chIdx) document.documentElement.dataset.ch = String(chIdx);
-    else delete document.documentElement.dataset.ch;
-    return () => {
-      delete document.documentElement.dataset.ch;
-    };
-  }, [chIdx]);
   const prevNoRef = useRef(0);
   const dir = chNo && prevNoRef.current && chNo !== prevNoRef.current ? Math.sign(chNo - prevNoRef.current) : 0;
   useEffect(() => {
@@ -153,8 +135,8 @@ export default function CaCourse() {
     return [
       { to: `${CA_BASE}`, full: '总目录', short: '目录', active: !currentChapter && !onPractice && !onAtt, key: null, tip: '课程首页 · 课程与资料概况' },
       ...groups,
-      { to: `${CA_BASE}/practice`, full: '在线练习', short: '练习', active: onPractice, key: null, tip: '在线练习 · 3 份试题', extra: 'practice-tab', dot: 'var(--ca-practice)' },
-      { to: `${CA_BASE}/attachments`, full: '附件', short: '附件', active: onAtt, key: null, tip: '附件资料 · 课件 / 试题 / 附件目录与预览', dot: 'var(--ca-att)' },
+      { to: `${CA_BASE}/practice`, full: '在线练习', short: '练习', active: onPractice, key: null, tip: '在线练习 · 3 份试题', extra: 'practice-tab' },
+      { to: `${CA_BASE}/attachments`, full: '附件', short: '附件', active: onAtt, key: null, tip: '附件资料 · 课件 / 试题 / 附件目录与预览' },
     ];
   }, [currentChapter, onPractice, onAtt, chapterById]);
 

@@ -32,200 +32,72 @@
   --warn: #ad5700;               /* 比较 / 警示 */
   --purple: #8d34c9;
 
-  /* 每讲一色：讲次 tabs / 侧栏徽章 / h2 编号 / 进度条 / demo 控件统一取色 */
-  --deck1: #0071e3;              /* 绪论 · 蓝 */
-  --deck2: #5e5ce6;              /* 算法基础 · 靛 */
-  --deck3: #248a3d;              /* 算法分析 · 绿 */
-  --deck4: #b5430a;              /* 线性时间排序 · 红橙（与总目录的琥珀金拉开色相） */
-  --deck5: #9a6a00;              /* 线性时间选择 · 琥珀金（与总目录互换） */
-  --deck6: #0071a4;              /* 递归与分治 · 青 */
-  --deck7: #8d34c9;              /* 动态规划 · 紫 */
-  --deck8: #c0397a;              /* 贪心法 · 玫红 */
-  --os: #4d7c0f;                 /* 操作系统课程 · 橄榄绿（黄绿相位，与算法课的绿/青/琥珀都拉开距离） */
-  --net: #0f766e;                /* 计算机网络课程 · 深青（青绿相位，介于算法课的绿与青之间且明显更暗更灰） */
-  --pat: #6a5aa8;                /* 程序设计艺术与方法课程 · 蓝紫（灰紫相位，介于算法课的靛与紫之间且明显更灰更暗） */
-  --ai: #b53aad;                 /* 人工智能原理课程 · 品红（紫红相位，落在算法课的紫与玫红之间的最大空档，明显更灰更暗） */
-  --sa: #51739f;                 /* 软件体系结构课程 · 石板蓝（青灰相位，介于算法课的蓝与靛之间且大幅去饱和、更暗更灰） */
-  --phys: #8b5095;               /* 大学物理课程 · 藕紫（灰紫相位，介于算法课的紫与人工智能课的品红之间且明显更灰更暗） */
-  --ca: #5e3131;                 /* 计算机体系结构课程 · 暗酒红（深赭相位，全色相环上 CIEDE2000 距离最远的空档，暗而不刺眼） */
-  --math: #4f6b3a;               /* 高等数学课程 · 苔藓绿（橄榄与正绿之间的低饱和空档，与现有课程色均拉开距离） */
-  --pd: #a88820;                 /* 程序设计基础课程 · 赭金（金黄相位，全色相环上未被任何课程占用的空档，暗而不刺眼） */
-  --ncd: #a04230;                /* 计算机网络课程设计 · 砖红（红橙相位，介于暗酒红与赭金之间的暗陶土，暗而不刺眼） */
-  --nap: #8a705a;                /* 网络攻防实践 · 灰褐（暖灰褐相位，大幅去饱和的陶土灰，与相邻暖色均拉开明度与饱和差） */
-  --hd: #c43a71;                 /* 系统硬件综合设计 · 玫红（紫红相位，落在算法课紫与玫红之间的空档，暗而不刺眼） */
-  --mc: #35505a;                 /* 移动计算与应用开发 · 深青灰（青灰相位，介于网络课青绿与软件体系结构课石板蓝之间的去饱和空档） */
-  --nlu: #6736c9;                /* 自然语言理解 · 蓝紫罗兰（紫罗兰相位，落在程序设计艺术与方法课的灰蓝紫与大学物理课的藕紫之间的高饱和空档） */
-  --oscd: #31345e;               /* 操作系统课程设计 · 暗藏青（藏青相位，比程序设计艺术与方法课的蓝紫更暗更净） */
-  --cpd: #6f5a1f;                /* 编译原理课程设计 · 暗金（赭金相位，与程序设计基础课的赭金拉开明度差） */
-  --ntr: #a76262;                /* 网络工程师综合实训 · 灰红（陶红相位，介于砖红与灰褐之间更柔的中间调） */
-  --cv: #7a5270;                 /* 计算机视觉与深度学习 · 灰紫红（藕红相位，介于大学物理课藕紫与系统硬件课玫红之间更灰） */
-  --spm: #7b234c;                /* 软件项目管理 · 深酒红紫（酒红紫相位，暗于系统硬件课玫红且更沉） */
-  --bd: #262687;                 /* 大数据处理技术 · 靛蓝（深靛相位，比算法课靛更暗更蓝） */
-  --cap: #a96b42;                /* 计算机应用项目实训 · 陶橙（暖陶相位，介于砖红与赭金之间的亮陶土） */
-  --aie: #2a845a;                /* 人工智能经济学 · 翠绿（正绿相位，介于操作系统课橄榄绿与算法课绿之间更正） */
-  --sec: #395643;                /* 信息安全技术 · 暗松绿（松绿相位，比高等数学课苔藓绿更暗更冷） */
-  --db: #7b802d;                 /* 数据库系统 · 橄榄金（黄绿相位，介于操作系统课橄榄绿与赭金之间的黄绿） */
-  --se: #4b8391;                 /* 软件工程 · 青灰蓝（青灰蓝相位，介于网络课深青与软件体系结构课石板蓝之间） */
-  --st: #564a39;                 /* 软件测试 · 深褐（暖深褐相位，全色环上最后的低饱和空档） */
-  --dp: #4f246b;                 /* 分布式程序设计 · 深紫（紫罗兰暗相位，比算法课紫与自然语言理解蓝紫罗兰都更暗更沉） */
-  --swt: #a1367d;                /* 软件工程师综合训练 · 玫红紫（紫红相位，介于人工智能课品红与系统硬件课玫红之间更沉更灰） */
-  --dsd: #88a136;                /* 领域方向综合设计 · 苹果绿（黄绿亮相位，比操作系统课橄榄绿更亮更黄） */
-  --ip: #36a18f;                 /* 创新实践 · 青绿（青绿相位，比网络课深青更亮更绿，与数据库课橄榄金拉开色相） */
-  /* 大二上批次（11 门）：色相空间已近饱和，按「对全站 base 最小 ΔE ≥14、新课两两 ≥14」选取 */
-  --py: #764a2e;                 /* Python 程序设计 · 陶褐（暖棕相位，与灰褐/砖红均拉开明度与饱和） */
-  --dm: #843339;                 /* 离散数学 · 暗枣红（深红相位，比砖红更沉更紫） */
-  --cm: #817d4b;                 /* 计算方法 · 橄榄卡其（黄绿相位，低饱和） */
-  --prob: #632c5b;               /* 概率论与数理统计 · 深梅紫（紫红暗相位） */
-  --asm: #395493;                /* 汇编语言程序设计 · 靛蓝（比大数据靛蓝更亮更灰） */
-  --eda: #286728;                /* EDA实训 · 深草绿（正绿暗相位） */
-  --res: #723993;                /* 科研训练 · 紫罗兰（亮于分布式深紫、暗于自然语言蓝紫） */
-  --physlab: #668d3f;            /* 大学物理实验 · 苔绿（亮于高数苔藓绿、与操作系统橄榄绿拉开） */
-  --java: #39397f;               /* Java技术 · 深靛紫（藏青偏紫） */
-  --dl: #5e3147;                 /* 数字逻辑 · 暗酒紫（酒红暗相位） */
-  --robot: #286749;              /* 机器人技术 · 松绿（青绿暗相位） */
-
-  /* 大二下批次（12 门）：46 课占满色相环后按「对全站 base 最小 ΔE ≥11、新课两两 ≥15」选色
-   * （选色脚本 _tools/pick_colors_d2x.py，硬池含并行批次已落地的 15 课） */
-  --comp: #264f73;               /* 编译原理 · 深靛蓝（编译工具链的冷色调） */
-  --co: #a17936;                 /* 计算机组成原理 · 赭褐（硬件板卡的暖赭） */
-  --emb: #53874f;                /* 嵌入式系统原理 · 草绿（开发板正绿） */
-  --ml: #56a136;                 /* 机器学习 · 亮草绿（与嵌入式草绿拉开明度） */
-  --ste: #58562d;                /* 软件工具与环境 · 橄榄暗綠 */
-  --comb: #61487a;               /* 组合数学 · 暗紫（介于软件工程的灰蓝与自然语言理解的蓝紫之间） */
-  --cg: #73266e;                 /* 计算机图形学 · 紫红（介于人工智能品红与系统硬件玫红之间） */
-  --sma: #4f876f;                /* 软件建模与分析 · 灰青绿 */
-  --dmt: #369da1;                /* 数字媒体技术 · 湖青（比网络课深青更亮更青） */
-  --np: #3644a1;                 /* 网络程序设计 · 宝蓝（比大数据靛蓝更亮更纯） */
-  --micro: #7a5048;              /* 微机原理与接口技术 · 陶褐灰 */
-  --het: #a13656;                /* 硬件工程师综合训练 · 暗玫红 */
-  --maogai: #de2910;             /* 学习通题库 · 毛概（朱红；对全站课程基础色 min ΔE 12.2，白底对比 4.74） */
-
-  /* ---- 章节配色：各课程导航到的每一章/讲一色（与算法课 deck1..8 同机制）。
-   * 序数为该课章节列表中的序号；课程首页与在线练习仍用上方课程基础色。
-   * 同一课内色相各异、低饱和不刺眼；跨课程允许复用音（不同课程不同屏）。 */
-  /* 操作系统 · 8 章 */
-  --os1: #31708e;  --os2: #a05a2c;  --os3: #2e7d5b;  --os4: #7d5ba6;
-  --os5: #b5485e;  --os6: #8f741c;  --os7: #22767c;  --os8: #9c4a72;
-  /* 计算机网络 · 2025 八章 */
-  --net1: #4a5aa8; --net2: #a05a2c; --net3: #6b7a2f; --net4: #9c4a72;
-  --net5: #22767c; --net6: #8f741c; --net7: #b5485e; --net8: #6b5ba7;
-  /* 程序设计艺术与方法 · 6 讲 */
-  --pat1: #31708e; --pat2: #b5485e; --pat3: #8f741c; --pat4: #2e7d5b;
-  --pat5: #9c4a72; --pat6: #4a5aa8;
-  /* 软件体系结构 · 4 单元（第4/5/7章 + RSA 专题） */
-  --sa1: #a05a2c;  --sa2: #2e7d5b;  --sa3: #9c4a72;  --sa4: #8f741c;
-  /* 大学物理 · 12 章 */
-  --phys1: #31708e;  --phys2: #a05a2c;  --phys3: #2e7d5b;  --phys4: #b5485e;
-  --phys5: #8f741c;  --phys6: #4a5aa8;  --phys7: #22767c;  --phys8: #8a4a2f;
-  --phys9: #7d5ba6;  --phys10: #6b7a2f; --phys11: #9c4a72; --phys12: #56698f;
-  /* 计算机体系结构 · 13 讲（第 13 讲回落课程暗酒红） */
-  --ca1: #31708e;  --ca2: #2e7d5b;  --ca3: #8f741c;  --ca4: #7d5ba6;
-  --ca5: #a05a2c;  --ca6: #22767c;  --ca7: #b5485e;  --ca8: #6b7a2f;
-  --ca9: #4a5aa8;  --ca10: #8a4a2f; --ca11: #56698f; --ca12: #9c4a72;
-  --ca13: #36a136; --ca14: #6e4a24;   /* ca13 原为 #5e3131（与课程基础色重复），换绿 */
-  /* 高等数学 · 6 章 */
-  --math1: #31708e; --math2: #a05a2c; --math3: #7d5ba6; --math4: #b5485e;
-  --math5: #22767c; --math6: #8f741c;
-  /* 程序设计基础 · 11 章（第 1～9、11、12 章，按章节序号取共享色板） */
-  --pd1: #31708e;  --pd2: #a05a2c;  --pd3: #2e7d5b;  --pd4: #b5485e;
-  --pd5: #8f741c;  --pd6: #4a5aa8;  --pd7: #22767c;  --pd8: #8a4a2f;
-  --pd9: #7d5ba6;  --pd10: #6b7a2f; --pd11: #9c4a72;
-  /* 系统硬件综合设计 · 4 讲 */
-  --hd1: #31708e;  --hd2: #2e7d5b;  --hd3: #7d5ba6;  --hd4: #8f741c;
-  /* aie 章（按章节序号取共享色板） */
-  --aie1: #31708e;  --aie2: #a05a2c;  --aie3: #2e7d5b;  --aie4: #b5485e;  --aie5: #8f741c;  --aie6: #4a5aa8;  --aie7: #22767c;  --aie8: #8a4a2f;
-  /* sec 章（按章节序号取共享色板） */
-  --sec1: #31708e;  --sec2: #a05a2c;  --sec3: #2e7d5b;  --sec4: #b5485e;  --sec5: #8f741c;  --sec6: #4a5aa8;
-  /* db 章（按章节序号取共享色板） */
-  --db1: #31708e;  --db2: #a05a2c;  --db3: #2e7d5b;  --db4: #b5485e;  --db5: #8f741c;  --db6: #4a5aa8;  --db7: #22767c;  --db8: #8a4a2f;  --db9: #7d5ba6;  --db10: #6b7a2f;  --db11: #9c4a72;  --db12: #56698f;
-  /* se 章（按章节序号取共享色板，偏移 1 与课程青灰蓝基础色拉开） */
-  --se1: #a05a2c;  --se2: #2e7d5b;  --se3: #b5485e;  --se4: #8f741c;  --se5: #4a5aa8;  --se6: #22767c;  --se7: #8a4a2f;  --se8: #7d5ba6;  --se9: #6b7a2f;  --se10: #9c4a72;  --se11: #56698f;  --se12: #36a136;  --se13: #6e4a24;  --se14: #0071a4;
-  /* st 章（按章节序号取共享色板） */
-  --st1: #31708e;  --st2: #a05a2c;  --st3: #2e7d5b;  --st4: #b5485e;  --st5: #8f741c;  --st6: #4a5aa8;  --st7: #22767c;  --st8: #8a4a2f;  --st9: #7d5ba6;  --st10: #6b7a2f;  --st11: #9c4a72;
-  /* 大二上批次章色（取共享色板，按各课章数截断；首章均避开该课基础色） */
-  --py1: #31708e;  --py2: #a05a2c;  --py3: #2e7d5b;  --py4: #b5485e;  --py5: #8f741c;  --py6: #4a5aa8;  --py7: #22767c;  --py8: #8a4a2f;  --py9: #7d5ba6;
-  --dm1: #31708e;  --dm2: #a05a2c;  --dm3: #2e7d5b;  --dm4: #8f741c;  --dm5: #4a5aa8;  --dm6: #22767c;
-  --cm1: #31708e;  --cm2: #a05a2c;  --cm3: #2e7d5b;  --cm4: #b5485e;  --cm5: #4a5aa8;  --cm6: #22767c;  --cm7: #7d5ba6;
-  --prob1: #2e7d5b;  --prob2: #8f741c;  --prob3: #4a5aa8;  --prob4: #22767c;  --prob5: #a05a2c;  --prob6: #31708e;
-  --asm1: #a05a2c;  --asm2: #2e7d5b;  --asm3: #b5485e;  --asm4: #8f741c;  --asm5: #22767c;  --asm6: #7d5ba6;
-  --eda1: #31708e;  --eda2: #a05a2c;  --eda3: #b5485e;
-  --res1: #31708e;  --res2: #a05a2c;
-  --physlab1: #31708e;  --physlab2: #a05a2c;  --physlab3: #7d5ba6;
-  --java1: #a05a2c;  --java2: #2e7d5b;  --java3: #b5485e;  --java4: #8f741c;  --java5: #31708e;  --java6: #7d5ba6;
-  --dl1: #31708e;  --dl2: #a05a2c;  --dl3: #2e7d5b;  --dl4: #8f741c;  --dl5: #4a5aa8;  --dl6: #22767c;
-  --robot1: #31708e;  --robot2: #a05a2c;  --robot3: #b5485e;  --robot4: #8f741c;
-  /* 大二下批次章色（共享 12 色板，按导航顺序取色：总目录 → 各章 → 练习/附件 相邻 ΔE 均 ≥22） */
-  --comp1: #a05a2c;  --comp2: #4a5aa8;  --comp3: #2e7d5b;  --comp4: #9c4a72;  --comp5: #6b7a2f;  --comp6: #7d5ba6;  --comp7: #8f741c;
-  --co1: #22767c;  --co2: #a05a2c;  --co3: #4a5aa8;  --co4: #6b7a2f;  --co5: #7d5ba6;  --co6: #2e7d5b;  --co7: #b5485e;  --co8: #31708e;  --co9: #8f741c;
-  --emb1: #9c4a72;  --emb2: #2e7d5b;  --emb3: #b5485e;  --emb4: #22767c;  --emb5: #a05a2c;  --emb6: #4a5aa8;
-  --ml1: #a05a2c;  --ml2: #4a5aa8;  --ml3: #6b7a2f;  --ml4: #7d5ba6;  --ml5: #8f741c;
-  --ste1: #2e7d5b;  --ste2: #b5485e;  --ste3: #22767c;  --ste4: #a05a2c;  --ste5: #4a5aa8;  --ste6: #8f741c;
-  --comb1: #b5485e;  --comb2: #22767c;  --comb3: #a05a2c;  --comb4: #2e7d5b;
-
-
-  /* ---- 在线练习 / 附件页专属色：每课与总目录、各章均不同色（选色见 _tools/pick_colors3.py，
-   * 约束：课内全部颜色两两 ΔE≥22（不可达时≥18），导航相邻 ≥22；避开 ok/hot/warn 语义色） ---- */
-  --deck-practice: #5b3933;      /* 算法课练习 · 暗砖褐 */
-  --os-practice: #8d34c9;  --os-att: #37335b;
-  --net-practice: #8d34c9; --net-att: #812e8a;
-  --pat-practice: #8d34c9; --pat-att: #a1369a;
-  --ai-practice: #36a136;  --ai-att: #335b47;
-  --sa-att: #8d34c9;
-  --phys-practice: #8d34c9; --phys-att: #b53aad;
-  --ca-practice: #8d34c9;  --ca-att: #a1369d;
-  --math-practice: #36a136; --math-att: #36a16b;
-  --pd-att: #56698f;
-  --ncd-att: #37505f;
-  --nap-att: #4a5f7a;
-  --hd-att: #54527f;
-  --mc-att: #6e214f;
-  --nlu-att: #8f741c;
-  --oscd-att: #812e8a;
-  --cpd-att: #8d34c9;
-  --ntr-att: #812e8a;
-  --cv-att: #335b47;
-  --spm-att: #a1369a;
-  --bd-att: #36a16b;
-  --cap-att: #b53aad;
-  --aie-att: #56698f;
-  --sec-att: #a1369d;
-  --db-att: #8a6a30;
-  --se-att: #37335b;
-  --st-att: #4a5f7a;
-  --dp-att: #6f36a1;
-  --swt-att: #37505f;
-  --dsd-att: #37335b;
-  --ip-att: #29367a;
-  --db-practice: #8d34c9;
-  --se-practice: #8d34c9;
-  --st-practice: #8d34c9;
-  /* 大二上批次：练习 / 附件专属色（att 跨课复用既有色对，课内与 base、章色均拉开） */
-  --py-att: #8d34c9;
-  --dm-practice: #8d34c9;  --dm-att: #36a136;
-  --cm-att: #b53aad;
-  --prob-practice: #a1369a;  --prob-att: #8a6a30;
-  --asm-practice: #a1369a;  --asm-att: #56698f;
-  --eda-practice: #b53aad;  --eda-att: #56698f;
-  --res-att: #812e8a;
-  --physlab-practice: #8d34c9;  --physlab-att: #8a6a30;
-  --java-att: #37505f;
-  --dl-att: #56698f;
-  --robot-att: #335b47;
-  /* 大二下批次：练习 / 附件专属色（att 跨课复用既有色对；课内与 base、章色相邻 ΔE 均 ≥22） */
-  --comp-practice: #8d34c9;  --comp-att: #8d495d;
-  --co-practice: #8d34c9;    --co-att: #5d6321;
-  --emb-practice: #8d34c9;   --emb-att: #632321;
-  --ml-att: #a1363d;
-  --ste-att: #346563;
-  --comb-att: #8f36a1;
-  --cg-att: #632133;
-  --sma-att: #4d3154;
-  --dmt-att: #313b54;
-  --np-att: #a1363d;
-  --micro-att: #a1363d;
-  --het-att: #71874f;
+  /* ---------------- 一课一色：全站 59 门课程主题色（亮色）。
+   * 每课所有页面（总目录/章节/练习/附件）共用一个主题色，选色由
+   * _tools/pick_course_colors.py 全局重排：白底对比 ≥4.5、OKLCH 彩度
+   * ≤0.125（低饱和不刺眼）、课间两两 CIEDE2000 ≥8.8、避开对/错语义色。 */
+  --algo: #004c76;                 /* 算法设计与分析 · 海蓝 */
+  --os: #70265f;                 /* 操作系统 · 梅紫 */
+  --net: #4e4a01;                 /* 计算机网络 · 暗橄榄 */
+  --pat: #0b5351;                 /* 程序设计艺术与方法 · 深青 */
+  --ai: #8667b9;                 /* 人工智能原理 · 亮紫 */
+  --sa: #895964;                 /* 软件体系结构 · 灰玫瑰 */
+  --phys: #643c29;                 /* 大学物理 · 暗褐 */
+  --ca: #127e96;                 /* 计算机体系结构 · 青蓝 */
+  --math: #8c7403;                 /* 高等数学 · 暗金 */
+  --pd: #01571f;                 /* 程序设计基础 · 深绿 */
+  --ncd: #4a4b73;                 /* 计算机网络课程设计 · 蓝紫灰 */
+  --nap: #00856d;                 /* 网络攻防实践 · 青绿 */
+  --hd: #6b784d;                 /* 系统硬件综合设计 · 橄榄灰 */
+  --mc: #9a3d4a;                 /* 移动计算与应用开发 · 绯红 */
+  --nlu: #a35d9d;                 /* 自然语言理解 · 藕紫 */
+  --oscd: #6c3900;                 /* 操作系统课程设计 · 褐橙 */
+  --cpd: #4476be;                 /* 编译原理课程设计 · 钢蓝 */
+  --ntr: #906f4c;                 /* 网络工程师综合实训 · 卡其 */
+  --cv: #9f4434;                 /* 计算机视觉与深度学习 · 陶红 */
+  --spm: #144f61;                 /* 软件项目管理 · 深青蓝 */
+  --bd: #7e4c96;                 /* 大数据处理技术 · 紫 */
+  --cap: #4a6541;                 /* 计算机应用项目实训 · 灰绿 */
+  --aie: #346c1d;                 /* 人工智能经济学 · 苔绿 */
+  --sec: #93400f;                 /* 信息安全技术 · 赭橙 */
+  --db: #6e3334;                 /* 数据库系统 · 暗酒红 */
+  --se: #5c53a3;                 /* 软件工程 · 蓝紫 */
+  --st: #816c94;                 /* 软件测试 · 灰紫 */
+  --dp: #785c0e;                 /* 分布式程序设计 · 暗金 */
+  --swt: #7d2512;                 /* 软件工程师综合训练 · 砖红 */
+  --dsd: #747813;                 /* 领域方向综合设计 · 橄榄黄 */
+  --ip: #5e5f33;                 /* 创新实践 · 橄榄 */
+  --py: #0c6d98;                 /* Python程序设计 · 海蓝 */
+  --dm: #b95858;                 /* 离散数学 · 陶红 */
+  --cm: #208182;                 /* 计算方法 · 青 */
+  --prob: #b45777;                 /* 概率论与数理统计 · 莓红 */
+  --asm: #9e6a10;                 /* 汇编语言程序设计 · 赭金 */
+  --eda: #805533;                 /* EDA实训 · 褐 */
+  --res: #663d51;                 /* 科研训练 · 梅紫 */
+  --physlab: #6a739d;                 /* 大学物理实验 · 蓝紫灰 */
+  --java: #2b418a;                 /* Java技术 · 靛蓝 */
+  --dl: #563b64;                 /* 数字逻辑 · 暗紫 */
+  --robot: #4f3582;                 /* 机器人技术 · 紫蓝 */
+  --ds: #007346;                 /* 数据结构 · 深绿 */
+  --dscd: #936457;                 /* 数据结构课程设计 · 陶褐 */
+  --la: #597f27;                 /* 线性代数 · 草绿 */
+  --ee: #5e481f;                 /* 电路与电子技术基础 · 深褐 */
+  --comp: #546500;                 /* 编译原理 · 橄榄绿 */
+  --co: #24523b;                 /* 计算机组成原理 · 松绿 */
+  --emb: #827648;                 /* 嵌入式系统原理 · 卡其 */
+  --ml: #176773;                 /* 机器学习 · 青蓝 */
+  --ste: #954374;                 /* 软件工具与环境 · 紫红 */
+  --comb: #7a2142;                 /* 组合数学 · 酒红紫 */
+  --cg: #326d60;                 /* 计算机图形学 · 青绿 */
+  --sma: #537d60;                 /* 软件建模与分析 · 灰绿 */
+  --dmt: #b65e3a;                 /* 数字媒体技术 · 陶橙 */
+  --np: #486285;                 /* 网络程序设计 · 灰蓝 */
+  --micro: #735475;                 /* 微机原理与接口技术 · 灰紫 */
+  --het: #3a5018;                 /* 硬件工程师综合训练 · 暗橄榄 */
+  --maogai: #de2910;                 /* 学习通题库·毛概 · 朱红（品牌色，固定不参与重排） */
 
   --deck-accent: var(--accent);  /* 当前讲次色（无讲次时回落全局色） */
+  --on-accent: #ffffff;             /* 实心主题色底上的文字（亮色 accent 深 → 白字） */
 
   /* 提示块底色 */
   --key-bg: rgba(0, 113, 227, 0.08);
@@ -304,157 +176,67 @@
   --warn: #ff9f0a;
   --purple: #bf5af2;
 
-  --deck1: #0a84ff;
-  --deck2: #c7a5e9;   /* 原与 deck1 暗色过近（ΔE 19.8），换淡紫 */
-  --deck3: #30d158;
-  --deck4: #ff6b3d;
-  --deck5: #f0b429;
-  --deck6: #4db8e8;
-  --deck7: #bf5af2;
-  --deck8: #ff6aa2;
-  --os: #a3cc3f;
-  --net: #2dd4bf;
-  --pat: #a391e0;
-  --ai: #e283d2;
-  --sa: #9db8dc;
-  --phys: #c897d6;
-  --ca: #d49a9a;
-  --math: #a9c98a;
-  --pd: #d4a94f;
-  --ncd: #c06040;
-  --nap: #d4b896;
-  --hd: #ca7195;
-  --mc: #65bac3;
-  --nlu: #a86ed8;
-  --oscd: #5890d0;
-  --cpd: #d7d770;
-  --ntr: #d39064;
-  --cv: #d058d0;
-  --spm: #d3b1ce;
-  --bd: #9288af;
-  --cap: #d37373;
-  --aie: #acc8b0;
-  --sec: #6dba6d;
-  --db: #bab06d;
-  --se: #94e1d6;
-  --st: #e4e0a0;
-  --dp: #7275d5;
-  --swt: #de68a7;
-  --dsd: #a3e279;
-  --ip: #8ae5b2;
-  /* 大二上批次（暗色同色相提亮变体） */
-  --py: #e1a78e;  --dm: #e59ec4;  --cm: #cbe18e;  --prob: #ae77c5;  --asm: #a9d0da;
-  --eda: #66d675;  --res: #afa6de;  --physlab: #9cdd92;  --java: #7280cb;  --dl: #c577b0;  --robot: #77c5a6;
-  /* 大二下批次（暗色提亮变体） */
-  --comp: #6c60dc;  --co: #dbaf76;  --emb: #b8d666;  --ml: #81dc60;  --ste: #e0c671;
-  --comb: #d176db;  --cg: #dc60bb;  --sma: #60dc96;  --dmt: #aae4c1;  --np: #82c6e3;
-  --micro: #dc6060; --het: #dc607d;
-  --maogai: #ec6f5e;             /* 毛概（暗色提亮变体） */
-  /* 章节配色（暗色提亮变体，与上方亮色一一对应） */
-  --os1: #74b3d2;  --os2: #e0975f;  --os3: #7cc9a3;  --os4: #b39be0;
-  --os5: #ec8ea0;  --os6: #d4b95a;  --os7: #6cc4c9;  --os8: #d69ab8;
-  --net1: #8f9ce0; --net2: #e0975f; --net3: #b3c26e; --net4: #d69ab8;
-  --net5: #6cc4c9; --net6: #d4b95a; --net7: #ec8ea0; --net8: #b7a8ee;
-  --pat1: #74b3d2; --pat2: #ec8ea0; --pat3: #d4b95a; --pat4: #7cc9a3;
-  --pat5: #d69ab8; --pat6: #8f9ce0;
-  --sa1: #e0975f;  --sa2: #7cc9a3;  --sa3: #d69ab8;  --sa4: #d4b95a;
-  --phys1: #74b3d2;  --phys2: #e0975f;  --phys3: #7cc9a3;  --phys4: #ec8ea0;
-  --phys5: #d4b95a;  --phys6: #8f9ce0;  --phys7: #6cc4c9;  --phys8: #d18f6e;
-  --phys9: #b39be0;  --phys10: #b3c26e; --phys11: #d69ab8; --phys12: #9db0d6;
-  --ca1: #74b3d2;  --ca2: #7cc9a3;  --ca3: #d4b95a;  --ca4: #b39be0;
-  --ca5: #e0975f;  --ca6: #6cc4c9;  --ca7: #ec8ea0;  --ca8: #b3c26e;
-  --ca9: #8f9ce0;  --ca10: #d18f6e; --ca11: #9db0d6; --ca12: #d69ab8;
-  --ca13: #68de68; --ca14: #d69c63;
-  --math1: #74b3d2; --math2: #e0975f; --math3: #b39be0; --math4: #ec8ea0;
-  --math5: #6cc4c9; --math6: #d4b95a;
-  --pd1: #74b3d2; --pd2: #e0975f; --pd3: #7cc9a3; --pd4: #ec8ea0;
-  --pd5: #d4b95a; --pd6: #8f9ce0; --pd7: #6cc4c9; --pd8: #d18f6e;
-  --pd9: #b39be0; --pd10: #b3c26e; --pd11: #d69ab8;
-  --hd1: #74b3d2; --hd2: #7cc9a3; --hd3: #b39be0; --hd4: #d4b95a;
-  --se1: #e0975f;  --se2: #7cc9a3;  --se3: #ec8ea0;  --se4: #d4b95a;  --se5: #8f9ce0;  --se6: #6cc4c9;  --se7: #d18f6e;  --se8: #b39be0;  --se9: #b3c26e;  --se10: #d69ab8;  --se11: #9db0d6;  --se12: #68de68;  --se13: #d69c63;  --se14: #4db8e8;
-  --aie1: #74b3d2;  --aie2: #e0975f;  --aie3: #7cc9a3;  --aie4: #ec8ea0;  --aie5: #d4b95a;  --aie6: #8f9ce0;  --aie7: #6cc4c9;  --aie8: #d18f6e;
-  --sec1: #74b3d2;  --sec2: #e0975f;  --sec3: #7cc9a3;  --sec4: #ec8ea0;  --sec5: #d4b95a;  --sec6: #8f9ce0;
-  --db1: #74b3d2;  --db2: #e0975f;  --db3: #7cc9a3;  --db4: #ec8ea0;  --db5: #d4b95a;  --db6: #8f9ce0;  --db7: #6cc4c9;  --db8: #d18f6e;  --db9: #b39be0;  --db10: #b3c26e;  --db11: #d69ab8;  --db12: #9db0d6;
-  --st1: #74b3d2;  --st2: #e0975f;  --st3: #7cc9a3;  --st4: #ec8ea0;  --st5: #d4b95a;  --st6: #8f9ce0;  --st7: #6cc4c9;  --st8: #d18f6e;  --st9: #b39be0;  --st10: #b3c26e;  --st11: #d69ab8;
-  /* 大二上批次章色（暗色） */
-  --py1: #74b3d2;  --py2: #e0975f;  --py3: #7cc9a3;  --py4: #ec8ea0;  --py5: #d4b95a;  --py6: #8f9ce0;  --py7: #6cc4c9;  --py8: #d18f6e;  --py9: #b39be0;
-  --dm1: #74b3d2;  --dm2: #e0975f;  --dm3: #7cc9a3;  --dm4: #d4b95a;  --dm5: #8f9ce0;  --dm6: #6cc4c9;
-  --cm1: #74b3d2;  --cm2: #e0975f;  --cm3: #7cc9a3;  --cm4: #ec8ea0;  --cm5: #8f9ce0;  --cm6: #6cc4c9;  --cm7: #b39be0;
-  --prob1: #7cc9a3;  --prob2: #d4b95a;  --prob3: #8f9ce0;  --prob4: #6cc4c9;  --prob5: #e0975f;  --prob6: #74b3d2;
-  --asm1: #e0975f;  --asm2: #7cc9a3;  --asm3: #ec8ea0;  --asm4: #d4b95a;  --asm5: #6cc4c9;  --asm6: #b39be0;
-  --eda1: #74b3d2;  --eda2: #e0975f;  --eda3: #ec8ea0;
-  --res1: #74b3d2;  --res2: #e0975f;
-  --physlab1: #74b3d2;  --physlab2: #e0975f;  --physlab3: #b39be0;
-  --java1: #e0975f;  --java2: #7cc9a3;  --java3: #ec8ea0;  --java4: #d4b95a;  --java5: #74b3d2;  --java6: #b39be0;
-  --dl1: #74b3d2;  --dl2: #e0975f;  --dl3: #7cc9a3;  --dl4: #d4b95a;  --dl5: #8f9ce0;  --dl6: #6cc4c9;
-  --robot1: #74b3d2;  --robot2: #e0975f;  --robot3: #ec8ea0;  --robot4: #d4b95a;
-  /* 大二下批次章色（暗色变体，与亮色同序） */
-  --comp1: #e0975f;  --comp2: #8f9ce0;  --comp3: #7cc9a3;  --comp4: #d69ab8;  --comp5: #b3c26e;  --comp6: #b39be0;  --comp7: #d4b95a;
-  --co1: #6cc4c9;  --co2: #e0975f;  --co3: #8f9ce0;  --co4: #b3c26e;  --co5: #b39be0;  --co6: #7cc9a3;  --co7: #ec8ea0;  --co8: #74b3d2;  --co9: #d4b95a;
-  --emb1: #d69ab8;  --emb2: #7cc9a3;  --emb3: #ec8ea0;  --emb4: #6cc4c9;  --emb5: #e0975f;  --emb6: #8f9ce0;
-  --ml1: #e0975f;  --ml2: #8f9ce0;  --ml3: #b3c26e;  --ml4: #b39be0;  --ml5: #d4b95a;
-  --ste1: #7cc9a3;  --ste2: #ec8ea0;  --ste3: #6cc4c9;  --ste4: #e0975f;  --ste5: #8f9ce0;  --ste6: #d4b95a;
-  --comb1: #ec8ea0;  --comb2: #6cc4c9;  --comb3: #e0975f;  --comb4: #7cc9a3;
-
-  --deck-practice: #cfdeaf;
-  --os-practice: #bf5af2;  --os-att: #da6cc8;
-  --net-practice: #bf5af2; --net-att: #e279d4;
-  --pat-practice: #ff6b3d; --pat-att: #decaaf;
-  --ai-practice: #68de68;  --ai-att: #afdec5;
-  --sa-att: #bf5af2;
-  --phys-practice: #bf5af2; --phys-att: #826cda;
-  --ca-practice: #bf5af2;  --ca-att: #da6cc8;
-  --math-practice: #bf5af2; --math-att: #da6cc8;
-  --pd-att: #9db0d6;
-  --ncd-att: #93b3c9;
-  --nap-att: #93b8d4;
-  --hd-att: #a8a4d4;
-  --mc-att: #b873a1;
-  --nlu-att: #d4b95a;
-  --oscd-att: #93b8d4;
-  --cpd-att: #da6cc8;
-  --ntr-att: #da6cc8;
-  --cv-att: #afdec5;
-  --spm-att: #da6cc8;
-  --bd-att: #da6cc8;
-  --cap-att: #decaaf;
-  --aie-att: #9db0d6;
-  --sec-att: #da6cc8;
-  --db-att: #d0aa55;
-  --se-att: #da6cc8;
-  --st-att: #93b8d4;
-  --dp-att: #ca8ae5;
-  --swt-att: #93b3c9;
-  --dsd-att: #da6cc8;
-  --ip-att: #a9d7e5;
-  --db-practice: #bf5af2;
-  --se-practice: #bf5af2;
-  --st-practice: #bf5af2;
-  /* 大二上批次：练习 / 附件专属色（暗色） */
-  --py-att: #bf5af2;
-  --dm-practice: #bf5af2;  --dm-att: #68de68;
-  --cm-att: #826cda;
-  --prob-practice: #da6cc8;  --prob-att: #d0aa55;
-  --asm-practice: #da6cc8;  --asm-att: #9db0d6;
-  --eda-practice: #826cda;  --eda-att: #9db0d6;
-  --res-att: #da6cc8;
-  --physlab-practice: #bf5af2;  --physlab-att: #d0aa55;
-  --java-att: #93b3c9;
-  --dl-att: #9db0d6;
-  --robot-att: #afdec5;
-  /* 大二下批次：练习 / 附件专属色（暗色） */
-  --comp-practice: #bf5af2;  --comp-att: #ddb9b0;
-  --co-practice: #bf5af2;    --co-att: #ddd7b0;
-  --emb-practice: #bf5af2;   --emb-att: #e7cb92;
-  --ml-att: #e4aabb;
-  --ste-att: #7799c5;
-  --comb-att: #b760dc;
-  --cg-att: #db8a76;
-  --sma-att: #9f82e3;
-  --dmt-att: #8691cb;
-  --np-att: #e4aabb;
-  --micro-att: #e4aabb;
-  --het-att: #b2e4aa;
+  --on-accent: #1e1e20;              /* 实心主题色底上的文字（暗色 accent 浅 → 深字） */
+  /* 课程主题色（暗色提亮变体，色相与亮色一一对应，对 #1e1e20 面板对比 ≥4.5） */
+  --algo: #00ade4;
+  --os: #f7aafe;
+  --net: #ddd29d;
+  --pat: #2cecf5;
+  --ai: #a79bfe;
+  --sa: #eeb2b5;
+  --phys: #c1955e;
+  --ca: #9bdeed;
+  --math: #a4a537;
+  --pd: #80b9a1;
+  --ncd: #cccbfe;
+  --nap: #73edb1;
+  --hd: #85ae47;
+  --mc: #e077a4;
+  --nlu: #b28fc0;
+  --oscd: #fec48a;
+  --cpd: #53a3f2;
+  --ntr: #dd8736;
+  --cv: #ff977f;
+  --spm: #6aa9bb;
+  --bd: #c5a8ec;
+  --cap: #bae178;
+  --aie: #aedfbc;
+  --sec: #cd958b;
+  --db: #e87780;
+  --se: #9eb0df;
+  --st: #b486e3;
+  --dp: #fcc959;
+  --swt: #fac2af;
+  --dsd: #a8a06d;
+  --ip: #dacf57;
+  --py: #25d2fc;
+  --dm: #ca8a97;
+  --cm: #15b6a9;
+  --prob: #ffb9d9;
+  --asm: #cd9219;
+  --eda: #fe9b61;
+  --res: #f591cd;
+  --physlab: #b3d4ff;
+  --java: #7d98f5;
+  --dl: #e5c3ef;
+  --robot: #9c98c8;
+  --ds: #1fc094;
+  --dscd: #d78764;
+  --la: #60b46f;
+  --ee: #d3b373;
+  --comp: #8da87c;
+  --co: #95dad1;
+  --emb: #c8a82a;
+  --ml: #25c0cd;
+  --ste: #d1a0be;
+  --comb: #fd93ab;
+  --cg: #31e1c7;
+  --sma: #90d189;
+  --dmt: #d5a687;
+  --np: #78c7fd;
+  --micro: #d07cc5;
+  --het: #b2c07d;
+  --maogai: #ec6f5e;
 
   --key-bg: rgba(10, 132, 255, 0.14);
   --warn-bg: rgba(255, 159, 10, 0.14);
@@ -499,107 +281,41 @@
   --c-warn-bg: var(--warn-bg);
 }
 
-/* --------------------------------------- 当前讲次 → 主题色（html[data-deck]） */
-:root[data-deck='deck1'] { --deck-accent: var(--deck1); }
-:root[data-deck='deck2'] { --deck-accent: var(--deck2); }
-:root[data-deck='deck3'] { --deck-accent: var(--deck3); }
-:root[data-deck='deck4'] { --deck-accent: var(--deck4); }
-:root[data-deck='deck5'] { --deck-accent: var(--deck5); }
-:root[data-deck='deck6'] { --deck-accent: var(--deck6); }
-:root[data-deck='deck7'] { --deck-accent: var(--deck7); }
-:root[data-deck='deck8'] { --deck-accent: var(--deck8); }
+/* ---------------- 一课一色：html[data-deck=课key] → 课程主题色。
+ * 章节页/练习页/附件页不再覆盖（旧 data-ch/data-pg 机制已移除）。
+ * 每次路由变化课程根组件都会重新声明 data-deck。 */
 
-/* ------------------------- 操作系统课程 → 橄榄绿主题（html[data-deck='os']） */
+:root[data-deck='algo'] { --deck-accent: var(--algo); }
 :root[data-deck='os'] { --deck-accent: var(--os); }
-
-/* ------------------------- 计算机网络课程 → 深青主题（html[data-deck='net']） */
 :root[data-deck='net'] { --deck-accent: var(--net); }
-
-/* --------------------- 程序设计艺术与方法课程 → 蓝紫主题（html[data-deck='pat']） */
 :root[data-deck='pat'] { --deck-accent: var(--pat); }
-
-/* --------------------- 人工智能原理课程 → 品红主题（html[data-deck='ai']） */
 :root[data-deck='ai'] { --deck-accent: var(--ai); }
-
-/* --------------------- 软件体系结构课程 → 石板蓝主题（html[data-deck='sa']） */
 :root[data-deck='sa'] { --deck-accent: var(--sa); }
-
-/* --------------------- 大学物理课程 → 藕紫主题（html[data-deck='phys']） */
 :root[data-deck='phys'] { --deck-accent: var(--phys); }
-
-/* --------------------- 计算机体系结构课程 → 暗酒红主题（html[data-deck='ca']） */
 :root[data-deck='ca'] { --deck-accent: var(--ca); }
-
-/* --------------------- 高等数学课程 → 苔藓绿主题（html[data-deck='math']） */
 :root[data-deck='math'] { --deck-accent: var(--math); }
-
-/* --------------------- 程序设计基础课程 → 赭金主题（html[data-deck='pd']） */
 :root[data-deck='pd'] { --deck-accent: var(--pd); }
-
-/* --------------------- 计算机网络课程设计 → 砖红主题（html[data-deck='ncd']） */
 :root[data-deck='ncd'] { --deck-accent: var(--ncd); }
-
-/* --------------------- 网络攻防实践 → 灰褐主题（html[data-deck='nap']） */
 :root[data-deck='nap'] { --deck-accent: var(--nap); }
-
-/* --------------------- 系统硬件综合设计 → 玫红主题（html[data-deck='hd']） */
 :root[data-deck='hd'] { --deck-accent: var(--hd); }
-
-/* --------------------- 移动计算与应用开发 → 深青灰主题（html[data-deck='mc']） */
 :root[data-deck='mc'] { --deck-accent: var(--mc); }
-
-/* --------------------- 自然语言理解 → 蓝紫罗兰主题（html[data-deck='nlu']） */
 :root[data-deck='nlu'] { --deck-accent: var(--nlu); }
-
-/* --------------------- 操作系统课程设计 → 暗藏青主题（html[data-deck='oscd']） */
 :root[data-deck='oscd'] { --deck-accent: var(--oscd); }
-
-/* --------------------- 编译原理课程设计 → 暗金主题（html[data-deck='cpd']） */
 :root[data-deck='cpd'] { --deck-accent: var(--cpd); }
-
-/* --------------------- 网络工程师综合实训 → 灰红主题（html[data-deck='ntr']） */
 :root[data-deck='ntr'] { --deck-accent: var(--ntr); }
-
-/* --------------------- 计算机视觉与深度学习 → 灰紫红主题（html[data-deck='cv']） */
 :root[data-deck='cv'] { --deck-accent: var(--cv); }
-
-/* --------------------- 软件项目管理 → 深酒红紫主题（html[data-deck='spm']） */
 :root[data-deck='spm'] { --deck-accent: var(--spm); }
-
-/* --------------------- 大数据处理技术 → 靛蓝主题（html[data-deck='bd']） */
 :root[data-deck='bd'] { --deck-accent: var(--bd); }
-
-/* --------------------- 计算机应用项目实训 → 陶橙主题（html[data-deck='cap']） */
 :root[data-deck='cap'] { --deck-accent: var(--cap); }
-
-/* --------------------- 人工智能经济学 → 翠绿主题（html[data-deck='aie']） */
 :root[data-deck='aie'] { --deck-accent: var(--aie); }
-
-/* --------------------- 信息安全技术 → 暗松绿主题（html[data-deck='sec']） */
 :root[data-deck='sec'] { --deck-accent: var(--sec); }
-
-/* --------------------- 数据库系统 → 橄榄金主题（html[data-deck='db']） */
 :root[data-deck='db'] { --deck-accent: var(--db); }
-
-/* --------------------- 软件工程 → 青灰蓝主题（html[data-deck='se']） */
 :root[data-deck='se'] { --deck-accent: var(--se); }
-
-/* --------------------- 软件测试 → 深褐主题（html[data-deck='st']） */
 :root[data-deck='st'] { --deck-accent: var(--st); }
-
-/* --------------------- 分布式程序设计 → 深紫主题（html[data-deck='dp']） */
 :root[data-deck='dp'] { --deck-accent: var(--dp); }
-
-/* --------------------- 软件工程师综合训练 → 玫红紫主题（html[data-deck='swt']） */
 :root[data-deck='swt'] { --deck-accent: var(--swt); }
-
-/* --------------------- 领域方向综合设计 → 苹果绿主题（html[data-deck='dsd']） */
 :root[data-deck='dsd'] { --deck-accent: var(--dsd); }
-
-/* --------------------- 创新实践 → 青绿主题（html[data-deck='ip']） */
 :root[data-deck='ip'] { --deck-accent: var(--ip); }
-
-/* --------------------- 大二上批次课程主题 */
 :root[data-deck='py'] { --deck-accent: var(--py); }
 :root[data-deck='dm'] { --deck-accent: var(--dm); }
 :root[data-deck='cm'] { --deck-accent: var(--cm); }
@@ -611,8 +327,10 @@
 :root[data-deck='java'] { --deck-accent: var(--java); }
 :root[data-deck='dl'] { --deck-accent: var(--dl); }
 :root[data-deck='robot'] { --deck-accent: var(--robot); }
-
-/* --------------------- 大二下批次课程主题 */
+:root[data-deck='ds'] { --deck-accent: var(--ds); }
+:root[data-deck='dscd'] { --deck-accent: var(--dscd); }
+:root[data-deck='la'] { --deck-accent: var(--la); }
+:root[data-deck='ee'] { --deck-accent: var(--ee); }
 :root[data-deck='comp'] { --deck-accent: var(--comp); }
 :root[data-deck='co'] { --deck-accent: var(--co); }
 :root[data-deck='emb'] { --deck-accent: var(--emb); }
@@ -625,390 +343,7 @@
 :root[data-deck='np'] { --deck-accent: var(--np); }
 :root[data-deck='micro'] { --deck-accent: var(--micro); }
 :root[data-deck='het'] { --deck-accent: var(--het); }
-
-/* --------------------- 学习通题库（毛概）→ 朱红主题 */
 :root[data-deck='maogai'] { --deck-accent: var(--maogai); }
-
-/* --------- 各章一色：章节页写 html[data-ch='序数']，覆盖课程基础色；
- * 首页/在线练习不带 data-ch，仍用课程基础色（与算法课 deck1..8 同机制） --------- */
-:root[data-deck='os'][data-ch='1'] { --deck-accent: var(--os1); }
-:root[data-deck='os'][data-ch='2'] { --deck-accent: var(--os2); }
-:root[data-deck='os'][data-ch='3'] { --deck-accent: var(--os3); }
-:root[data-deck='os'][data-ch='4'] { --deck-accent: var(--os4); }
-:root[data-deck='os'][data-ch='5'] { --deck-accent: var(--os5); }
-:root[data-deck='os'][data-ch='6'] { --deck-accent: var(--os6); }
-:root[data-deck='os'][data-ch='7'] { --deck-accent: var(--os7); }
-:root[data-deck='os'][data-ch='8'] { --deck-accent: var(--os8); }
-:root[data-deck='net'][data-ch='1'] { --deck-accent: var(--net1); }
-:root[data-deck='net'][data-ch='2'] { --deck-accent: var(--net2); }
-:root[data-deck='net'][data-ch='3'] { --deck-accent: var(--net3); }
-:root[data-deck='net'][data-ch='4'] { --deck-accent: var(--net4); }
-:root[data-deck='net'][data-ch='5'] { --deck-accent: var(--net5); }
-:root[data-deck='net'][data-ch='6'] { --deck-accent: var(--net6); }
-:root[data-deck='net'][data-ch='7'] { --deck-accent: var(--net7); }
-:root[data-deck='net'][data-ch='8'] { --deck-accent: var(--net8); }
-:root[data-deck='pat'][data-ch='1'] { --deck-accent: var(--pat1); }
-:root[data-deck='pat'][data-ch='2'] { --deck-accent: var(--pat2); }
-:root[data-deck='pat'][data-ch='3'] { --deck-accent: var(--pat3); }
-:root[data-deck='pat'][data-ch='4'] { --deck-accent: var(--pat4); }
-:root[data-deck='pat'][data-ch='5'] { --deck-accent: var(--pat5); }
-:root[data-deck='pat'][data-ch='6'] { --deck-accent: var(--pat6); }
-:root[data-deck='sa'][data-ch='1'] { --deck-accent: var(--sa1); }
-:root[data-deck='sa'][data-ch='2'] { --deck-accent: var(--sa2); }
-:root[data-deck='sa'][data-ch='3'] { --deck-accent: var(--sa3); }
-:root[data-deck='sa'][data-ch='4'] { --deck-accent: var(--sa4); }
-:root[data-deck='phys'][data-ch='1'] { --deck-accent: var(--phys1); }
-:root[data-deck='phys'][data-ch='2'] { --deck-accent: var(--phys2); }
-:root[data-deck='phys'][data-ch='3'] { --deck-accent: var(--phys3); }
-:root[data-deck='phys'][data-ch='4'] { --deck-accent: var(--phys4); }
-:root[data-deck='phys'][data-ch='5'] { --deck-accent: var(--phys5); }
-:root[data-deck='phys'][data-ch='6'] { --deck-accent: var(--phys6); }
-:root[data-deck='phys'][data-ch='7'] { --deck-accent: var(--phys7); }
-:root[data-deck='phys'][data-ch='8'] { --deck-accent: var(--phys8); }
-:root[data-deck='phys'][data-ch='9'] { --deck-accent: var(--phys9); }
-:root[data-deck='phys'][data-ch='10'] { --deck-accent: var(--phys10); }
-:root[data-deck='phys'][data-ch='11'] { --deck-accent: var(--phys11); }
-:root[data-deck='phys'][data-ch='12'] { --deck-accent: var(--phys12); }
-:root[data-deck='ca'][data-ch='1'] { --deck-accent: var(--ca1); }
-:root[data-deck='ca'][data-ch='2'] { --deck-accent: var(--ca2); }
-:root[data-deck='ca'][data-ch='3'] { --deck-accent: var(--ca3); }
-:root[data-deck='ca'][data-ch='4'] { --deck-accent: var(--ca4); }
-:root[data-deck='ca'][data-ch='5'] { --deck-accent: var(--ca5); }
-:root[data-deck='ca'][data-ch='6'] { --deck-accent: var(--ca6); }
-:root[data-deck='ca'][data-ch='7'] { --deck-accent: var(--ca7); }
-:root[data-deck='ca'][data-ch='8'] { --deck-accent: var(--ca8); }
-:root[data-deck='ca'][data-ch='9'] { --deck-accent: var(--ca9); }
-:root[data-deck='ca'][data-ch='10'] { --deck-accent: var(--ca10); }
-:root[data-deck='ca'][data-ch='11'] { --deck-accent: var(--ca11); }
-:root[data-deck='ca'][data-ch='12'] { --deck-accent: var(--ca12); }
-:root[data-deck='ca'][data-ch='13'] { --deck-accent: var(--ca13); }
-:root[data-deck='ca'][data-ch='14'] { --deck-accent: var(--ca14); }
-
-/* ---- 在线练习 / 附件页：data-pg 指定专属色（与总目录、各章不重复） ---- */
-:root[data-pg='practice'] { --deck-accent: var(--deck-practice); }  /* 算法课（无 data-deck 基础规则） */
-:root[data-deck='os'][data-pg='practice'] { --deck-accent: var(--os-practice); }
-:root[data-deck='os'][data-pg='att'] { --deck-accent: var(--os-att); }
-:root[data-deck='net'][data-pg='practice'] { --deck-accent: var(--net-practice); }
-:root[data-deck='net'][data-pg='att'] { --deck-accent: var(--net-att); }
-:root[data-deck='pat'][data-pg='practice'] { --deck-accent: var(--pat-practice); }
-:root[data-deck='pat'][data-pg='att'] { --deck-accent: var(--pat-att); }
-:root[data-deck='ai'][data-pg='practice'] { --deck-accent: var(--ai-practice); }
-:root[data-deck='ai'][data-pg='att'] { --deck-accent: var(--ai-att); }
-:root[data-deck='sa'][data-pg='att'] { --deck-accent: var(--sa-att); }
-:root[data-deck='phys'][data-pg='practice'] { --deck-accent: var(--phys-practice); }
-:root[data-deck='phys'][data-pg='att'] { --deck-accent: var(--phys-att); }
-:root[data-deck='ca'][data-pg='practice'] { --deck-accent: var(--ca-practice); }
-:root[data-deck='ca'][data-pg='att'] { --deck-accent: var(--ca-att); }
-:root[data-deck='math'][data-pg='practice'] { --deck-accent: var(--math-practice); }
-:root[data-deck='math'][data-pg='att'] { --deck-accent: var(--math-att); }
-:root[data-deck='pd'][data-pg='att'] { --deck-accent: var(--pd-att); }
-:root[data-deck='ncd'][data-pg='att'] { --deck-accent: var(--ncd-att); }
-:root[data-deck='nap'][data-pg='att'] { --deck-accent: var(--nap-att); }
-:root[data-deck='hd'][data-pg='att'] { --deck-accent: var(--hd-att); }
-:root[data-deck='mc'][data-pg='att'] { --deck-accent: var(--mc-att); }
-:root[data-deck='nlu'][data-pg='att'] { --deck-accent: var(--nlu-att); }
-:root[data-deck='oscd'][data-pg='att'] { --deck-accent: var(--oscd-att); }
-:root[data-deck='cpd'][data-pg='att'] { --deck-accent: var(--cpd-att); }
-:root[data-deck='ntr'][data-pg='att'] { --deck-accent: var(--ntr-att); }
-:root[data-deck='cv'][data-pg='att'] { --deck-accent: var(--cv-att); }
-:root[data-deck='spm'][data-pg='att'] { --deck-accent: var(--spm-att); }
-:root[data-deck='bd'][data-pg='att'] { --deck-accent: var(--bd-att); }
-:root[data-deck='cap'][data-pg='att'] { --deck-accent: var(--cap-att); }
-:root[data-deck='aie'][data-pg='att'] { --deck-accent: var(--aie-att); }
-:root[data-deck='sec'][data-pg='att'] { --deck-accent: var(--sec-att); }
-:root[data-deck='db'][data-pg='att'] { --deck-accent: var(--db-att); }
-:root[data-deck='se'][data-pg='att'] { --deck-accent: var(--se-att); }
-:root[data-deck='st'][data-pg='att'] { --deck-accent: var(--st-att); }
-:root[data-deck='dp'][data-pg='att'] { --deck-accent: var(--dp-att); }
-:root[data-deck='swt'][data-pg='att'] { --deck-accent: var(--swt-att); }
-:root[data-deck='dsd'][data-pg='att'] { --deck-accent: var(--dsd-att); }
-:root[data-deck='ip'][data-pg='att'] { --deck-accent: var(--ip-att); }
-/* 大二上批次练习 / 附件页专属色 */
-:root[data-deck='py'][data-pg='att'] { --deck-accent: var(--py-att); }
-:root[data-deck='dm'][data-pg='practice'] { --deck-accent: var(--dm-practice); }
-:root[data-deck='dm'][data-pg='att'] { --deck-accent: var(--dm-att); }
-:root[data-deck='cm'][data-pg='att'] { --deck-accent: var(--cm-att); }
-:root[data-deck='prob'][data-pg='practice'] { --deck-accent: var(--prob-practice); }
-:root[data-deck='prob'][data-pg='att'] { --deck-accent: var(--prob-att); }
-:root[data-deck='asm'][data-pg='practice'] { --deck-accent: var(--asm-practice); }
-:root[data-deck='asm'][data-pg='att'] { --deck-accent: var(--asm-att); }
-:root[data-deck='eda'][data-pg='practice'] { --deck-accent: var(--eda-practice); }
-:root[data-deck='eda'][data-pg='att'] { --deck-accent: var(--eda-att); }
-:root[data-deck='res'][data-pg='att'] { --deck-accent: var(--res-att); }
-:root[data-deck='physlab'][data-pg='practice'] { --deck-accent: var(--physlab-practice); }
-:root[data-deck='physlab'][data-pg='att'] { --deck-accent: var(--physlab-att); }
-:root[data-deck='java'][data-pg='att'] { --deck-accent: var(--java-att); }
-:root[data-deck='dl'][data-pg='att'] { --deck-accent: var(--dl-att); }
-:root[data-deck='robot'][data-pg='att'] { --deck-accent: var(--robot-att); }
-:root[data-deck='db'][data-pg='practice'] { --deck-accent: var(--db-practice); }
-:root[data-deck='se'][data-pg='practice'] { --deck-accent: var(--se-practice); }
-:root[data-deck='st'][data-pg='practice'] { --deck-accent: var(--st-practice); }
-/* 大二下批次练习 / 附件页专属色 */
-:root[data-deck='comp'][data-pg='practice'] { --deck-accent: var(--comp-practice); }
-:root[data-deck='comp'][data-pg='att'] { --deck-accent: var(--comp-att); }
-:root[data-deck='co'][data-pg='practice'] { --deck-accent: var(--co-practice); }
-:root[data-deck='co'][data-pg='att'] { --deck-accent: var(--co-att); }
-:root[data-deck='emb'][data-pg='practice'] { --deck-accent: var(--emb-practice); }
-:root[data-deck='emb'][data-pg='att'] { --deck-accent: var(--emb-att); }
-:root[data-deck='ml'][data-pg='att'] { --deck-accent: var(--ml-att); }
-:root[data-deck='ste'][data-pg='att'] { --deck-accent: var(--ste-att); }
-:root[data-deck='comb'][data-pg='att'] { --deck-accent: var(--comb-att); }
-:root[data-deck='cg'][data-pg='att'] { --deck-accent: var(--cg-att); }
-:root[data-deck='sma'][data-pg='att'] { --deck-accent: var(--sma-att); }
-:root[data-deck='dmt'][data-pg='att'] { --deck-accent: var(--dmt-att); }
-:root[data-deck='np'][data-pg='att'] { --deck-accent: var(--np-att); }
-:root[data-deck='micro'][data-pg='att'] { --deck-accent: var(--micro-att); }
-:root[data-deck='het'][data-pg='att'] { --deck-accent: var(--het-att); }
-
-:root[data-deck='math'][data-ch='1'] { --deck-accent: var(--math1); }
-:root[data-deck='math'][data-ch='2'] { --deck-accent: var(--math2); }
-:root[data-deck='math'][data-ch='3'] { --deck-accent: var(--math3); }
-:root[data-deck='math'][data-ch='4'] { --deck-accent: var(--math4); }
-:root[data-deck='math'][data-ch='5'] { --deck-accent: var(--math5); }
-:root[data-deck='math'][data-ch='6'] { --deck-accent: var(--math6); }
-:root[data-deck='pd'][data-ch='1'] { --deck-accent: var(--pd1); }
-:root[data-deck='pd'][data-ch='2'] { --deck-accent: var(--pd2); }
-:root[data-deck='pd'][data-ch='3'] { --deck-accent: var(--pd3); }
-:root[data-deck='pd'][data-ch='4'] { --deck-accent: var(--pd4); }
-:root[data-deck='pd'][data-ch='5'] { --deck-accent: var(--pd5); }
-:root[data-deck='pd'][data-ch='6'] { --deck-accent: var(--pd6); }
-:root[data-deck='pd'][data-ch='7'] { --deck-accent: var(--pd7); }
-:root[data-deck='pd'][data-ch='8'] { --deck-accent: var(--pd8); }
-:root[data-deck='pd'][data-ch='9'] { --deck-accent: var(--pd9); }
-:root[data-deck='pd'][data-ch='10'] { --deck-accent: var(--pd10); }
-:root[data-deck='pd'][data-ch='11'] { --deck-accent: var(--pd11); }
-:root[data-deck='hd'][data-ch='1'] { --deck-accent: var(--hd1); }
-:root[data-deck='hd'][data-ch='2'] { --deck-accent: var(--hd2); }
-:root[data-deck='hd'][data-ch='3'] { --deck-accent: var(--hd3); }
-:root[data-deck='hd'][data-ch='4'] { --deck-accent: var(--hd4); }
-:root[data-deck='aie'][data-ch='1'] { --deck-accent: var(--aie1); }
-:root[data-deck='aie'][data-ch='2'] { --deck-accent: var(--aie2); }
-:root[data-deck='aie'][data-ch='3'] { --deck-accent: var(--aie3); }
-:root[data-deck='aie'][data-ch='4'] { --deck-accent: var(--aie4); }
-:root[data-deck='aie'][data-ch='5'] { --deck-accent: var(--aie5); }
-:root[data-deck='aie'][data-ch='6'] { --deck-accent: var(--aie6); }
-:root[data-deck='aie'][data-ch='7'] { --deck-accent: var(--aie7); }
-:root[data-deck='aie'][data-ch='8'] { --deck-accent: var(--aie8); }
-:root[data-deck='sec'][data-ch='1'] { --deck-accent: var(--sec1); }
-:root[data-deck='sec'][data-ch='2'] { --deck-accent: var(--sec2); }
-:root[data-deck='sec'][data-ch='3'] { --deck-accent: var(--sec3); }
-:root[data-deck='sec'][data-ch='4'] { --deck-accent: var(--sec4); }
-:root[data-deck='sec'][data-ch='5'] { --deck-accent: var(--sec5); }
-:root[data-deck='sec'][data-ch='6'] { --deck-accent: var(--sec5); }
-:root[data-deck='sec'][data-ch='7'] { --deck-accent: var(--sec6); }
-:root[data-deck='db'][data-ch='1'] { --deck-accent: var(--db1); }
-:root[data-deck='db'][data-ch='2'] { --deck-accent: var(--db2); }
-:root[data-deck='db'][data-ch='3'] { --deck-accent: var(--db3); }
-:root[data-deck='db'][data-ch='4'] { --deck-accent: var(--db4); }
-:root[data-deck='db'][data-ch='5'] { --deck-accent: var(--db5); }
-:root[data-deck='db'][data-ch='6'] { --deck-accent: var(--db6); }
-:root[data-deck='db'][data-ch='7'] { --deck-accent: var(--db7); }
-:root[data-deck='db'][data-ch='8'] { --deck-accent: var(--db8); }
-:root[data-deck='db'][data-ch='9'] { --deck-accent: var(--db9); }
-:root[data-deck='db'][data-ch='10'] { --deck-accent: var(--db10); }
-:root[data-deck='db'][data-ch='11'] { --deck-accent: var(--db11); }
-:root[data-deck='db'][data-ch='12'] { --deck-accent: var(--db12); }
-:root[data-deck='se'][data-ch='1'] { --deck-accent: var(--se1); }
-:root[data-deck='se'][data-ch='2'] { --deck-accent: var(--se2); }
-:root[data-deck='se'][data-ch='3'] { --deck-accent: var(--se3); }
-:root[data-deck='se'][data-ch='4'] { --deck-accent: var(--se4); }
-:root[data-deck='se'][data-ch='5'] { --deck-accent: var(--se5); }
-:root[data-deck='se'][data-ch='6'] { --deck-accent: var(--se6); }
-:root[data-deck='se'][data-ch='7'] { --deck-accent: var(--se7); }
-:root[data-deck='se'][data-ch='8'] { --deck-accent: var(--se8); }
-:root[data-deck='se'][data-ch='9'] { --deck-accent: var(--se9); }
-:root[data-deck='se'][data-ch='10'] { --deck-accent: var(--se10); }
-:root[data-deck='se'][data-ch='11'] { --deck-accent: var(--se11); }
-:root[data-deck='se'][data-ch='12'] { --deck-accent: var(--se12); }
-:root[data-deck='se'][data-ch='13'] { --deck-accent: var(--se13); }
-:root[data-deck='se'][data-ch='14'] { --deck-accent: var(--se14); }
-:root[data-deck='st'][data-ch='1'] { --deck-accent: var(--st1); }
-:root[data-deck='st'][data-ch='2'] { --deck-accent: var(--st2); }
-:root[data-deck='st'][data-ch='3'] { --deck-accent: var(--st3); }
-:root[data-deck='st'][data-ch='4'] { --deck-accent: var(--st4); }
-:root[data-deck='st'][data-ch='5'] { --deck-accent: var(--st5); }
-:root[data-deck='st'][data-ch='6'] { --deck-accent: var(--st6); }
-:root[data-deck='st'][data-ch='7'] { --deck-accent: var(--st7); }
-:root[data-deck='st'][data-ch='8'] { --deck-accent: var(--st8); }
-:root[data-deck='st'][data-ch='9'] { --deck-accent: var(--st9); }
-:root[data-deck='st'][data-ch='10'] { --deck-accent: var(--st10); }
-:root[data-deck='st'][data-ch='11'] { --deck-accent: var(--st11); }
-/* 大二上批次章色映射 */
-:root[data-deck='py'][data-ch='1'] { --deck-accent: var(--py1); }
-:root[data-deck='py'][data-ch='2'] { --deck-accent: var(--py2); }
-:root[data-deck='py'][data-ch='3'] { --deck-accent: var(--py3); }
-:root[data-deck='py'][data-ch='4'] { --deck-accent: var(--py4); }
-:root[data-deck='py'][data-ch='5'] { --deck-accent: var(--py5); }
-:root[data-deck='py'][data-ch='6'] { --deck-accent: var(--py6); }
-:root[data-deck='py'][data-ch='7'] { --deck-accent: var(--py7); }
-:root[data-deck='py'][data-ch='8'] { --deck-accent: var(--py8); }
-:root[data-deck='py'][data-ch='9'] { --deck-accent: var(--py9); }
-:root[data-deck='dm'][data-ch='1'] { --deck-accent: var(--dm1); }
-:root[data-deck='dm'][data-ch='2'] { --deck-accent: var(--dm2); }
-:root[data-deck='dm'][data-ch='3'] { --deck-accent: var(--dm3); }
-:root[data-deck='dm'][data-ch='4'] { --deck-accent: var(--dm4); }
-:root[data-deck='dm'][data-ch='5'] { --deck-accent: var(--dm5); }
-:root[data-deck='dm'][data-ch='6'] { --deck-accent: var(--dm6); }
-:root[data-deck='cm'][data-ch='1'] { --deck-accent: var(--cm1); }
-:root[data-deck='cm'][data-ch='2'] { --deck-accent: var(--cm2); }
-:root[data-deck='cm'][data-ch='3'] { --deck-accent: var(--cm3); }
-:root[data-deck='cm'][data-ch='4'] { --deck-accent: var(--cm4); }
-:root[data-deck='cm'][data-ch='5'] { --deck-accent: var(--cm5); }
-:root[data-deck='cm'][data-ch='6'] { --deck-accent: var(--cm6); }
-:root[data-deck='cm'][data-ch='7'] { --deck-accent: var(--cm7); }
-:root[data-deck='prob'][data-ch='1'] { --deck-accent: var(--prob1); }
-:root[data-deck='prob'][data-ch='2'] { --deck-accent: var(--prob2); }
-:root[data-deck='prob'][data-ch='3'] { --deck-accent: var(--prob3); }
-:root[data-deck='prob'][data-ch='4'] { --deck-accent: var(--prob4); }
-:root[data-deck='prob'][data-ch='5'] { --deck-accent: var(--prob5); }
-:root[data-deck='prob'][data-ch='6'] { --deck-accent: var(--prob6); }
-:root[data-deck='asm'][data-ch='1'] { --deck-accent: var(--asm1); }
-:root[data-deck='asm'][data-ch='2'] { --deck-accent: var(--asm2); }
-:root[data-deck='asm'][data-ch='3'] { --deck-accent: var(--asm3); }
-:root[data-deck='asm'][data-ch='4'] { --deck-accent: var(--asm4); }
-:root[data-deck='asm'][data-ch='5'] { --deck-accent: var(--asm5); }
-:root[data-deck='asm'][data-ch='6'] { --deck-accent: var(--asm6); }
-:root[data-deck='eda'][data-ch='1'] { --deck-accent: var(--eda1); }
-:root[data-deck='eda'][data-ch='2'] { --deck-accent: var(--eda2); }
-:root[data-deck='eda'][data-ch='3'] { --deck-accent: var(--eda3); }
-:root[data-deck='res'][data-ch='1'] { --deck-accent: var(--res1); }
-:root[data-deck='res'][data-ch='2'] { --deck-accent: var(--res2); }
-:root[data-deck='physlab'][data-ch='1'] { --deck-accent: var(--physlab1); }
-:root[data-deck='physlab'][data-ch='2'] { --deck-accent: var(--physlab2); }
-:root[data-deck='physlab'][data-ch='3'] { --deck-accent: var(--physlab3); }
-:root[data-deck='java'][data-ch='1'] { --deck-accent: var(--java1); }
-:root[data-deck='java'][data-ch='2'] { --deck-accent: var(--java2); }
-:root[data-deck='java'][data-ch='3'] { --deck-accent: var(--java3); }
-:root[data-deck='java'][data-ch='4'] { --deck-accent: var(--java4); }
-:root[data-deck='java'][data-ch='5'] { --deck-accent: var(--java5); }
-:root[data-deck='java'][data-ch='6'] { --deck-accent: var(--java6); }
-:root[data-deck='dl'][data-ch='1'] { --deck-accent: var(--dl1); }
-:root[data-deck='dl'][data-ch='2'] { --deck-accent: var(--dl2); }
-:root[data-deck='dl'][data-ch='3'] { --deck-accent: var(--dl3); }
-:root[data-deck='dl'][data-ch='4'] { --deck-accent: var(--dl4); }
-:root[data-deck='dl'][data-ch='5'] { --deck-accent: var(--dl5); }
-:root[data-deck='dl'][data-ch='6'] { --deck-accent: var(--dl6); }
-:root[data-deck='robot'][data-ch='1'] { --deck-accent: var(--robot1); }
-:root[data-deck='robot'][data-ch='2'] { --deck-accent: var(--robot2); }
-:root[data-deck='robot'][data-ch='3'] { --deck-accent: var(--robot3); }
-:root[data-deck='robot'][data-ch='4'] { --deck-accent: var(--robot4); }
-
-/* ---- 大二下批次：章节序号 → 章色（章号有缺号时按列表序取色） ---- */
-:root[data-deck='comp'][data-ch='1'] { --deck-accent: var(--comp1); }
-:root[data-deck='comp'][data-ch='2'] { --deck-accent: var(--comp2); }
-:root[data-deck='comp'][data-ch='3'] { --deck-accent: var(--comp3); }
-:root[data-deck='comp'][data-ch='4'] { --deck-accent: var(--comp4); }
-:root[data-deck='comp'][data-ch='5'] { --deck-accent: var(--comp5); }
-:root[data-deck='comp'][data-ch='6'] { --deck-accent: var(--comp6); }
-:root[data-deck='comp'][data-ch='7'] { --deck-accent: var(--comp7); }
-:root[data-deck='co'][data-ch='1'] { --deck-accent: var(--co1); }
-:root[data-deck='co'][data-ch='3'] { --deck-accent: var(--co2); }
-:root[data-deck='co'][data-ch='4'] { --deck-accent: var(--co3); }
-:root[data-deck='co'][data-ch='5'] { --deck-accent: var(--co4); }
-:root[data-deck='co'][data-ch='6'] { --deck-accent: var(--co5); }
-:root[data-deck='co'][data-ch='7'] { --deck-accent: var(--co6); }
-:root[data-deck='co'][data-ch='8'] { --deck-accent: var(--co7); }
-:root[data-deck='co'][data-ch='9'] { --deck-accent: var(--co8); }
-:root[data-deck='co'][data-ch='10'] { --deck-accent: var(--co9); }
-:root[data-deck='emb'][data-ch='1'] { --deck-accent: var(--emb1); }
-:root[data-deck='emb'][data-ch='2'] { --deck-accent: var(--emb2); }
-:root[data-deck='emb'][data-ch='3'] { --deck-accent: var(--emb3); }
-:root[data-deck='emb'][data-ch='4'] { --deck-accent: var(--emb4); }
-:root[data-deck='emb'][data-ch='5'] { --deck-accent: var(--emb5); }
-:root[data-deck='emb'][data-ch='6'] { --deck-accent: var(--emb6); }
-:root[data-deck='ml'][data-ch='1'] { --deck-accent: var(--ml1); }
-:root[data-deck='ml'][data-ch='2'] { --deck-accent: var(--ml2); }
-:root[data-deck='ml'][data-ch='3'] { --deck-accent: var(--ml3); }
-:root[data-deck='ml'][data-ch='4'] { --deck-accent: var(--ml4); }
-:root[data-deck='ml'][data-ch='5'] { --deck-accent: var(--ml5); }
-:root[data-deck='ste'][data-ch='1'] { --deck-accent: var(--ste1); }
-:root[data-deck='ste'][data-ch='2'] { --deck-accent: var(--ste2); }
-:root[data-deck='ste'][data-ch='3'] { --deck-accent: var(--ste3); }
-:root[data-deck='ste'][data-ch='4'] { --deck-accent: var(--ste4); }
-:root[data-deck='ste'][data-ch='5'] { --deck-accent: var(--ste5); }
-:root[data-deck='ste'][data-ch='6'] { --deck-accent: var(--ste6); }
-:root[data-deck='comb'][data-ch='1'] { --deck-accent: var(--comb1); }
-:root[data-deck='comb'][data-ch='2'] { --deck-accent: var(--comb2); }
-:root[data-deck='comb'][data-ch='3'] { --deck-accent: var(--comb3); }
-:root[data-deck='comb'][data-ch='4'] { --deck-accent: var(--comb4); }
-
-
-
-/* ============ 大一上/下补全批次：数据结构 / 数据结构课程设计 / 线性代数 / 电路与电子技术基础 ============ */
-:root {
-  --ds: #385d9f;
-  --dscd: #7b4832;
-  --la: #773aa6;
-  --ee: #9f3849;
-  --la1: #31708e; --la2: #a05a2c; --la3: #2e7d5b;
-  --la4: #b5485e; --la5: #8f741c; --la6: #4a5aa8;
-  --ds1: #a05a2c; --ds2: #2e7d5b; --ds3: #b5485e; --ds4: #8f741c;
-  --ds5: #22767c; --ds6: #7d5ba6; --ds7: #9c4a72; --ds8: #36a136;
-  --ee1: #31708e; --ee2: #a05a2c; --ee3: #2e7d5b; --ee4: #8f741c; --ee5: #4a5aa8;
-  --ee6: #22767c; --ee7: #8a4a2f; --ee8: #7d5ba6; --ee9: #6b7a2f; --ee10: #9c4a72;
-  --ee11: #56698f; --ee12: #36a136; --ee13: #6e4a24; --ee14: #d18f6e; --ee15: #9c6b3f;
-  --la-practice: #36a136; --la-att: #b53aad;
-  --ds-practice: #bf5af2; --ds-att: #36a16b;
-  --dscd-att: #36a16b;
-  --ee-practice: #bf5af2; --ee-att: #a1369a;
-}
-[data-theme='dark'] {
-  --ds: #588be4;
-  --dscd: #dca289;
-  --la: #8b54d4;
-  --ee: #e14770;
-  --la1: #74b3d2; --la2: #e0975f; --la3: #7cc9a3;
-  --la4: #ec8ea0; --la5: #d4b95a; --la6: #8f9ce0;
-  --ds1: #e0975f; --ds2: #7cc9a3; --ds3: #ec8ea0; --ds4: #d4b95a;
-  --ds5: #6cc4c9; --ds6: #b39be0; --ds7: #d69ab8; --ds8: #68de68;
-  --ee1: #74b3d2; --ee2: #e0975f; --ee3: #7cc9a3; --ee4: #d4b95a; --ee5: #8f9ce0;
-  --ee6: #6cc4c9; --ee7: #d18f6e; --ee8: #b39be0; --ee9: #b3c26e; --ee10: #d69ab8;
-  --ee11: #9db0d6; --ee12: #68de68; --ee13: #d69c63; --ee14: #e0975f; --ee15: #b39be0;
-  --la-practice: #68de68; --la-att: #c58ae5;
-  --ds-practice: #bf5af2; --ds-att: #7cc9a3;
-  --dscd-att: #7cc9a3;
-  --ee-practice: #bf5af2; --ee-att: #a86ed8;
-}
-:root[data-deck='ds'] { --deck-accent: var(--ds); }
-:root[data-deck='dscd'] { --deck-accent: var(--dscd); }
-:root[data-deck='la'] { --deck-accent: var(--la); }
-:root[data-deck='ee'] { --deck-accent: var(--ee); }
-:root[data-deck='la'][data-ch='1'] { --deck-accent: var(--la1); }
-:root[data-deck='la'][data-ch='2'] { --deck-accent: var(--la2); }
-:root[data-deck='la'][data-ch='3'] { --deck-accent: var(--la3); }
-:root[data-deck='la'][data-ch='4'] { --deck-accent: var(--la4); }
-:root[data-deck='la'][data-ch='5'] { --deck-accent: var(--la5); }
-:root[data-deck='la'][data-ch='6'] { --deck-accent: var(--la6); }
-:root[data-deck='ds'][data-ch='1'] { --deck-accent: var(--ds1); }
-:root[data-deck='ds'][data-ch='2'] { --deck-accent: var(--ds2); }
-:root[data-deck='ds'][data-ch='3'] { --deck-accent: var(--ds3); }
-:root[data-deck='ds'][data-ch='4'] { --deck-accent: var(--ds4); }
-:root[data-deck='ds'][data-ch='5'] { --deck-accent: var(--ds5); }
-:root[data-deck='ds'][data-ch='6'] { --deck-accent: var(--ds6); }
-:root[data-deck='ds'][data-ch='7'] { --deck-accent: var(--ds7); }
-:root[data-deck='ds'][data-ch='8'] { --deck-accent: var(--ds8); }
-:root[data-deck='ee'][data-ch='1'] { --deck-accent: var(--ee1); }
-:root[data-deck='ee'][data-ch='2'] { --deck-accent: var(--ee2); }
-:root[data-deck='ee'][data-ch='3'] { --deck-accent: var(--ee3); }
-:root[data-deck='ee'][data-ch='4'] { --deck-accent: var(--ee4); }
-:root[data-deck='ee'][data-ch='5'] { --deck-accent: var(--ee5); }
-:root[data-deck='ee'][data-ch='6'] { --deck-accent: var(--ee6); }
-:root[data-deck='ee'][data-ch='7'] { --deck-accent: var(--ee7); }
-:root[data-deck='ee'][data-ch='8'] { --deck-accent: var(--ee8); }
-:root[data-deck='ee'][data-ch='9'] { --deck-accent: var(--ee9); }
-:root[data-deck='ee'][data-ch='10'] { --deck-accent: var(--ee10); }
-:root[data-deck='ee'][data-ch='11'] { --deck-accent: var(--ee11); }
-:root[data-deck='ee'][data-ch='12'] { --deck-accent: var(--ee12); }
-:root[data-deck='ee'][data-ch='13'] { --deck-accent: var(--ee13); }
-:root[data-deck='ee'][data-ch='14'] { --deck-accent: var(--ee14); }
-:root[data-deck='ee'][data-ch='15'] { --deck-accent: var(--ee15); }
-:root[data-deck='la'][data-pg='practice'] { --deck-accent: var(--la-practice); }
-:root[data-deck='la'][data-pg='att'] { --deck-accent: var(--la-att); }
-:root[data-deck='ds'][data-pg='practice'] { --deck-accent: var(--ds-practice); }
-:root[data-deck='ds'][data-pg='att'] { --deck-accent: var(--ds-att); }
-:root[data-deck='dscd'][data-pg='att'] { --deck-accent: var(--dscd-att); }
-:root[data-deck='ee'][data-pg='practice'] { --deck-accent: var(--ee-practice); }
-:root[data-deck='ee'][data-pg='att'] { --deck-accent: var(--ee-att); }
 
 /* ------------------------------------------------------- 无障碍偏好适配 */
 @media (prefers-reduced-transparency: reduce) {

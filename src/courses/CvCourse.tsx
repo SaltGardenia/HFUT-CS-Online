@@ -29,23 +29,14 @@ export default function CvCourse() {
   const reduced = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // 课程页 → html[data-deck='nap']：整套课程统一切换到计算机视觉与深度学习主题色（灰紫红）
+  // 课程页 → html[data-deck='cv']：整套课程统一切换到计算机视觉与深度学习主题色（灰紫红）
   useEffect(() => {
-    document.documentElement.dataset.deck = 'nap';
+    document.documentElement.dataset.deck = 'cv';
     return () => {
       delete document.documentElement.dataset.deck;
     };
   }, []);
 
-  // 附件页专属色：html[data-pg='att'] → tokens.css 覆盖 --deck-accent（本课唯一页面）
-  const onAtt = location.pathname.startsWith(`${CV_BASE}/attachments`);
-  useEffect(() => {
-    if (onAtt) document.documentElement.dataset.pg = 'att';
-    else delete document.documentElement.dataset.pg;
-    return () => {
-      delete document.documentElement.dataset.pg;
-    };
-  }, [onAtt]);
 
   // Esc 关闭抽屉
   useEffect(() => {
