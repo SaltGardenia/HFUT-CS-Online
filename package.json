@@ -1,7 +1,7 @@
 {
   "name": "hfut-cs-online",
   "private": true,
-  "version": "2.5.0",
+  "version": "2.6.0",
   "type": "module",
   "description": "《算法设计与分析》复习手册 —— 依据课程 PPT 整理的核心考点、24 个交互式算法动画与 36 道自测题",
   "license": "Apache-2.0",

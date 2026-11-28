@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.6.0 (2026-11-28)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+## What's Changed
+### 新功能
+* feat(quiz): 学习通题库「毛概」背题应用——百词斩式艾宾浩斯学习/复习 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/47
+* feat(practice): 页内返回键并入顶栏统一返回——试卷页/书页左上角直回上一级 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/50
+### 修复
+* fix(maoquiz): 毛概顶栏左上角双胶囊，与课程页 topbar 同款 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/49
+* fix(hub): 去掉学期标题旁的「课程 · N 门」小字 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/53
+* fix(practice): 回填练习报告丢失的样式节 by @SaltGardenia in https://github.com/SaltGardenia/HFUT-CS-Online/pull/52
+
+
+**Full Changelog**: https://github.com/SaltGardenia/HFUT-CS-Online/compare/v2.5.0...v2.6.0
+
 ## 2.5.0 (2026-11-27)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
