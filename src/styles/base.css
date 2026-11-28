@@ -5179,7 +5179,7 @@ pre.code .cl-code:empty + .cl-com {
 
 /* 进度行（章节 / 题型） */
 .mq-rows { display: flex; flex-direction: column; gap: 11px; }
-.mq-row { display: grid; grid-template-columns: minmax(0, 30%) 1fr 56px; align-items: center; gap: 12px; }
+.mq-row { display: grid; grid-template-columns: fit-content(42%) 1fr 56px; align-items: center; gap: 12px; }
 .mq-row-name {
   min-width: 0;
   font-size: 13px;
@@ -5252,7 +5252,7 @@ pre.code .cl-code:empty + .cl-com {
   .mq-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0 14px; }
   .mq-modes { grid-template-columns: 1fr; }
   .mq-card { padding: 16px; }
-  .mq-row { grid-template-columns: minmax(0, 34%) 1fr 44px; }
+  .mq-row { grid-template-columns: fit-content(60%) 1fr 44px; }
   .mq-qcard.pq-has-corner .quiz-q { padding-right: 120px; }
   .mq-chart { gap: 3px; }
   .mq-col:nth-child(2n) .mq-col-x { visibility: hidden; }
