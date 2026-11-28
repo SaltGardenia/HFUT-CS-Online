@@ -440,7 +440,6 @@ export default function CourseHubPage() {
         <section className="hub-sem" aria-label="学习通题库">
           <div className="hub-sem-h">
             <h2>学习通题库</h2>
-            <span>课程 · 1 门</span>
           </div>
           <div className="hub-grid">
             <motion.div
@@ -473,9 +472,7 @@ export default function CourseHubPage() {
           <section className="hub-sem" key={g.semester}>
             <div className="hub-sem-h">
               <h2>{g.semester}</h2>
-              <span>
-                {g.semester === '公共课与杂项' ? '不属于具体学期课程的公共资料' : '课程'} · {g.cards.length} 门
-              </span>
+              {g.semester === '公共课与杂项' && <span>不属于具体学期课程的公共资料</span>}
             </div>
             <div className="hub-grid">{g.cards.map(card)}</div>
           </section>
