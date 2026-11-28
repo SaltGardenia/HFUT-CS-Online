@@ -15,7 +15,10 @@ import type {
   ReadingMap,
   RemoteFavoriteRow,
   RemoteProgressRow,
+  QuizCardMap,
+  QuizCardState,
   RemoteQMarkRow,
+  RemoteQuizRow,
   RemoteReadingRow,
   RemoteRecentRow,
   RecentMeta,
@@ -304,6 +307,50 @@ export function mergeReading(local: ReadingMap, remote: RemoteReadingRow[]): Mer
         y: Math.max(0, remoteRow.scroll_y ?? 0),
         p: Math.min(1, Math.max(0, remoteRow.percent ?? 0)),
         s: remoteRow.section ?? undefined,
+        t: remoteT,
+      };
+    }
+  }
+
+  return { map, push };
+}
+
+export interface QuizPushDraft {
+  question_id: string;
+  card: QuizCardState;
+}
+
+export interface MergeQuizResult {
+  map: QuizCardMap;
+  push: QuizPushDraft[];
+}
+
+/**
+ * 学习通题库背题账合并：一张卡一条，按本地时间戳与云端 updated_at 取新；
+ * 本地较新（或云端没有）的回传上传。卡片只增不删，无墓碑概念。
+ */
+export function mergeQuizCards(local: QuizCardMap, remote: RemoteQuizRow[]): MergeQuizResult {
+  const remoteBy = new Map(remote.map((r) => [r.question_id, r]));
+  const map: QuizCardMap = {};
+  const push: QuizPushDraft[] = [];
+
+  for (const qid of new Set([...Object.keys(local), ...remoteBy.keys()])) {
+    const localCard = local[qid];
+    const remoteRow = remoteBy.get(qid);
+    const localT = localCard && Number.isFinite(localCard.t) ? localCard.t : -Infinity;
+    const remoteT = remoteRow ? ts(remoteRow.updated_at) : -Infinity;
+
+    if (localCard && localT >= remoteT) {
+      map[qid] = localCard;
+      if (!remoteRow || localT > remoteT) push.push({ question_id: qid, card: localCard });
+    } else if (remoteRow) {
+      map[qid] = {
+        st: remoteRow.st,
+        streak: remoteRow.streak,
+        fails: remoteRow.fails,
+        ivl: remoteRow.ivl,
+        due: remoteRow.due,
+        rv: remoteRow.rv,
         t: remoteT,
       };
     }

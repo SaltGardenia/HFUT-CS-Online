@@ -8,12 +8,20 @@
  */
 import { createSupabaseBackend, type SyncBackend } from './backend';
 import { syncEnabled } from './config';
-import { PROGRESS_STORES, courseNameBySlug, courseSlugByName, progressStoreOf } from './keys';
+import {
+  PROGRESS_STORES,
+  courseNameBySlug,
+  courseSlugByName,
+  progressStoreOf,
+  quizCloudCourse,
+  quizSlugOfCloudCourse,
+} from './keys';
 import * as local from './local';
 import {
   mergeFavorites,
   mergeProgress,
   mergeQMarks,
+  mergeQuizCards,
   mergeReading,
   mergeRecent,
   type FavoritePushDraft,
@@ -47,6 +55,8 @@ interface PreparedPush {
   recentSeq: number;
   /** 发送时各课程的 qmarks 序号快照（发送期间又写入的课程保留脏标记） */
   qmarksSeq: Map<string, number>;
+  /** 同上：学习通题库背题账 */
+  quizSeq: Map<string, number>;
 }
 
 const initialState = (): SyncState => ({
@@ -80,6 +90,9 @@ class SyncManager {
   /** 题目两本账：发生过写入的课程 → 写入序号（清脏时按快照比对） */
   private dirtyQMarks = new Set<string>();
   private qmarksSeq = new Map<string, number>();
+  /** 学习通题库背题账：发生写入的课程 slug → 写入序号 */
+  private dirtyQuiz = new Set<string>();
+  private quizSeq = new Map<string, number>();
 
   /* -------------------------------------------------------------- 对外 */
 
@@ -109,6 +122,8 @@ class SyncManager {
         this.recentSeq += 1;
       } else if (e.kind === 'qmarks' && e.course) {
         this.markQMarks(e.course);
+      } else if (e.kind === 'quiz' && e.course) {
+        this.markQuiz(e.course);
       }
       this.schedulePush();
     });
@@ -226,6 +241,11 @@ class SyncManager {
     this.qmarksSeq.set(course, (this.qmarksSeq.get(course) ?? 0) + 1);
   }
 
+  private markQuiz(course: string) {
+    this.dirtyQuiz.add(course);
+    this.quizSeq.set(course, (this.quizSeq.get(course) ?? 0) + 1);
+  }
+
   private async attach(user: SyncUser): Promise<void> {
     if (!this.backend) return;
     if (this.attachUserId === user.id && this.state.ready) return;
@@ -244,6 +264,8 @@ class SyncManager {
       this.recentDirty = false;
       this.dirtyQMarks.clear();
       this.qmarksSeq.clear();
+      this.dirtyQuiz.clear();
+      this.quizSeq.clear();
     }
     local.writeOwner(user.id);
 
@@ -267,6 +289,11 @@ class SyncManager {
       for (const course of local.qmarkCourses()) {
         if (local.hasAnyQMark(course)) this.markQMarks(course);
       }
+      // 学习通题库背题账：旧记录缺时间戳的补「现在」，再整课标脏
+      for (const course of local.quizCardCourses()) {
+        local.ensureQuizStamps(course);
+        this.markQuiz(course);
+      }
 
       await this.pullAndMerge(gen);
       if (gen !== this.sessionGen) return;
@@ -285,6 +312,8 @@ class SyncManager {
     this.recentDirty = false;
     this.dirtyQMarks.clear();
     this.qmarksSeq.clear();
+    this.dirtyQuiz.clear();
+    this.quizSeq.clear();
     this.retryIndex = 0;
     if (this.pushTimer !== null) {
       window.clearTimeout(this.pushTimer);
@@ -398,6 +427,31 @@ class SyncManager {
         if (merged.push.length > 0) this.markQMarks(course);
       }
     }
+
+    // 学习通题库背题账：一卡一条，取新合并，本地较新的回传
+    {
+      const remoteQuiz = remote.quiz ?? [];
+      const byCourse = new Map<string, typeof remoteQuiz>();
+      for (const row of remoteQuiz) {
+        const slug = quizSlugOfCloudCourse(row.course);
+        if (!slug) continue;
+        let rows = byCourse.get(slug);
+        if (!rows) {
+          rows = [];
+          byCourse.set(slug, rows);
+        }
+        rows.push(row);
+      }
+      const courses = new Set([...byCourse.keys(), ...local.quizCardCourses()]);
+      for (const course of courses) {
+        const localCards = local.readQuizCards(course);
+        const rows = byCourse.get(course) ?? [];
+        if (rows.length === 0 && Object.keys(localCards).length === 0) continue;
+        const merged = mergeQuizCards(localCards, rows);
+        local.applyQuizCards(course, merged.map);
+        if (merged.push.length > 0) this.markQuiz(course);
+      }
+    }
   }
 
   private schedulePush(delay = PUSH_DEBOUNCE_MS) {
@@ -410,12 +464,13 @@ class SyncManager {
   }
 
   private preparePush(): PreparedPush | null {
-    const payload: PushPayload = { progress: [], favorites: [], recent: [], reading: [], qmarks: [] };
+    const payload: PushPayload = { progress: [], favorites: [], recent: [], reading: [], qmarks: [], quiz: [] };
     const sentProgress: SentProgress[] = [];
     const sentReading: { page: string; t: number }[] = [];
     const deviceId = local.getDeviceId();
     const progressMetaCache = new Map<string, ProgressMeta>();
     const qmarksSeqSnapshot = new Map(this.qmarksSeq);
+    const quizSeqSnapshot = new Map(this.quizSeq);
 
     for (const [key, qids] of this.dirtyProgress) {
       const store = progressStoreOf(key);
@@ -501,12 +556,34 @@ class SyncManager {
       }
     }
 
+    if (this.dirtyQuiz.size > 0) {
+      for (const course of this.dirtyQuiz) {
+        const cards = local.readQuizCards(course);
+        for (const [qid, card] of Object.entries(cards)) {
+          if (!card || !Number.isFinite(card.t) || card.t <= 0) continue;
+          payload.quiz.push({
+            course: quizCloudCourse(course),
+            question_id: qid,
+            st: card.st,
+            streak: card.streak,
+            fails: card.fails,
+            ivl: card.ivl,
+            due: card.due,
+            rv: card.rv,
+            updated_at: new Date(card.t).toISOString(),
+            device_id: deviceId,
+          });
+        }
+      }
+    }
+
     if (
       payload.progress.length === 0 &&
       payload.favorites.length === 0 &&
       payload.recent.length === 0 &&
       payload.reading.length === 0 &&
-      payload.qmarks.length === 0
+      payload.qmarks.length === 0 &&
+      payload.quiz.length === 0
     ) {
       return null;
     }
@@ -517,6 +594,7 @@ class SyncManager {
       favoritesSeq: this.favoritesSeq,
       recentSeq: this.recentSeq,
       qmarksSeq: qmarksSeqSnapshot,
+      quizSeq: quizSeqSnapshot,
     };
   }
 
@@ -571,6 +649,9 @@ class SyncManager {
     // 发送期间又写入的课程（序号变了）保留脏标记等下一轮
     for (const [course, seq] of prepared.qmarksSeq) {
       if (this.qmarksSeq.get(course) === seq) this.dirtyQMarks.delete(course);
+    }
+    for (const [course, seq] of prepared.quizSeq) {
+      if (this.quizSeq.get(course) === seq) this.dirtyQuiz.delete(course);
     }
 
     if (prepared.sentReading.length > 0) {

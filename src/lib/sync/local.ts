@@ -10,14 +10,17 @@ import {
   FAVORITES_KEY,
   PROGRESS_STORES,
   QMARKS_PREFIX,
+  QUIZ_CARDS_PREFIX,
   READING_KEY,
   RECENT_KEY,
   RECENT_META_KEY,
   progressMetaKey,
   qmarksKey,
+  quizCardsKey,
 } from './keys';
 import type {
   CourseQMarks,
+  QuizCardMap,
   FavoriteMeta,
   FavoriteStamp,
   ProgressMap,
@@ -99,7 +102,7 @@ function sameJSON(a: unknown, b: unknown): boolean {
 /* ------------------------------------------------------------------ 进度 */
 
 export interface DirtyEvent {
-  kind: 'progress' | 'favorite' | 'recent' | 'reading' | 'qmarks';
+  kind: 'progress' | 'favorite' | 'recent' | 'reading' | 'qmarks' | 'quiz';
   /** progress：发生变化的进度存储键 */
   key?: string;
   /** progress：发生变化的题目 id */
@@ -322,6 +325,73 @@ export function applyQMarks(course: string, marks: CourseQMarks) {
   if (!sameJSON(readQMarks(course), marks)) writeRaw(qmarksKey(course), JSON.stringify(marks));
 }
 
+/** 学习通题库背题账的课程 slug 列表（扫描本地键） */
+export function quizCardCourses(): string[] {
+  const courses: string[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(QUIZ_CARDS_PREFIX)) courses.push(key.slice(QUIZ_CARDS_PREFIX.length));
+    }
+  } catch {
+    /* ignore */
+  }
+  return courses;
+}
+
+/** 读某门课的背题账（云端合并与上传用；页面本身走 lib/maoquiz 自己的缓存） */
+export function readQuizCards(course: string): QuizCardMap {
+  const raw = readJSON<unknown>(quizCardsKey(course), {});
+  const record =
+    raw && typeof raw === 'object' && !Array.isArray(raw)
+      ? ((raw as Record<string, unknown>).cards as Record<string, unknown> | undefined) ?? {}
+      : {};
+  const out: QuizCardMap = {};
+  for (const [qid, value] of Object.entries(record)) {
+    if (!value || typeof value !== 'object') continue;
+    const v = value as Record<string, unknown>;
+    const num = (k: string) => (typeof v[k] === 'number' ? (v[k] as number) : 0);
+    out[qid] = {
+      st: num('st'),
+      streak: num('streak'),
+      fails: num('fails'),
+      ivl: num('ivl'),
+      due: num('due'),
+      rv: num('rv'),
+      t: num('t'),
+    };
+  }
+  return out;
+}
+
+/** 云端合并结果落盘（结构保持 hb-maquiz 原样：{v:1,cards}；不产生脏标记） */
+export function applyQuizCards(course: string, cards: QuizCardMap) {
+  const next = JSON.stringify({ v: 1, cards });
+  const current = readRaw(quizCardsKey(course));
+  if (current === next) return;
+  writeRaw(quizCardsKey(course), next);
+}
+
+/** 首次登录前的本地卡片没有时间戳：补成「现在」参与上传；返回补了几条 */
+export function ensureQuizStamps(course: string): number {
+  const cards = readQuizCards(course);
+  const now = Date.now();
+  let fixed = 0;
+  for (const card of Object.values(cards)) {
+    if (!card.t) {
+      card.t = now;
+      fixed += 1;
+    }
+  }
+  if (fixed > 0) applyQuizCards(course, cards);
+  return fixed;
+}
+
+/** 页面写入背题账后上报脏数据（lib/maoquiz 调用） */
+export function emitQuizDirty(course: string) {
+  emitDirty({ kind: 'quiz', course });
+}
+
 /** 一门课是否记过任何账（含墓碑）；登录时用它决定哪些课要参与上传 */
 export function hasAnyQMark(course: string): boolean {
   const marks = readQMarks(course);
@@ -444,6 +514,13 @@ export function clearUserData() {
   for (const course of qmarkCourses()) {
     try {
       localStorage.removeItem(qmarksKey(course));
+    } catch {
+      /* ignore */
+    }
+  }
+  for (const course of quizCardCourses()) {
+    try {
+      localStorage.removeItem(quizCardsKey(course));
     } catch {
       /* ignore */
     }

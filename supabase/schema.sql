@@ -9,6 +9,7 @@
 --   user_recent     最近查看（按课程一行，取最大 viewed_at）
 --   user_reading    阅读进度（按页面一行，记录滚动位置与百分比）
 --   user_qmarks     题目收藏本/错题本（course + question_id + kind 唯一；marked=false 为移出墓碑）
+--   user_quiz_cards 学习通题库背题排期（course + question_id 唯一；卡片按 updated_at 取新）
 --   site_visits     首页访问计数（按访客 + 会话 + 日期去重，匿名可上报、不可直接读写）
 --
 -- 安全
@@ -490,3 +491,110 @@ grant execute on function public.record_site_visit(text, text) to anon, authenti
 
 -- 可选：实时订阅（跨设备即时刷新，当前前端按「回到前台拉取」处理，无需开启）
 -- alter publication supabase_realtime add table public.user_progress;
+
+-- ================================================================
+-- 学习通题库 · 背题排期账（2026-11 追加；整段可重复执行）
+-- 每张卡一行：艾宾浩斯调度状态 + 本地更新时间，跨设备按 updated_at 取新。
+-- 老库没有这段时前端会自动跳过（只在本机保留），不影响其它数据同步。
+-- ================================================================
+create table if not exists public.user_quiz_cards (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  course text not null,
+  question_id text not null,
+  st smallint not null default 0,
+  streak smallint not null default 0,
+  fails smallint not null default 0,
+  ivl integer not null default 0,
+  due bigint not null default 0,
+  rv integer not null default 0,
+  updated_at timestamptz not null default now(),
+  device_id text,
+  primary key (user_id, course, question_id)
+);
+
+create index if not exists user_quiz_cards_user_idx on public.user_quiz_cards (user_id);
+
+alter table public.user_quiz_cards enable row level security;
+
+drop policy if exists "quiz select own" on public.user_quiz_cards;
+create policy "quiz select own"
+  on public.user_quiz_cards for select to authenticated
+  using (auth.uid() = user_id);
+
+drop policy if exists "quiz insert own" on public.user_quiz_cards;
+create policy "quiz insert own"
+  on public.user_quiz_cards for insert to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "quiz update own" on public.user_quiz_cards;
+create policy "quiz update own"
+  on public.user_quiz_cards for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "quiz delete own" on public.user_quiz_cards;
+create policy "quiz delete own"
+  on public.user_quiz_cards for delete to authenticated
+  using (auth.uid() = user_id);
+
+create or replace function public.sync_push_quiz(
+  p_quiz jsonb default '[]'::jsonb
+)
+returns void
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    raise exception 'not authenticated';
+  end if;
+
+  insert into public.user_quiz_cards (user_id, course, question_id, st, streak, fails, ivl, due, rv, updated_at, device_id)
+  select
+    v_uid,
+    x.course,
+    x.question_id,
+    coalesce(x.st, 0),
+    coalesce(x.streak, 0),
+    coalesce(x.fails, 0),
+    coalesce(x.ivl, 0),
+    coalesce(x.due, 0),
+    coalesce(x.rv, 0),
+    coalesce(x.updated_at, now()),
+    x.device_id
+  from jsonb_to_recordset(coalesce(p_quiz, '[]'::jsonb)) as x(
+    course text,
+    question_id text,
+    st integer,
+    streak integer,
+    fails integer,
+    ivl integer,
+    due bigint,
+    rv integer,
+    updated_at timestamptz,
+    device_id text
+  )
+  where x.course is not null and x.question_id is not null
+  on conflict (user_id, course, question_id) do update
+    set st = excluded.st,
+        streak = excluded.streak,
+        fails = excluded.fails,
+        ivl = excluded.ivl,
+        due = excluded.due,
+        rv = excluded.rv,
+        updated_at = excluded.updated_at,
+        device_id = excluded.device_id
+    where excluded.updated_at > user_quiz_cards.updated_at;
+end;
+$$;
+
+grant select, insert, update, delete on public.user_quiz_cards to authenticated;
+revoke all on public.user_quiz_cards from anon;
+
+revoke all on function public.sync_push_quiz(jsonb) from public;
+revoke all on function public.sync_push_quiz(jsonb) from anon;
+grant execute on function public.sync_push_quiz(jsonb) to authenticated;
+
