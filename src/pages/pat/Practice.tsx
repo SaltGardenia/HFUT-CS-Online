@@ -148,7 +148,7 @@ export default function PatPractice() {
                       key={q.id}
                       type="button"
                       className="pq-heat-cell"
-                      data-state={state === 'revealed' ? 'revealed' : state ? 'right' : 'none'}
+                      data-state={state}
                       title={`赛题 ${q.no} ${q.title} · ${stateText(r)}`}
                       aria-label={`赛题 ${q.no} ${q.title} ${stateText(r)}`}
                       onClick={() => {
