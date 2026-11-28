@@ -2363,7 +2363,6 @@ pre.code .cl-code:empty + .cl-com {
 }
 .quiz.answered-right {
   border-color: color-mix(in srgb, var(--ok) 45%, transparent);
-  background: color-mix(in srgb, var(--tip-bg) 60%, var(--panel-2));
 }
 .quiz.answered-wrong {
   border-color: color-mix(in srgb, var(--hot) 40%, transparent);
@@ -2444,7 +2443,6 @@ pre.code .cl-code:empty + .cl-com {
 }
 .opt-btn.correct {
   border-color: var(--ok);
-  background: var(--tip-bg);
 }
 .opt-btn.correct .opt-key {
   background: var(--ok);
