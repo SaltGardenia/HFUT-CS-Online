@@ -5146,6 +5146,10 @@ pre.code .cl-code:empty + .cl-com {
 .mq-mode:disabled { opacity: 0.45; pointer-events: none; }
 .mq-mode b { font-size: 16px; font-weight: 650; color: var(--ink); }
 .mq-mode span { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* 标题行：完成页卡片的箭头贴着文字放（返回在左、继续在右） */
+.mq-mode-head { display: inline-flex; align-items: center; gap: 8px; }
+.mq-mode-head svg { flex: none; color: var(--ink-3); transition: color 160ms, translate 160ms; }
+.mq-mode:hover .mq-mode-head svg { color: var(--ink); }
 /* 入口卡右侧箭头：学习/复习两个开篇 */
 .mq-mode-arrow {
   position: absolute;

@@ -16,6 +16,7 @@ import {
 } from '../../lib/maoquiz';
 import { setQMark } from '../../lib/sync/local';
 import { useCourseQMarks } from '../../lib/sync';
+import { IconArrowLeft, IconArrowRight } from '../../components/icons';
 import QuestionCard from './QuestionCard';
 
 export default function QuizSession({ course }: { course: QuizCourse }) {
@@ -141,9 +142,19 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
           答对 {tally.good} · 答错 {tally.bad} · 本组 {groupTotal} 题
         </p>
         <div className="mq-modes">
+          <Link className="mq-mode" to={`/quiz/${course.slug}`}>
+            <span className="mq-mode-head">
+              <IconArrowLeft size={16} />
+              <b>返回总览</b>
+            </span>
+            <span>已学 {Object.keys(live.cards).length} / {course.count} 题</span>
+          </Link>
           {endActions.learnLeft > 0 && (
             <button type="button" className="mq-mode" onClick={() => startGroup('learn')}>
-              <b>继续学习</b>
+              <span className="mq-mode-head">
+                <b>继续学习</b>
+                <IconArrowRight size={16} />
+              </span>
               <span>
                 下一组 {Math.min(readGroupSize('learn'), endActions.learnLeft)} 题 · 待学 {endActions.learnLeft}
               </span>
@@ -151,16 +162,15 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
           )}
           {endActions.reviewLeft > 0 && (
             <button type="button" className="mq-mode" onClick={() => startGroup('review')}>
-              <b>接着复习</b>
+              <span className="mq-mode-head">
+                <b>接着复习</b>
+                <IconArrowRight size={16} />
+              </span>
               <span>
                 下一组 {Math.min(readGroupSize('review'), endActions.reviewLeft)} 题 · 到期 {endActions.reviewLeft}
               </span>
             </button>
           )}
-          <Link className="mq-mode" to={`/quiz/${course.slug}`}>
-            <b>返回总览</b>
-            <span>已学 {Object.keys(live.cards).length} / {course.count} 题</span>
-          </Link>
         </div>
       </main>
     );
