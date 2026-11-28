@@ -5084,6 +5084,15 @@ pre.code .cl-code:empty + .cl-com {
 }
 .mq-head p { margin: 6px 0 0; font-size: 13.5px; color: var(--ink-3); }
 
+/* 书页标题行：左标题 / 右一键清空（错题本、收藏本） */
+.mq-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 /* 总览数字 */
 .mq-stats {
   display: grid;
@@ -5204,7 +5213,7 @@ pre.code .cl-code:empty + .cl-com {
   box-shadow: var(--shadow-1);
 }
 /* 有角标的题卡：题干首行给右上角让位（与 .practice-q 同款） */
-.mq-qcard.pq-has-corner .quiz-q { padding-right: 60px; }
+.mq-qcard.pq-has-corner .quiz-q { padding-right: 150px; }
 .mq-chip {
   display: inline-block;
   margin: 0 0 10px;
@@ -5237,6 +5246,7 @@ pre.code .cl-code:empty + .cl-com {
   .mq-modes { grid-template-columns: 1fr; }
   .mq-card { padding: 16px; }
   .mq-row { grid-template-columns: 52px 1fr 48px; }
+  .mq-qcard.pq-has-corner .quiz-q { padding-right: 120px; }
   .mq-chart { gap: 3px; }
   .mq-col:nth-child(2n) .mq-col-x { visibility: hidden; }
 }

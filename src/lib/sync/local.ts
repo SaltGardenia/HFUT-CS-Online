@@ -306,6 +306,17 @@ export function setQMark(course: string, kind: QMarkKind, qid: string, on: boole
   emitDirty({ kind: 'qmarks', course });
 }
 
+/** 一键清空一本账（错题本/收藏本）：全部改为墓碑，云端同样会同步删除 */
+export function clearQMarks(course: string, kind: QMarkKind) {
+  const marks = readQMarks(course);
+  const ids = Object.keys(marks[kind]).filter((id) => marks[kind][id]?.on);
+  if (!ids.length) return;
+  const t = Date.now();
+  for (const id of ids) marks[kind][id] = { t, on: false };
+  writeRaw(qmarksKey(course), JSON.stringify(marks));
+  emitDirty({ kind: 'qmarks', course });
+}
+
 /** 云端合并结果落盘（不产生脏标记，避免回声） */
 export function applyQMarks(course: string, marks: CourseQMarks) {
   if (!sameJSON(readQMarks(course), marks)) writeRaw(qmarksKey(course), JSON.stringify(marks));

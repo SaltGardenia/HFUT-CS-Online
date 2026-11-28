@@ -3,9 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import { loadQuizBank, type QuizCourse } from '../../content/quizbank';
 import type { QuizQuestion } from '../../content/quizbank/types';
 import { gradeCard } from '../../lib/maoquiz';
-import { setQMark } from '../../lib/sync/local';
+import { clearQMarks, setQMark } from '../../lib/sync/local';
 import { useCourseQMarks } from '../../lib/sync';
 import QuestionCard from './QuestionCard';
+import ClearProgress from '../../components/practice/ClearProgress';
 
 /**
  * 题库错题本 / 收藏本（账在 hb-qmarks:<slug>，与其他课程的两本账同约定）。
@@ -36,9 +37,17 @@ export default function QuizBook({ course }: { course: QuizCourse }) {
 
   return (
     <main className="mq-main">
-      <div className="mq-head">
-        <h1>{title}</h1>
-        <p>{course.name} · {entries.length} 题</p>
+      <div className="mq-head mq-head-row">
+        <div>
+          <h1>{title}</h1>
+          <p>{course.name} · {entries.length} 题</p>
+        </div>
+        <ClearProgress
+          done={entries.length}
+          label={book === 'wrong' ? '清空错题本' : '清空收藏本'}
+          onClear={() => clearQMarks(course.slug, book)}
+          tip={`清空「${course.name}」${title}里的全部 ${entries.length} 题？`}
+        />
       </div>
 
       {bank !== null && entries.length === 0 ? (
