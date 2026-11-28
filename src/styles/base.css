@@ -5242,6 +5242,9 @@ pre.code .cl-code:empty + .cl-com {
   border-radius: 999px;
   padding: 2px 10px;
 }
+/* 连对计数：中性小胶囊，跟在章节标签后面；答错归零（数据来自 SRS 账） */
+.mq-chip-streak { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.mq-chip + .mq-chip-streak { margin-left: 6px; }
 
 /* 艾宾浩斯自评：建议档描边提示（静态描边，非悬浮色底） */
 .mq-grade { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }

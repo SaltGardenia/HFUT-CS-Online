@@ -169,6 +169,10 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
           onNext={next}
           onGrade={onGrade(q)}
           fav={{ on: favOn(q.id), onToggle: () => toggleFav(q.id) }}
+          streak={{
+            n: live.cards[q.id]?.streak ?? 0,
+            target: kind === 'learn' ? LEARN_STREAK : undefined,
+          }}
         />
       </motion.div>
     </main>

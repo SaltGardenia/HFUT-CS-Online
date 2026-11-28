@@ -24,6 +24,8 @@ interface Props {
   fav: { on: boolean; onToggle: () => void };
   /** 角标动作（错题本：移出错题本） */
   cornerAction?: { label: string; onClick: () => void };
+  /** 连对进度：n = 当前连续答对数（答错归零）；target = 学会所需次数（学习模式才给） */
+  streak?: { n: number; target?: number };
 }
 
 /**
@@ -31,7 +33,7 @@ interface Props {
  * 单选/判断点选项立即判分；多选勾选后提交；填空输入比对；
  * 「直接看答案」视为没答上。判分结果经 onGrade 交给外层（调度账 + 错题本）。
  */
-export default function QuestionCard({ q, onGrade, onNext, fav, cornerAction }: Props) {
+export default function QuestionCard({ q, onGrade, onNext, fav, cornerAction, streak }: Props) {
   const options = optionsOf(q);
   const answerIdx = q.kind === 'fill' ? [] : (q.answer as number[]);
   const [picked, setPicked] = useState<string[]>([]);
@@ -152,6 +154,14 @@ export default function QuestionCard({ q, onGrade, onNext, fav, cornerAction }: 
         <span>{decodeEntities(q.question)}</span>
       </p>
       {q.chapter && <span className="mq-chip">{q.chapter}</span>}
+      {streak && (
+        <span
+          className="mq-chip mq-chip-streak"
+          title={`连续答对 ${streak.n} 次${streak.target ? `（连对 ${streak.target} 次学会）` : ''}`}
+        >
+          连对 {streak.n}{streak.target ? ` / ${streak.target}` : ''}
+        </span>
+      )}
 
       {q.kind !== 'fill' && (
         <ul className="quiz-opt">
