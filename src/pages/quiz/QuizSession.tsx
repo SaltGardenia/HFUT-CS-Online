@@ -157,7 +157,10 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
               </span>
             </button>
           )}
-          <Link className="btn" to={`/quiz/${course.slug}`}>返回总览</Link>
+          <Link className="mq-mode" to={`/quiz/${course.slug}`}>
+            <b>返回总览</b>
+            <span>已学 {Object.keys(live.cards).length} / {course.count} 题</span>
+          </Link>
         </div>
       </main>
     );

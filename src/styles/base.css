@@ -1376,7 +1376,7 @@ button {
   margin: 5px 0;
 }
 /* 链接：hover 用下划线示意可点，不铺色底（块级卡片锚点不参与药丸/下划线，走各自的抬升+阴影） */
-.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row) {
+.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):not(.mq-mode) {
   color: var(--deck-accent);
   text-decoration: none;
   padding: 1px 3px;
@@ -1384,7 +1384,7 @@ button {
   border-radius: 5px;
   transition: color 140ms var(--press-ease);
 }
-.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):hover {
+.page a:not(.ext-card):not(.card):not(.btn):not(.net-paper-card):not(.ei-tag-row):not(.mq-mode):hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -5132,6 +5132,8 @@ pre.code .cl-code:empty + .cl-com {
   border-radius: var(--r-l);
   background: var(--panel-strong);
   box-shadow: var(--shadow-1);
+  color: var(--ink);
+  text-decoration: none;
   cursor: pointer;
   transition: transform 160ms var(--press-ease), box-shadow 160ms, border-color 160ms;
 }
