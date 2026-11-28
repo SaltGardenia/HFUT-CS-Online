@@ -5221,6 +5221,9 @@ pre.code .cl-code:empty + .cl-com {
 }
 /* 有角标的题卡：题干首行给右上角让位（与 .practice-q 同款） */
 .mq-qcard.pq-has-corner .quiz-q { padding-right: 150px; }
+/* 判对后答案块跟随语义色：课程朱红主题下红条红字容易被误读成答错 */
+.mq-qcard.answered-right .quiz-a { border-left-color: var(--ok); }
+.mq-qcard.answered-right .quiz-a b { color: var(--ok); }
 .mq-chip {
   display: inline-block;
   margin: 0 0 10px;
