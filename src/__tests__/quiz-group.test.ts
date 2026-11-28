@@ -1,12 +1,13 @@
 /**
- * 学习通题库「每组题数」：默认值、写入收敛、读取回落与分组切片的边界。
+ * 学习通题库「每组题数」：学习/复习各一份，默认值、写入收敛、旧键兜底与分组切片的边界。
  */
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   GROUP_SIZE_DEFAULT,
   GROUP_SIZE_MAX,
   GROUP_SIZE_MIN,
-  QUIZ_GROUP_KEY,
+  QUIZ_GROUP_KEYS,
+  QUIZ_GROUP_LEGACY_KEY,
   normalizeGroupSize,
   readGroupSize,
   takeGroup,
@@ -16,9 +17,10 @@ import {
 beforeEach(() => localStorage.clear());
 
 describe('每组题数设置', () => {
-  it('默认 10 题，未写入时回落到默认值', () => {
+  it('学习与复习都默认 10 题', () => {
     expect(GROUP_SIZE_DEFAULT).toBe(10);
-    expect(readGroupSize()).toBe(10);
+    expect(readGroupSize('learn')).toBe(10);
+    expect(readGroupSize('review')).toBe(10);
   });
 
   it('输入收敛为 1–100 的整数', () => {
@@ -30,18 +32,35 @@ describe('每组题数设置', () => {
     expect(normalizeGroupSize(Number.POSITIVE_INFINITY)).toBe(GROUP_SIZE_DEFAULT);
   });
 
-  it('写入后可读回，且写入值同样收敛', () => {
-    expect(writeGroupSize(12)).toBe(12);
-    expect(readGroupSize()).toBe(12);
-    expect(localStorage.getItem(QUIZ_GROUP_KEY)).toBe('12');
+  it('学习与复习各存一份，互不影响', () => {
+    expect(writeGroupSize('learn', 5)).toBe(5);
+    expect(writeGroupSize('review', 20)).toBe(20);
+    expect(readGroupSize('learn')).toBe(5);
+    expect(readGroupSize('review')).toBe(20);
+    expect(localStorage.getItem(QUIZ_GROUP_KEYS.learn)).toBe('5');
+    expect(localStorage.getItem(QUIZ_GROUP_KEYS.review)).toBe('20');
+  });
 
-    expect(writeGroupSize(0)).toBe(GROUP_SIZE_MIN);
-    expect(readGroupSize()).toBe(GROUP_SIZE_MIN);
+  it('写入值同样收敛', () => {
+    expect(writeGroupSize('learn', 0)).toBe(GROUP_SIZE_MIN);
+    expect(readGroupSize('learn')).toBe(GROUP_SIZE_MIN);
+    expect(writeGroupSize('review', 1000)).toBe(GROUP_SIZE_MAX);
+    expect(readGroupSize('review')).toBe(GROUP_SIZE_MAX);
+  });
+
+  it('旧版单一键作为两种模式的初始值，各自写入后独立', () => {
+    localStorage.setItem(QUIZ_GROUP_LEGACY_KEY, '7');
+    expect(readGroupSize('learn')).toBe(7);
+    expect(readGroupSize('review')).toBe(7);
+
+    writeGroupSize('learn', 5);
+    expect(readGroupSize('learn')).toBe(5);
+    expect(readGroupSize('review')).toBe(7);
   });
 
   it('存储里是脏数据时回落默认值', () => {
-    localStorage.setItem(QUIZ_GROUP_KEY, 'abc');
-    expect(readGroupSize()).toBe(GROUP_SIZE_DEFAULT);
+    localStorage.setItem(QUIZ_GROUP_KEYS.learn, 'abc');
+    expect(readGroupSize('learn')).toBe(GROUP_SIZE_DEFAULT);
   });
 });
 

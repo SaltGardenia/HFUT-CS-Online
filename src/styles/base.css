@@ -5123,11 +5123,12 @@ pre.code .cl-code:empty + .cl-com {
   margin: 0 0 22px;
 }
 .mq-mode {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 3px;
   align-items: flex-start;
-  padding: 18px 20px;
+  padding: 18px 44px 18px 20px;
   border: 1px solid var(--hairline-soft);
   border-radius: var(--r-l);
   background: var(--panel-strong);
@@ -5145,10 +5146,27 @@ pre.code .cl-code:empty + .cl-com {
 .mq-mode:disabled { opacity: 0.45; pointer-events: none; }
 .mq-mode b { font-size: 16px; font-weight: 650; color: var(--ink); }
 .mq-mode span { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* 入口卡右侧箭头：学习/复习两个开篇 */
+.mq-mode-arrow {
+  position: absolute;
+  inset-inline-end: 18px;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--ink-3);
+  transition: color 160ms, translate 160ms;
+}
+.mq-mode:hover .mq-mode-arrow { color: var(--ink); translate: 2px -50%; }
 
-/* 每组题数：预设胶囊 + 自定义输入（选中只描边，不铺色底） */
+/* 每组题数：学习/复习各一份，预设胶囊 + 自定义输入（选中只描边，不铺色底） */
 .mq-group-card { padding: 16px 20px; }
 .mq-group-card h2 { margin: 0 0 12px; }
+.mq-group-split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.mq-group-half { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mq-group-half + .mq-group-half {
+  border-inline-start: 1px solid var(--hairline-soft);
+  padding-inline-start: 20px;
+}
+.mq-group-title { font-size: 12.5px; font-weight: 600; color: var(--ink-3); }
 .mq-group-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mq-group-btn {
   height: 32px;
@@ -5310,6 +5328,13 @@ pre.code .cl-code:empty + .cl-com {
   .mq-main { width: calc(100% - 32px); padding: 28px 0 40px; }
   .mq-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0 14px; }
   .mq-modes { grid-template-columns: 1fr; }
+  .mq-group-split { grid-template-columns: 1fr; gap: 14px; }
+  .mq-group-half + .mq-group-half {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+    border-top: 1px solid var(--hairline-soft);
+    padding-top: 14px;
+  }
   .mq-card { padding: 16px; }
   .mq-row { grid-template-columns: fit-content(60%) 1fr 44px; }
   .mq-qcard.pq-has-corner .quiz-q { padding-right: 120px; }

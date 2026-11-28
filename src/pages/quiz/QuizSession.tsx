@@ -45,7 +45,7 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
       } else {
         full = learnQueue(b, state);
       }
-      const picked = takeGroup(full, readGroupSize());
+      const picked = takeGroup(full, readGroupSize(kind));
       setGroup(picked);
       setQueue(picked);
     });
@@ -82,7 +82,7 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
     } else {
       full = learnQueue(bank, live);
     }
-    const picked = takeGroup(full, readGroupSize());
+    const picked = takeGroup(full, readGroupSize(m));
     setGroup(picked);
     setQueue(picked);
     setIdx(0);
@@ -145,7 +145,7 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
             <button type="button" className="mq-mode" onClick={() => startGroup('learn')}>
               <b>继续学习</b>
               <span>
-                下一组 {Math.min(readGroupSize(), endActions.learnLeft)} 题 · 待学 {endActions.learnLeft}
+                下一组 {Math.min(readGroupSize('learn'), endActions.learnLeft)} 题 · 待学 {endActions.learnLeft}
               </span>
             </button>
           )}
@@ -153,7 +153,7 @@ export default function QuizSession({ course }: { course: QuizCourse }) {
             <button type="button" className="mq-mode" onClick={() => startGroup('review')}>
               <b>接着复习</b>
               <span>
-                下一组 {Math.min(readGroupSize(), endActions.reviewLeft)} 题 · 到期 {endActions.reviewLeft}
+                下一组 {Math.min(readGroupSize('review'), endActions.reviewLeft)} 题 · 到期 {endActions.reviewLeft}
               </span>
             </button>
           )}

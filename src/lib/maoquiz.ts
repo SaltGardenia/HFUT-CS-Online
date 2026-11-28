@@ -44,8 +44,14 @@ export const REVIEW_DAILY_CAP = 150;
 
 /* ------------------------------------------------ 每组题数（背单词式分组节奏） */
 
-/** 每组题数的存储键（全局偏好，不分课、不参与云端同步） */
-export const QUIZ_GROUP_KEY = 'hb-maquiz-group-size';
+/** 学习 / 复习各有一份每组题数（全局偏好，不分课、不参与云端同步） */
+export type QuizGroupMode = 'learn' | 'review';
+export const QUIZ_GROUP_KEYS: Record<QuizGroupMode, string> = {
+  learn: 'hb-maquiz-group-learn',
+  review: 'hb-maquiz-group-review',
+};
+/** 旧版共用的一个键：仅作读取兜底，让已设过的值平滑迁移到学习/复习 */
+export const QUIZ_GROUP_LEGACY_KEY = 'hb-maquiz-group-size';
 export const GROUP_SIZE_DEFAULT = 10;
 export const GROUP_SIZE_PRESETS = [5, 10, 20] as const;
 export const GROUP_SIZE_MIN = 1;
@@ -175,21 +181,25 @@ export function useQuizState(slug: string): QuizState {
 
 const groupListeners = new Set<() => void>();
 
-/** 读取每组题数（页面每次取快照都直接读 localStorage，跨标签页改动能即时反映） */
-export function readGroupSize(): number {
+/** 读取某模式的每组题数（每次取快照都读 localStorage，跨标签页改动能即时反映） */
+export function readGroupSize(mode: QuizGroupMode): number {
   try {
-    const raw = localStorage.getItem(QUIZ_GROUP_KEY);
-    return raw === null ? GROUP_SIZE_DEFAULT : normalizeGroupSize(Number(raw));
+    const own = localStorage.getItem(QUIZ_GROUP_KEYS[mode]);
+    if (own !== null) return normalizeGroupSize(Number(own));
+    // 旧版只有一个键：分别当作学习/复习的初始值，写一次新键后即独立
+    const legacy = localStorage.getItem(QUIZ_GROUP_LEGACY_KEY);
+    if (legacy !== null) return normalizeGroupSize(Number(legacy));
   } catch {
-    return GROUP_SIZE_DEFAULT;
+    /* 隐私模式 */
   }
+  return GROUP_SIZE_DEFAULT;
 }
 
-/** 写入每组题数，返回收敛后的值（隐私模式下仅在本次会话生效） */
-export function writeGroupSize(n: number): number {
+/** 写入某模式的每组题数，返回收敛后的值（隐私模式下仅在本次会话生效） */
+export function writeGroupSize(mode: QuizGroupMode, n: number): number {
   const size = normalizeGroupSize(n);
   try {
-    localStorage.setItem(QUIZ_GROUP_KEY, String(size));
+    localStorage.setItem(QUIZ_GROUP_KEYS[mode], String(size));
   } catch {
     /* 写失败：内存里生效 */
   }
@@ -197,15 +207,15 @@ export function writeGroupSize(n: number): number {
   return size;
 }
 
-/** 订阅每组题数（总览页的设置控件用） */
-export function useQuizGroupSize(): number {
+/** 订阅某模式的每组题数（总览页的设置控件用） */
+export function useQuizGroupSize(mode: QuizGroupMode): number {
   return useSyncExternalStore(
     (l) => {
       groupListeners.add(l);
       return () => groupListeners.delete(l);
     },
-    readGroupSize,
-    readGroupSize,
+    () => readGroupSize(mode),
+    () => readGroupSize(mode),
   );
 }
 
